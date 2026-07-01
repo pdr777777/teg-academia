@@ -4,20 +4,46 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CRM — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../assets/css/global.css" />
   <link rel="stylesheet" href="../assets/css/admin.css" />
 </head>
 <body>
 
-  <!-- TODO André: Kanban board com 5 colunas:
-       Novo Lead | Contato | Visitou | Matriculado | Perdido
-       Dados: GET /api/leads
-       Mover lead: PATCH /api/leads/:id/pipeline
-       Cards com nome, telefone, objetivo, origem, data
-  -->
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><span class="dot"></span>TEG ADMIN</div>
+      <nav class="sidebar-nav">
+        <a href="index.html"><span data-icon="grid" data-icon-size="18"></span>Dashboard</a>
+        <a href="alunos.html"><span data-icon="users" data-icon-size="18"></span>Alunos</a>
+        <a href="crm.html" class="active"><span data-icon="columns" data-icon-size="18"></span>CRM</a>
+        <a href="pagamentos.html"><span data-icon="credit-card" data-icon-size="18"></span>Pagamentos</a>
+      </nav>
+      <div class="sidebar-foot">
+        <a href="#" id="btn-logout"><span data-icon="log-out" data-icon-size="18"></span>Sair</a>
+      </div>
+    </aside>
 
+    <div class="main-content">
+      <div class="page-head">
+        <button class="btn btn-ghost btn-sm sidebar-toggle" id="btn-sidebar-toggle" data-icon="menu"></button>
+        <div>
+          <h1>CRM</h1>
+          <p>Arraste os cards entre as etapas do funil.</p>
+        </div>
+      </div>
+
+      <div class="kanban-board" id="kanban-board">
+        <div class="loading-row" style="grid-column:1/-1"><span class="spinner"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
   <script src="../assets/js/api.js"></script>
-  <script src="../assets/js/auth-guard.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/admin-guard.js"></script>
   <script src="../assets/js/admin-crm.js"></script>
 </body>
 </html>

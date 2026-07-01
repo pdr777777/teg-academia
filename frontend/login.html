@@ -3,21 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login — Academia TEG</title>
+  <title>Entrar — Academia TEG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/global.css" />
+  <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 <body>
 
-  <!-- TODO André: form login → POST /api/auth/login → salva token no localStorage → redireciona dashboard.html -->
-  <form id="form-login">
-    <input type="email" id="email" placeholder="E-mail" required />
-    <input type="password" id="senha" placeholder="Senha" required />
-    <button type="submit">Entrar</button>
-    <a href="esqueci-senha.html">Esqueci minha senha</a>
-    <a href="matricula.html">Não tenho conta</a>
-  </form>
+  <div class="auth-wrap">
+    <a href="index.html" class="brand auth-brand"><span class="dot"></span>TEG ACADEMIA</a>
 
+    <form id="form-login" class="card auth-card">
+      <h1>Bem-vindo de volta</h1>
+      <p class="text-muted" style="margin-bottom:1.75rem">Entre para acessar sua área do aluno.</p>
+
+      <div class="field">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" required autocomplete="email" />
+      </div>
+      <div class="field">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" required autocomplete="current-password" />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+
+      <div class="auth-links">
+        <a href="https://wa.me/5511940028922?text=Oi!%20Esqueci%20minha%20senha%20da%20área%20do%20aluno" target="_blank" rel="noopener">Esqueci minha senha</a>
+        <a href="matricula.html">Não tenho conta</a>
+      </div>
+    </form>
+  </div>
+
+  <script src="assets/js/icons.js"></script>
   <script src="assets/js/api.js"></script>
+  <script src="assets/js/ui.js"></script>
   <script src="assets/js/login.js"></script>
 </body>
 </html>

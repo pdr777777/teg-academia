@@ -4,17 +4,63 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ranking — Academia TEG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/global.css" />
+  <link rel="stylesheet" href="assets/css/aluno.css" />
   <link rel="stylesheet" href="assets/css/ranking.css" />
 </head>
 <body>
 
-  <!-- TODO André: tabs Semanal / Mensal / Geral (GET /api/ranking?tipo=...) -->
-  <!-- Leaderboard com posição, foto, nome, treinos, XP, sequência -->
-  <!-- Destaque da posição do usuário logado (minha_posicao) -->
-  <!-- Seção de conquistas / medalhas (GET /api/ranking/conquistas/:id) -->
+  <header class="topnav">
+    <a href="dashboard.html" class="brand"><span class="dot"></span>TEG ACADEMIA</a>
+    <nav class="topnav-links">
+      <a href="dashboard.html"><span data-icon="home" data-icon-size="16"></span>Dashboard</a>
+      <a href="treinos.html"><span data-icon="dumbbell" data-icon-size="16"></span>Treinos</a>
+      <a href="ranking.html" class="active"><span data-icon="award" data-icon-size="16"></span>Ranking</a>
+      <a href="indicacao.html"><span data-icon="link" data-icon-size="16"></span>Indicação</a>
+    </nav>
+    <div class="topnav-right">
+      <button class="btn btn-ghost btn-sm" id="btn-logout"><span data-icon="log-out" data-icon-size="16"></span>Sair</button>
+      <button class="topnav-menu-btn btn-ghost btn-sm" id="btn-mobile-menu" data-icon="menu"></button>
+    </div>
+  </header>
 
+  <main class="container aluno-main">
+    <div class="page-head">
+      <div>
+        <h1>Ranking</h1>
+        <p class="text-muted">Quem mais treinou por aqui.</p>
+      </div>
+      <div class="tabs" id="tabs-ranking">
+        <button class="tab active" data-tipo="semanal">Semanal</button>
+        <button class="tab" data-tipo="mensal">Mensal</button>
+        <button class="tab" data-tipo="geral">Geral</button>
+      </div>
+    </div>
+
+    <div id="minha-posicao-card" class="card minha-posicao"></div>
+
+    <div class="table-wrap" style="margin-top:1.25rem">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Aluno</th><th>Treinos</th><th>XP</th><th>Sequência</th></tr>
+        </thead>
+        <tbody id="ranking-body">
+          <tr><td colspan="5" class="loading-row"><span class="spinner"></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <section class="card" style="margin-top:2rem">
+      <h2 style="margin-bottom:1rem">Conquistas</h2>
+      <div id="conquistas-grid" class="grid grid-4"></div>
+    </section>
+  </main>
+
+  <script src="assets/js/icons.js"></script>
   <script src="assets/js/api.js"></script>
+  <script src="assets/js/ui.js"></script>
   <script src="assets/js/auth-guard.js"></script>
   <script src="assets/js/ranking.js"></script>
 </body>

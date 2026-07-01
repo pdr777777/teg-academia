@@ -1,0 +1,21 @@
+.auth-wrap {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  gap: 2rem;
+  background: radial-gradient(50% 40% at 50% 0%, rgba(255,60,0,0.10), transparent), var(--color-bg);
+}
+.auth-brand { font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 0.6rem; }
+.auth-brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--color-primary); }
+.auth-card { width: 100%; max-width: 400px; }
+.auth-card h1 { font-size: 1.4rem; }
+.auth-links { display: flex; justify-content: space-between; margin-top: 1.5rem; font-size: 0.85rem; }
+.auth-links a { color: var(--color-muted); }
+.auth-links a:hover { color: var(--color-primary); }
+
+@media (max-width: 420px) {
+  .auth-links { flex-direction: column; gap: 0.6rem; text-align: center; }
+}

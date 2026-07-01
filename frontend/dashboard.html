@@ -3,39 +3,97 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard — Academia TEG</title>
+  <title>Minha Área — Academia TEG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/global.css" />
+  <link rel="stylesheet" href="assets/css/aluno.css" />
   <link rel="stylesheet" href="assets/css/dashboard.css" />
 </head>
 <body>
 
-  <!-- SIDEBAR / NAV -->
-  <nav id="sidebar">
-    <!-- TODO André: links para dashboard, treinos, ranking, indicação, perfil -->
-  </nav>
+  <header class="topnav">
+    <a href="dashboard.html" class="brand"><span class="dot"></span>TEG ACADEMIA</a>
+    <nav class="topnav-links">
+      <a href="dashboard.html" class="active"><span data-icon="home" data-icon-size="16"></span>Dashboard</a>
+      <a href="treinos.html"><span data-icon="dumbbell" data-icon-size="16"></span>Treinos</a>
+      <a href="ranking.html"><span data-icon="award" data-icon-size="16"></span>Ranking</a>
+      <a href="indicacao.html"><span data-icon="link" data-icon-size="16"></span>Indicação</a>
+    </nav>
+    <div class="topnav-right">
+      <button class="btn btn-ghost btn-sm" id="btn-logout"><span data-icon="log-out" data-icon-size="16"></span>Sair</button>
+      <button class="topnav-menu-btn btn-ghost btn-sm" id="btn-mobile-menu" data-icon="menu"></button>
+    </div>
+  </header>
 
-  <!-- CONTEÚDO PRINCIPAL -->
-  <main>
+  <main class="container aluno-main">
 
-    <!-- Cards de resumo (GET /api/alunos/dashboard) -->
     <section id="cards-resumo">
-      <!-- Nome + Plano + Próximo vencimento + Frequência mensal + Dias treinados + XP atual -->
+      <div class="dash-hero card">
+        <div>
+          <p class="text-muted" id="saudacao">Carregando...</p>
+          <h1 id="dash-nome">—</h1>
+          <span class="badge badge-primary" id="dash-plano-badge"></span>
+        </div>
+        <div class="dash-hero-xp">
+          <span data-icon="zap"></span>
+          <div>
+            <strong id="dash-xp">0 XP</strong>
+            <span class="text-muted">Sequência atual: <span id="dash-sequencia">0</span> dias</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-4 stat-cards">
+        <div class="card stat-card">
+          <span class="stat-icon"><span data-icon="calendar"></span></span>
+          <strong id="stat-vencimento">—</strong>
+          <span class="text-muted">Vencimento do plano</span>
+        </div>
+        <div class="card stat-card">
+          <span class="stat-icon"><span data-icon="trending-up"></span></span>
+          <strong id="stat-freq-mes">0</strong>
+          <span class="text-muted">Dias treinados no mês</span>
+        </div>
+        <div class="card stat-card">
+          <span class="stat-icon"><span data-icon="dumbbell"></span></span>
+          <strong id="stat-total-treinos">0</strong>
+          <span class="text-muted">Treinos no total</span>
+        </div>
+        <div class="card stat-card">
+          <span class="stat-icon"><span data-icon="flame"></span></span>
+          <strong id="stat-maior-sequencia">0</strong>
+          <span class="text-muted">Maior sequência</span>
+        </div>
+      </div>
     </section>
 
-    <!-- Calendário de frequência do mês (GET /api/frequencias/minha?mes=...) -->
-    <section id="frequencia-mes">
-    </section>
+    <div class="grid grid-2 dash-lower">
+      <section id="frequencia-mes" class="card">
+        <div class="row-between" style="margin-bottom:1rem">
+          <h2>Frequência do mês</h2>
+          <span data-icon="calendar" data-icon-size="18" class="text-muted"></span>
+        </div>
+        <div class="calendario-grid" id="calendario-grid"></div>
+      </section>
 
-    <!-- Conquistas recentes -->
-    <section id="conquistas-recentes">
-    </section>
+      <section id="conquistas-recentes" class="card">
+        <div class="row-between" style="margin-bottom:1rem">
+          <h2>Conquistas recentes</h2>
+          <span data-icon="award" data-icon-size="18" class="text-muted"></span>
+        </div>
+        <div id="lista-conquistas" class="stack gap-md"></div>
+      </section>
+    </div>
 
-    <!-- Botão de check-in (POST /api/frequencias/checkin) -->
-    <button id="btn-checkin">Registrar treino de hoje 💪</button>
-
+    <button id="btn-checkin" class="btn btn-primary btn-checkin">
+      <span data-icon="check-circle"></span>Registrar treino de hoje
+    </button>
   </main>
 
+  <script src="assets/js/icons.js"></script>
   <script src="assets/js/api.js"></script>
+  <script src="assets/js/ui.js"></script>
   <script src="assets/js/auth-guard.js"></script>
   <script src="assets/js/dashboard.js"></script>
 </body>
