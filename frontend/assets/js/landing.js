@@ -34,30 +34,6 @@ document.getElementById('depoimentos-grid').innerHTML = DEPOIMENTOS.map((d) => `
   </div>
 `).join('');
 
-async function carregarPlanos() {
-  const grid = document.getElementById('planos-grid');
-  try {
-    const planos = await api.get('/api/planos');
-    if (!planos.length) {
-      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">Nenhum plano disponível no momento.</div>';
-      return;
-    }
-    const destaqueIdx = Math.min(1, planos.length - 1);
-    grid.innerHTML = planos.map((p, i) => `
-      <div class="card plano-card${i === destaqueIdx ? ' destaque' : ''}">
-        ${i === destaqueIdx ? '<span class="badge badge-primary">Mais popular</span>' : ''}
-        <div class="plano-nome">${p.nome}</div>
-        <div class="plano-desc">${p.descricao || ''}</div>
-        <div class="plano-preco">${formatMoeda(p.preco_mensal)}<span>/mês</span></div>
-        <div class="plano-duracao">Vigência de ${p.duracao_dias} dias</div>
-        <a href="matricula.html?plano=${p.id}" class="btn btn-primary btn-block">Escolher plano</a>
-      </div>
-    `).join('');
-  } catch (err) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">Não foi possível carregar os planos agora.</div>';
-  }
-}
-
 async function carregarHorarios() {
   const tbody = document.querySelector('#tabela-horarios tbody');
   try {
@@ -107,5 +83,4 @@ document.getElementById('form-lead').addEventListener('submit', async (ev) => {
   }
 });
 
-carregarPlanos();
 carregarHorarios();

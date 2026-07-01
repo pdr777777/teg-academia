@@ -7,9 +7,15 @@
   --color-border: #232323;
   --color-text: #f0f0f0;
   --color-muted: #8c8c8c;
-  --color-primary: #ff3c00;
-  --color-primary-hover: #e03500;
-  --color-primary-soft: rgba(255, 60, 0, 0.12);
+  --color-primary: #ff8a00;
+  --color-primary-hover: #e67a00;
+  --color-primary-soft: rgba(255, 138, 0, 0.14);
+  --color-wine: #7a1f3f;
+  --color-wine-dark: #5c1730;
+  --color-wine-soft: rgba(122, 31, 63, 0.12);
+  --color-coral: #ef4d4d;
+  --color-coral-hover: #dd3d3d;
+  --color-coral-soft: rgba(239, 77, 77, 0.14);
   --color-success: #22c55e;
   --color-success-soft: rgba(34, 197, 94, 0.12);
   --color-warning: #eab308;
@@ -166,6 +172,8 @@ label {
 }
 .topnav .brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 800; letter-spacing: -0.02em; font-size: 1.05rem; }
 .topnav .brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--color-primary); }
+.brand-logo { height: 34px; width: auto; display: block; }
+.brand-fallback { display: none; align-items: center; gap: 0.6rem; }
 .topnav-links { display: flex; align-items: center; gap: 0.25rem; }
 .topnav-links a {
   display: flex;

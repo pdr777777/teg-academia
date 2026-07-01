@@ -55,16 +55,33 @@
 .feature-card h3 { font-size: 1.05rem; margin-bottom: 0.4rem; }
 .feature-card p { color: var(--color-muted); font-size: 0.9rem; }
 
-/* ===== Planos ===== */
-.plano-card { display: flex; flex-direction: column; position: relative; }
-.plano-card.destaque { border-color: var(--color-primary); }
-.plano-card .badge-primary { position: absolute; top: -12px; right: 1.5rem; }
-.plano-nome { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.3rem; }
-.plano-desc { color: var(--color-muted); font-size: 0.88rem; margin-bottom: 1.25rem; min-height: 2.6em; }
-.plano-preco { font-size: 2.1rem; font-weight: 800; margin-bottom: 0.2rem; }
-.plano-preco span { font-size: 0.95rem; font-weight: 500; color: var(--color-muted); }
-.plano-duracao { color: var(--color-muted); font-size: 0.82rem; margin-bottom: 1.5rem; }
-.plano-card .btn { margin-top: auto; }
+/* ===== Vitrine de preços (landing, contúdo estático fiel ao Instagram) ===== */
+.planos-vitrine { max-width: 720px; margin: 0 auto; }
+.plano-vitrine-card { background: #fff; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-card); }
+.plano-vitrine-head {
+  background: var(--color-wine); color: #fff;
+  font-weight: 800; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.02em;
+  padding: 0.9rem 1.25rem; text-align: center;
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+}
+.plano-vitrine-body {
+  padding: 1.5rem 1.25rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; text-align: center;
+}
+.plano-vitrine-metodo { color: #444; font-size: 0.85rem; line-height: 1.5; }
+.plano-vitrine-metodo em { color: #777; font-style: normal; font-size: 0.78rem; }
+.plano-vitrine-metodo small { color: #999; font-size: 0.72rem; display: block; margin-top: 0.2rem; }
+.plano-vitrine-preco {
+  background: var(--color-coral); color: #fff; font-weight: 800; font-size: 1.05rem;
+  padding: 0.55rem 1.1rem; border-radius: 999px;
+}
+.badge-novo {
+  background: var(--color-coral); color: #fff; font-size: 0.62rem; font-weight: 800;
+  padding: 0.15rem 0.5rem; border-radius: 999px; text-transform: uppercase; margin-left: 0.4rem;
+}
+
+@media (max-width: 700px) {
+  .planos-vitrine.grid-2 { grid-template-columns: 1fr; }
+}
 
 /* ===== Horários ===== */
 #tabela-horarios td:first-child { font-weight: 600; }
@@ -100,6 +117,7 @@
 .site-footer { padding: 2rem 0; border-top: 1px solid var(--color-border); }
 .site-footer .brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 800; font-size: 0.9rem; }
 .site-footer .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); display: inline-block; }
+.site-footer .brand-logo { height: 24px; }
 
 @media (max-width: 900px) {
   .hero-inner, .localizacao-grid, .agendar-grid { grid-template-columns: 1fr; }

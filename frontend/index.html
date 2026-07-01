@@ -14,7 +14,7 @@
 <body>
 
   <header class="topnav" id="site-nav">
-    <a href="index.html" class="brand"><span class="dot"></span>TEG ACADEMIA</a>
+    <a href="index.html" class="brand"><img src="assets/img/logo.png" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ACADEMIA</span></a>
     <nav class="topnav-links">
       <a href="#planos">Planos</a>
       <a href="#horarios">Horários</a>
@@ -105,11 +105,55 @@
     <div class="container">
       <div class="section-head" style="margin-left:auto;margin-right:auto;text-align:center">
         <span class="eyebrow">Planos</span>
-        <h2>Escolha o plano ideal para você</h2>
+        <h2>Escolha a forma de pagamento ideal para você</h2>
         <p>Sem taxa de matrícula escondida. Cancele quando quiser.</p>
       </div>
-      <div class="grid grid-3" id="planos-grid">
-        <div class="loading-row" style="grid-column:1/-1"><span class="spinner"></span></div>
+      <div class="grid grid-2 planos-vitrine">
+        <div class="plano-vitrine-card">
+          <div class="plano-vitrine-head">Mensal</div>
+          <div class="plano-vitrine-body">
+            <span class="plano-vitrine-metodo">Pagamento:<br />Cartão de débito<br />Cartão de crédito</span>
+            <span class="plano-vitrine-preco">R$129,90</span>
+          </div>
+        </div>
+        <div class="plano-vitrine-card">
+          <div class="plano-vitrine-head">Anual</div>
+          <div class="plano-vitrine-body">
+            <span class="plano-vitrine-metodo">Pagamento:<br />Cartão de crédito<br /><strong class="text-primary">Recorrente</strong></span>
+            <span class="plano-vitrine-preco">12x R$109,90</span>
+          </div>
+        </div>
+        <div class="plano-vitrine-card">
+          <div class="plano-vitrine-head">Mensal</div>
+          <div class="plano-vitrine-body">
+            <span class="plano-vitrine-metodo">Pagamento:<br />Pix <em>(desconto de 7,6%)</em><br />Dinheiro</span>
+            <span class="plano-vitrine-preco">R$119,90</span>
+          </div>
+        </div>
+        <div class="plano-vitrine-card">
+          <div class="plano-vitrine-head">Anual</div>
+          <div class="plano-vitrine-body">
+            <span class="plano-vitrine-metodo">Pagamento:<br />Cartão de crédito<br /><strong class="text-primary">Parcelado</strong><br /><small>Necessário ter limite de R$1.198,80</small></span>
+            <span class="plano-vitrine-preco">12x R$99,90</span>
+          </div>
+        </div>
+        <div class="plano-vitrine-card">
+          <div class="plano-vitrine-head">Trimestral</div>
+          <div class="plano-vitrine-body">
+            <span class="plano-vitrine-metodo">Pagamento:<br />Crédito</span>
+            <span class="plano-vitrine-preco">3x R$109,90</span>
+          </div>
+        </div>
+        <div class="plano-vitrine-card">
+          <div class="plano-vitrine-head">Anual<span class="badge-novo">novo</span></div>
+          <div class="plano-vitrine-body">
+            <span class="plano-vitrine-metodo">Pagamento:<br />Pix<br /><strong class="text-primary">Recorrente</strong></span>
+            <span class="plano-vitrine-preco">12x R$109,90</span>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:2.5rem">
+        <a href="matricula.html" class="btn btn-primary">Matricule-se agora<span data-icon="arrow-right"></span></a>
       </div>
     </div>
   </section>
@@ -205,7 +249,7 @@
 
   <footer class="site-footer">
     <div class="container row-between">
-      <span class="brand"><span class="dot"></span>TEG ACADEMIA</span>
+      <span class="brand"><img src="assets/img/logo.png" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ACADEMIA</span></span>
       <span class="text-muted" style="font-size:.85rem">&copy; 2026 Academia TEG. Todos os direitos reservados.</span>
     </div>
   </footer>

@@ -39,9 +39,23 @@
 .step-section h1 { font-size: 1.7rem; margin-bottom: 0.4rem; }
 .step-back { margin-bottom: 1rem; }
 
-.matricula-wrap .plano-card { cursor: pointer; transition: border-color .15s, transform .1s; }
-.matricula-wrap .plano-card:hover { border-color: var(--color-primary); }
-.matricula-wrap .plano-card.selecionado { border-color: var(--color-primary); background: var(--color-primary-soft); }
+/* ===== Cartão de seleção de plano ===== */
+.plano-card {
+  display: flex; flex-direction: column; position: relative;
+  background: #fff; color: #1a1a1a; border: none; overflow: hidden; padding: 0;
+}
+.plano-card .badge-primary { position: absolute; top: 0.9rem; right: 0.9rem; z-index: 1; background: var(--color-coral); color: #fff; }
+.plano-card::before { content: ''; display: block; height: 8px; background: var(--color-wine); }
+.plano-nome { font-size: 1.1rem; font-weight: 700; margin: 1.25rem 1.5rem 0.3rem; }
+.plano-desc { color: #666; font-size: 0.88rem; margin: 0 1.5rem 1.25rem; min-height: 2.6em; }
+.plano-preco { font-size: 2.1rem; font-weight: 800; margin: 0 1.5rem 0.2rem; color: var(--color-coral); }
+.plano-preco span { font-size: 0.95rem; font-weight: 500; color: #888; }
+.plano-duracao { color: #888; font-size: 0.82rem; margin: 0 1.5rem 1.5rem; }
+.plano-card .btn { margin: 0 1.5rem 1.5rem; }
+
+.matricula-wrap .plano-card { cursor: pointer; transition: box-shadow .15s, transform .1s; box-shadow: 0 0 0 1px var(--color-border), var(--shadow-card); }
+.matricula-wrap .plano-card:hover { box-shadow: 0 0 0 2px var(--color-primary), var(--shadow-card); }
+.matricula-wrap .plano-card.selecionado { box-shadow: 0 0 0 2px var(--color-coral), var(--shadow-card); }
 
 .resumo-card .resumo-linha { display: flex; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid var(--color-border); font-size: 0.92rem; }
 .resumo-card .resumo-linha:last-child { border-bottom: none; }
