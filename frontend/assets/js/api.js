@@ -1,0 +1,21 @@
+const API_URL = 'http://localhost:3001';
+
+async function apiFetch(path, options = {}) {
+  const token = localStorage.getItem('token');
+  const headers = { 'Content-Type': 'application/json', ...options.headers };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  const data = await res.json();
+
+  if (!res.ok) throw new Error(data.error || 'Erro na requisição');
+  return data;
+}
+
+const api = {
+  get: (path) => apiFetch(path),
+  post: (path, body) => apiFetch(path, { method: 'POST', body: JSON.stringify(body) }),
+  patch: (path, body) => apiFetch(path, { method: 'PATCH', body: JSON.stringify(body) }),
+  put: (path, body) => apiFetch(path, { method: 'PUT', body: JSON.stringify(body) }),
+  del: (path) => apiFetch(path, { method: 'DELETE' }),
+};
