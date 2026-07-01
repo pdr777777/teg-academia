@@ -4,16 +4,44 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Meu Treino — Academia TEG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/global.css" />
+  <link rel="stylesheet" href="assets/css/aluno.css" />
   <link rel="stylesheet" href="assets/css/treinos.css" />
 </head>
 <body>
 
-  <!-- TODO André: exibe treino ativo do aluno (GET /api/treinos/meu) -->
-  <!-- Para cada exercício: nome, vídeo embed, séries x repetições, carga, descanso, observações -->
-  <!-- Visual estilo Hevy/Strong: card por exercício com vídeo no topo -->
+  <header class="topnav">
+    <a href="dashboard.html" class="brand"><img src="assets/img/logo.png" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ACADEMIA</span></a>
+    <nav class="topnav-links">
+      <a href="dashboard.html"><span data-icon="home" data-icon-size="16"></span>Dashboard</a>
+      <a href="treinos.html" class="active"><span data-icon="dumbbell" data-icon-size="16"></span>Treinos</a>
+      <a href="ranking.html"><span data-icon="award" data-icon-size="16"></span>Ranking</a>
+      <a href="indicacao.html"><span data-icon="link" data-icon-size="16"></span>Indicação</a>
+    </nav>
+    <div class="topnav-right">
+      <button class="btn btn-ghost btn-sm" id="btn-logout"><span data-icon="log-out" data-icon-size="16"></span>Sair</button>
+      <button class="topnav-menu-btn btn-ghost btn-sm" id="btn-mobile-menu" data-icon="menu"></button>
+    </div>
+  </header>
 
+  <main class="container aluno-main">
+    <div class="page-head">
+      <div>
+        <h1 id="treino-nome">Meu treino</h1>
+        <p id="treino-desc" class="text-muted"></p>
+      </div>
+    </div>
+
+    <div id="lista-exercicios" class="stack gap-lg">
+      <div class="loading-row"><span class="spinner"></span></div>
+    </div>
+  </main>
+
+  <script src="assets/js/icons.js"></script>
   <script src="assets/js/api.js"></script>
+  <script src="assets/js/ui.js"></script>
   <script src="assets/js/auth-guard.js"></script>
   <script src="assets/js/treinos.js"></script>
 </body>

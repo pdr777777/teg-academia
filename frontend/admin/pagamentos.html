@@ -4,17 +4,82 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pagamentos — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../assets/css/global.css" />
   <link rel="stylesheet" href="../assets/css/admin.css" />
 </head>
 <body>
 
-  <!-- TODO André: tabela de pagamentos (GET /api/pagamentos) -->
-  <!-- filtro por status (pendente/pago/cancelado) -->
-  <!-- botão confirmar pagamento (PATCH /api/pagamentos/:id/confirmar) com select do método -->
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><img src="../assets/img/logo.png" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ADMIN</span></div>
+      <nav class="sidebar-nav">
+        <a href="index.html"><span data-icon="grid" data-icon-size="18"></span>Dashboard</a>
+        <a href="alunos.html"><span data-icon="users" data-icon-size="18"></span>Alunos</a>
+        <a href="crm.html"><span data-icon="columns" data-icon-size="18"></span>CRM</a>
+        <a href="pagamentos.html" class="active"><span data-icon="credit-card" data-icon-size="18"></span>Pagamentos</a>
+      </nav>
+      <div class="sidebar-foot">
+        <a href="#" id="btn-logout"><span data-icon="log-out" data-icon-size="18"></span>Sair</a>
+      </div>
+    </aside>
 
+    <div class="main-content">
+      <div class="page-head">
+        <button class="btn btn-ghost btn-sm sidebar-toggle" id="btn-sidebar-toggle" data-icon="menu"></button>
+        <div>
+          <h1>Pagamentos</h1>
+          <p>Confirme pagamentos recebidos manualmente.</p>
+        </div>
+      </div>
+
+      <div class="filters-row">
+        <select id="filtro-status">
+          <option value="">Todos os status</option>
+          <option value="pendente">Pendente</option>
+          <option value="pago">Pago</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Aluno</th><th>Plano</th><th>Valor</th><th>Status</th><th>Data</th><th></th></tr>
+          </thead>
+          <tbody id="pagamentos-body">
+            <tr><td colspan="6" class="loading-row"><span class="spinner"></span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal confirmar pagamento -->
+  <div id="modal-confirmar" class="modal-overlay" style="display:none">
+    <div class="card modal-box">
+      <h2 style="margin-bottom:1rem">Confirmar pagamento</h2>
+      <div class="field">
+        <label for="select-metodo">Método de pagamento</label>
+        <select id="select-metodo">
+          <option value="pix">Pix</option>
+          <option value="cartao">Cartão</option>
+          <option value="dinheiro">Dinheiro</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+      <div class="row gap-sm" style="justify-content:flex-end;margin-top:1rem">
+        <button class="btn btn-ghost" id="btn-cancelar-modal">Cancelar</button>
+        <button class="btn btn-primary" id="btn-confirmar-modal">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
   <script src="../assets/js/api.js"></script>
-  <script src="../assets/js/auth-guard.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/admin-guard.js"></script>
   <script src="../assets/js/admin-pagamentos.js"></script>
 </body>
 </html>

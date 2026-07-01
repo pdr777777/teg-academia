@@ -1,0 +1,17 @@
+.exercicio-card { padding: 0; overflow: hidden; }
+.exercicio-video {
+  aspect-ratio: 16/9;
+  background: var(--color-surface-2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-muted);
+}
+.exercicio-video iframe { width: 100%; height: 100%; border: 0; }
+.exercicio-video .play-placeholder { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; font-size: 0.82rem; }
+.exercicio-body { padding: 1.25rem 1.5rem; }
+.exercicio-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.9rem; }
+.exercicio-head h3 { font-size: 1.05rem; }
+.exercicio-stats { display: flex; gap: 1.75rem; flex-wrap: wrap; }
+.exercicio-stat { display: flex; flex-direction: column; }
+.exercicio-stat strong { font-size: 1.15rem; }
+.exercicio-stat span { color: var(--color-muted); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.exercicio-obs { margin-top: 0.9rem; font-size: 0.85rem; color: var(--color-muted); border-top: 1px solid var(--color-border); padding-top: 0.9rem; }

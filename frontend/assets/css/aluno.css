@@ -1,0 +1,6 @@
+.aluno-main { padding: 2.5rem 1.5rem 4rem; }
+.aluno-main h1 { font-size: 1.5rem; }
+.aluno-main h2 { font-size: 1.05rem; }
+.aluno-main > section + section,
+.aluno-main > div + section,
+.aluno-main > section + div { margin-top: 1.5rem; }

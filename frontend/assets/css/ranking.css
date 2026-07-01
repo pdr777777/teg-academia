@@ -1,0 +1,25 @@
+.tabs { display: flex; gap: 0.3rem; background: var(--color-surface-2); padding: 0.3rem; border-radius: var(--radius-sm); }
+.tab { padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; color: var(--color-muted); }
+.tab.active { background: var(--color-primary); color: #fff; }
+
+.minha-posicao { display: flex; align-items: center; gap: 1rem; border-color: var(--color-primary); background: var(--color-primary-soft); }
+.minha-posicao .posicao-num { font-size: 1.6rem; font-weight: 800; color: var(--color-primary); width: 2.4rem; text-align: center; }
+
+.ranking-avatar-row { display: flex; align-items: center; gap: 0.7rem; }
+.ranking-pos { font-weight: 700; color: var(--color-muted); }
+.ranking-pos.top1 { color: #ffd54a; }
+.ranking-pos.top2 { color: #c9c9c9; }
+.ranking-pos.top3 { color: #d08a4f; }
+tr.linha-eu td { background: var(--color-primary-soft); }
+
+.conquista-card { text-align: center; padding: 1.25rem 0.75rem; opacity: 0.4; }
+.conquista-card.desbloqueada { opacity: 1; }
+.conquista-card .icon-badge {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--color-surface-2); color: var(--color-muted);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 0.6rem;
+}
+.conquista-card.desbloqueada .icon-badge { background: var(--color-primary-soft); color: var(--color-primary); }
+.conquista-card strong { display: block; font-size: 0.82rem; }
+.conquista-card span { font-size: 0.72rem; color: var(--color-muted); }

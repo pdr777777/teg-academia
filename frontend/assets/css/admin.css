@@ -1,0 +1,67 @@
+.sidebar-toggle { display: none; }
+
+.admin-stat-cards .stat-card { display: flex; flex-direction: column; gap: 0.5rem; }
+.admin-stat-cards .stat-icon { color: var(--color-primary); }
+.admin-stat-cards strong { font-size: 1.5rem; }
+.admin-stat-cards span { font-size: 0.82rem; color: var(--color-muted); }
+
+/* ===== Gráfico simples de barras (sem dependências) ===== */
+.chart-bars { display: flex; align-items: flex-end; gap: 1rem; height: 200px; padding-top: 1rem; }
+.chart-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 0.5rem; height: 100%; }
+.chart-bar { width: 100%; max-width: 46px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); border-radius: 6px 6px 0 0; }
+.chart-bar-value { font-size: 0.72rem; color: var(--color-muted); }
+.chart-bar-label { font-size: 0.76rem; color: var(--color-muted); text-transform: uppercase; }
+
+/* ===== Filtros ===== */
+.filters-row { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.filters-row .search-field { position: relative; flex: 1; min-width: 220px; }
+.filters-row .search-field .icon { position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); color: var(--color-muted); }
+.filters-row .search-field input { padding-left: 2.5rem; }
+.filters-row select { width: auto; min-width: 160px; }
+
+/* ===== Kanban CRM ===== */
+.kanban-board { display: grid; grid-template-columns: repeat(5, minmax(240px, 1fr)); gap: 1rem; overflow-x: auto; padding-bottom: 1rem; }
+.kanban-col { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); display: flex; flex-direction: column; min-height: 200px; }
+.kanban-col-head { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1rem; border-bottom: 1px solid var(--color-border); font-size: 0.85rem; font-weight: 700; }
+.kanban-col-body { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; flex: 1; min-height: 80px; }
+.kanban-col-body.drag-over { background: var(--color-primary-soft); }
+.kanban-card {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  cursor: grab;
+  font-size: 0.85rem;
+}
+.kanban-card:active { cursor: grabbing; }
+.kanban-card strong { display: block; margin-bottom: 0.3rem; }
+.kanban-card .kanban-meta { display: flex; align-items: center; gap: 0.4rem; color: var(--color-muted); font-size: 0.76rem; margin-top: 0.4rem; }
+
+/* ===== Toggle switch (ativar/desativar aluno) ===== */
+.switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch .slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background: var(--color-surface-2); border: 1px solid var(--color-border);
+  border-radius: 999px; transition: 0.15s;
+}
+.switch .slider::before {
+  content: ''; position: absolute; height: 16px; width: 16px; left: 2px; top: 2px;
+  background: var(--color-muted); border-radius: 50%; transition: 0.15s;
+}
+.switch input:checked + .slider { background: var(--color-success-soft); border-color: var(--color-success); }
+.switch input:checked + .slider::before { transform: translateX(18px); background: var(--color-success); }
+
+/* ===== Modal ===== */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(0,0,0,0.6);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+}
+.modal-box { width: 100%; max-width: 380px; }
+
+@media (max-width: 900px) {
+  .sidebar-toggle { display: inline-flex; }
+  .page-head { position: relative; padding-left: 0; }
+}
