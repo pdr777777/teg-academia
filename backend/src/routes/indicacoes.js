@@ -52,4 +52,34 @@ router.get('/stats', authMiddleware, async (req, res, next) => {
   }
 });
 
+// GET /api/indicacoes/ref/:codigo — público, sem auth
+// Usado na landing page personalizada de indicação
+router.get('/ref/:codigo', async (req, res, next) => {
+  try {
+    const { rows: [indicador] } = await pool.query(
+      `SELECT u.nome, u.foto_url,
+              COUNT(i.id) FILTER (WHERE i.status = 'convertido')::int AS amigos_convertidos
+       FROM usuarios u
+       LEFT JOIN indicacoes i ON i.indicador_id = u.id
+       WHERE u.link_indicacao = $1 AND u.ativo = TRUE
+       GROUP BY u.nome, u.foto_url`,
+      [req.params.codigo]
+    );
+
+    if (!indicador) return res.status(404).json({ error: 'Link inválido' });
+
+    res.json({
+      indicador: {
+        nome: indicador.nome,
+        foto_url: indicador.foto_url,
+        amigos_convertidos: indicador.amigos_convertidos,
+      },
+      mensagem: `${indicador.nome} te convidou para a academia! Venha treinar com a gente. 💪`,
+      codigo: req.params.codigo,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;
