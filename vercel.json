@@ -1,5 +1,5 @@
 {
-  "rootDirectory": "frontend",
+  "outputDirectory": "frontend",
   "headers": [
     {
       "source": "/(.*)",
