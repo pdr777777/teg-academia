@@ -1,4 +1,10 @@
-﻿// Mobile menu
+﻿// Page loader dismiss
+window.addEventListener('load', function () {
+  var loader = document.getElementById('page-loader');
+  if (loader) setTimeout(function () { loader.classList.add('hidden'); }, 250);
+});
+
+// Mobile menu
 document.getElementById('btn-mobile-menu').innerHTML = Icons.icon('menu', { size: 20 });
 
 // ===== Count-up stats =====
@@ -266,7 +272,7 @@ const revealObs = new IntersectionObserver(
 );
 
 document.querySelectorAll(
-  '.modalidade-card, .plan-card, .step-card, .depoimento-card, .gamificacao-copy, .gamificacao-visual, .faq-item'
+  '.plan-card, .step-card, .depoimento-card, .gamificacao-copy, .gamificacao-visual, .faq-item'
 ).forEach((el, i) => {
   if (!el.classList.contains('reveal')) el.classList.add('reveal');
   if (i % 4 === 1) el.classList.add('reveal-delay-1');

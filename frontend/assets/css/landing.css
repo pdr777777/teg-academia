@@ -389,9 +389,9 @@
   transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 .plan-card:hover {
-  border-color: rgba(255,138,0,.3);
-  transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(0,0,0,.4);
+  border-color: rgba(204,0,0,.35);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(204,0,0,.08), 0 0 40px rgba(204,0,0,.06);
 }
 .plan-card.plan-featured {
   border-color: var(--color-red);
@@ -548,9 +548,9 @@
   transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 .depoimento-card:hover {
-  border-color: rgba(204,0,0,.25);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0,0,0,.35);
+  border-color: rgba(204,0,0,.3);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 50px rgba(0,0,0,.45), 0 0 0 1px rgba(204,0,0,.06);
 }
 .depoimento-card p {
   font-size: 0.95rem;
