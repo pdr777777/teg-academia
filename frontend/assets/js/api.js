@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:3001';
+const API_URL = window.location.hostname === 'localhost'
+  ? 'http://localhost:3001'
+  : 'https://teg-academia-backend-production.up.railway.app';
 
 async function apiFetch(path, options = {}) {
   const token = localStorage.getItem('token');
