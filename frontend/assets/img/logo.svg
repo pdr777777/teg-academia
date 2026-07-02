@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 36" role="img" aria-label="TEG Academia">
+  <!-- Play icon: 4 facets — A(0,0) B(0,36) C(26,18) subdivided at midpoints M_AB(0,18) M_AC(13,9) M_BC(13,27) -->
+  <polygon points="0,0 13,9 0,18"  fill="#e85050"/>
+  <polygon points="0,18 13,9 13,27" fill="#cc0000"/>
+  <polygon points="0,18 13,27 0,36" fill="#6b1a30"/>
+  <polygon points="13,9 26,18 13,27" fill="#ff6d00"/>
+  <!-- TEG -->
+  <text x="34" y="25"
+        font-family="'Arial Black','Arial','Helvetica Neue',sans-serif"
+        font-size="22" font-weight="900" fill="#ffffff" letter-spacing="-0.5">TEG</text>
+  <!-- Academia -->
+  <text x="35.5" y="34.5"
+        font-family="Arial,'Helvetica Neue',sans-serif"
+        font-size="9" font-weight="500" fill="rgba(255,255,255,0.55)" letter-spacing="2.5">ACADEMIA</text>
+</svg>

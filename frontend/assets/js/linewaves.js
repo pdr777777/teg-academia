@@ -180,11 +180,11 @@
   gl.uniform1f(uSpeed,       2.2);
   gl.uniform1f(uInnerLines,  32.0);
   gl.uniform1f(uOuterLines,  23.0);
-  gl.uniform1f(uWarpInt,     0.1);
+  gl.uniform1f(uWarpInt,     0.12);
   gl.uniform1f(uRotation,    -32.0 * Math.PI / 180.0);
-  gl.uniform1f(uEdgeFade,    0.15);
+  gl.uniform1f(uEdgeFade,    0.6);
   gl.uniform1f(uCycleSpeed,  1.7);
-  gl.uniform1f(uBrightness,  0.2);
+  gl.uniform1f(uBrightness,  0.38);
   gl.uniform3fv(uColor1,     hexToRgb('#d40000'));
   gl.uniform3fv(uColor2,     hexToRgb('#983e00'));
   gl.uniform3fv(uColor3,     hexToRgb('#dc0000'));
