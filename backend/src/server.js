@@ -26,10 +26,25 @@ if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
 const app = express();
 
 app.use(helmet());
+const ALLOWED_ORIGINS = [
+  'https://teg-academia.pages.dev',
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:5500',
+  'http://localhost:8080',
+  'http://127.0.0.1:5500',
+  'http://127.0.0.1:3000',
+];
+
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? ['https://teg-academia.pages.dev']
+    ? (origin, cb) => {
+        // allow null (file://) and listed origins
+        if (!origin || ALLOWED_ORIGINS.includes(origin)) cb(null, true);
+        else cb(new Error('Not allowed by CORS'));
+      }
     : '*',
+  credentials: true,
 }));
 app.use(express.json());
 

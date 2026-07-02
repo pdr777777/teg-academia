@@ -1,6 +1,7 @@
+// Mobile menu
 document.getElementById('btn-mobile-menu').innerHTML = Icons.icon('menu', { size: 20 });
 
-// ===== PrismaticBurst — WebGL2 (shader idêntico ao react-bits original) =====
+// ===== PrismaticBurst — WebGL2 =====
 (function () {
   const canvas = document.querySelector('.hero-burst-canvas');
   if (!canvas) return;
@@ -134,7 +135,6 @@ void main(){
   if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { console.error(gl.getProgramInfoLog(prog)); return; }
   gl.useProgram(prog);
 
-  // Full-screen triangle (same as OGL Triangle)
   const vao = gl.createVertexArray();
   gl.bindVertexArray(vao);
   function buf(data, name, size) {
@@ -146,14 +146,13 @@ void main(){
   buf(new Float32Array([-1,-1, 3,-1, -1,3]), 'position', 2);
   buf(new Float32Array([ 0, 0, 2, 0,  0,2]), 'uv', 2);
 
-  // Uniform locations
   const U = {};
   ['uResolution','uTime','uIntensity','uSpeed','uAnimType','uMouse',
    'uColorCount','uDistort','uOffset','uGradient','uNoiseAmount','uRayCount']
     .forEach(n => U[n] = gl.getUniformLocation(prog, n));
 
-  // Gradient texture — cores do usuário
-  const HEX = ['#b10000','#d74600','#9e0000'];
+  // Gradient: vermelho → laranja → vermelho escuro
+  const HEX = ['#cc0000','#ff5500','#ff8a00','#cc0000'];
   const cData = new Uint8Array(HEX.length * 4);
   HEX.forEach((h, i) => {
     const v = parseInt(h.slice(1), 16);
@@ -167,14 +166,12 @@ void main(){
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-  // Static uniforms (intensity=2, speed=0.5, rotate3d, rayCount=0)
-  gl.uniform1f(U.uIntensity, 2.0);  gl.uniform1f(U.uSpeed, 0.5);
+  gl.uniform1f(U.uIntensity, 2.2);  gl.uniform1f(U.uSpeed, 0.45);
   gl.uniform1i(U.uAnimType, 1);     gl.uniform2f(U.uMouse, 0.5, 0.5);
   gl.uniform1i(U.uColorCount, HEX.length); gl.uniform1f(U.uDistort, 0.0);
   gl.uniform2f(U.uOffset, 0.0, 0.0); gl.uniform1i(U.uGradient, 0);
   gl.uniform1f(U.uNoiseAmount, 0.8); gl.uniform1i(U.uRayCount, 0);
 
-  // Resize
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
   function resize() {
     canvas.width  = canvas.offsetWidth  * DPR;
@@ -185,7 +182,6 @@ void main(){
   new ResizeObserver(resize).observe(canvas.parentElement);
   resize();
 
-  // Render loop
   const t0 = performance.now();
   (function render() {
     gl.uniform1f(U.uTime, (performance.now() - t0) * 0.001);
@@ -195,32 +191,44 @@ void main(){
   })();
 })();
 
+// ===== Stat alunos =====
 document.getElementById('stat-alunos').textContent = '500+';
 
-const ESTRUTURA = [
-  { icon: 'dumbbell', titulo: 'Musculação', desc: 'Equipamentos de última geração, renovados anualmente.' },
-  { icon: 'flame', titulo: 'Cross Training', desc: 'Espaço funcional completo para treinos de alta intensidade.' },
-  { icon: 'users', titulo: 'Aulas coletivas', desc: 'Spinning, jump, dança e muito mais, todos os dias.' },
-  { icon: 'user-check', titulo: 'Acompanhamento', desc: 'Professores especializados por área acompanham sua evolução.' },
+// ===== Modalidades =====
+const MODALIDADES = [
+  { icon: 'dumbbell',   titulo: 'Musculação',      desc: 'Equipamentos de última geração, renovados anualmente para o melhor desempenho.' },
+  { icon: 'flame',      titulo: 'Cross Training',  desc: 'Espaço funcional completo para treinos de alta intensidade e superação.' },
+  { icon: 'users',      titulo: 'Aulas Coletivas', desc: 'Spinning, jump, dança e muito mais — grade variada todos os dias.' },
+  { icon: 'activity',   titulo: 'Funcional',        desc: 'Treinamento funcional para força, mobilidade e equilíbrio corporal.' },
+  { icon: 'zap',        titulo: 'HIIT',             desc: 'Alta intensidade para maximizar resultados em menos tempo de treino.' },
+  { icon: 'heart',      titulo: 'Yoga',             desc: 'Flexibilidade, equilíbrio e bem-estar para corpo e mente.' },
+  { icon: 'music',      titulo: 'Dança',            desc: 'Zumba e aulas de dança para treinar com alegria e motivação.' },
+  { icon: 'user-check', titulo: 'Personal',         desc: 'Acompanhamento individual com protocolo personalizado para você.' },
 ];
 
-document.getElementById('estrutura-grid').innerHTML = ESTRUTURA.map((e) => `
-  <div class="card feature-card">
-    <div class="feature-icon">${Icons.icon(e.icon, { size: 22 })}</div>
-    <h3>${e.titulo}</h3>
-    <p>${e.desc}</p>
+document.getElementById('modalidades-grid').innerHTML = MODALIDADES.map((m) => `
+  <div class="modalidade-card reveal">
+    <div class="modalidade-icon">${Icons.icon(m.icon, { size: 22 })}</div>
+    <h3>${m.titulo}</h3>
+    <p>${m.desc}</p>
+    <button class="btn-modalidade">Ver mais ${Icons.icon('arrow-right', { size: 11 })}</button>
   </div>
 `).join('');
 
+// ===== Depoimentos =====
 const DEPOIMENTOS = [
-  { nome: 'Marina Souza', tag: 'Aluna há 2 anos', texto: 'Troquei de academia e não me arrependo. O acompanhamento dos professores faz toda diferença.' },
-  { nome: 'Rafael Torres', tag: 'Aluno há 8 meses', texto: 'A área do aluno com XP e sequência me motiva a não faltar. Melhor academia que já treinei.' },
-  { nome: 'Camila Duarte', tag: 'Aluna há 1 ano', texto: 'Estrutura excelente, ambiente limpo e horários que cabem na minha rotina.' },
+  { nome: 'Marina Souza',   tag: 'Aluna há 2 anos',  texto: 'Troquei de academia e não me arrependo. O acompanhamento dos professores faz toda diferença.' },
+  { nome: 'Rafael Torres',  tag: 'Aluno há 8 meses', texto: 'A área do aluno com XP e sequência me motiva a nunca faltar. Melhor academia que já treinei.' },
+  { nome: 'Camila Duarte',  tag: 'Aluna há 1 ano',   texto: 'Estrutura excelente, ambiente limpo e horários que cabem na minha rotina.' },
 ];
 
+function iniciais(nome) {
+  return nome.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+}
+
 document.getElementById('depoimentos-grid').innerHTML = DEPOIMENTOS.map((d) => `
-  <div class="card depoimento-card">
-    <div class="stars">${Icons.icon('star', { size: 15 }).repeat(5)}</div>
+  <div class="card depoimento-card reveal">
+    <div class="stars">${Icons.icon('star', { size: 14 }).repeat(5)}</div>
     <p>&ldquo;${d.texto}&rdquo;</p>
     <div class="depoimento-autor">
       <span class="avatar-fallback">${iniciais(d.nome)}</span>
@@ -229,6 +237,7 @@ document.getElementById('depoimentos-grid').innerHTML = DEPOIMENTOS.map((d) => `
   </div>
 `).join('');
 
+// ===== Horários =====
 async function carregarHorarios() {
   const tbody = document.querySelector('#tabela-horarios tbody');
   try {
@@ -246,56 +255,204 @@ async function carregarHorarios() {
         `);
       });
     });
-    tbody.innerHTML = linhas.length ? linhas.join('') : '<tr><td colspan="4" class="empty-state">Grade de horários em breve.</td></tr>';
-  } catch (err) {
+    tbody.innerHTML = linhas.length
+      ? linhas.join('')
+      : '<tr><td colspan="4" class="empty-state">Grade de horários em breve.</td></tr>';
+  } catch {
     tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Não foi possível carregar os horários agora.</td></tr>';
   }
 }
+carregarHorarios();
 
+// ===== FAQ =====
+const FAQS = [
+  { q: 'Como funciona a matrícula?', a: 'A matrícula é 100% online. Escolha seu plano, clique em "Começar agora" e você será redirecionado para o WhatsApp para finalizar com nossa equipe. Rápido, sem burocracia.' },
+  { q: 'Tem taxa de matrícula?', a: 'Não. Na TEG não cobramos taxa de matrícula nem taxas escondidas. Você paga apenas o valor do plano escolhido.' },
+  { q: 'Posso cancelar quando quiser?', a: 'Nos planos mensais, sim — basta avisar com 5 dias de antecedência. Nos planos trimestrais e anuais, o cancelamento antecipado pode implicar em multa proporcional.' },
+  { q: 'Quais modalidades estão incluídas no plano?', a: 'Todos os planos incluem acesso completo a todas as modalidades disponíveis: musculação, cross training, aulas coletivas (spinning, jump, yoga, dança), funcional e HIIT.' },
+  { q: 'Qual é o horário de funcionamento?', a: 'A TEG funciona de segunda a domingo, das 06h às 23h. Confira a grade de aulas coletivas na seção de horários.' },
+  { q: 'O que é a área do aluno?', a: 'É a plataforma digital exclusiva para alunos TEG. Lá você registra treinos, acumula XP, acompanha sua sequência diária e compete no ranking mensal com outros alunos.' },
+];
+
+document.getElementById('faq-list').innerHTML = FAQS.map((f) => `
+  <div class="faq-item">
+    <button class="faq-trigger" aria-expanded="false">
+      <span>${f.q}</span>
+      <span class="faq-arrow">${Icons.icon('chevron-down', { size: 18 })}</span>
+    </button>
+    <div class="faq-body"><p>${f.a}</p></div>
+  </div>
+`).join('');
+
+document.querySelectorAll('.faq-trigger').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach((el) => {
+      el.classList.remove('open');
+      el.querySelector('.faq-trigger').setAttribute('aria-expanded', 'false');
+    });
+    if (!isOpen) {
+      item.classList.add('open');
+      btn.setAttribute('aria-expanded', 'true');
+    }
+  });
+});
+
+// ===== Plan buttons → WhatsApp =====
+const WA = 'https://wa.me/5567993009296?text=';
+const PLAN_MSGS = [
+  'Olá!+Tenho+interesse+no+plano+Mensal+da+Academia+TEG+(R%24119%2C90%2Fmês+no+Pix).+Pode+me+ajudar+a+finalizar+minha+matrícula%3F',
+  'Olá!+Tenho+interesse+no+plano+Trimestral+da+Academia+TEG+(3x+R%24109%2C90).+Pode+me+ajudar+a+finalizar+minha+matrícula%3F',
+  'Olá!+Tenho+interesse+no+plano+Anual+da+Academia+TEG+(12x+R%24099%2C90+no+Pix+recorrente).+Pode+me+ajudar+a+finalizar+minha+matrícula%3F',
+];
+
+document.querySelectorAll('.plan-card').forEach((card, i) => {
+  const btn = card.querySelector('.btn');
+  if (btn && PLAN_MSGS[i]) {
+    btn.href   = WA + PLAN_MSGS[i];
+    btn.target = '_blank';
+    btn.rel    = 'noopener';
+  }
+});
+
+// ===== Electric Border on featured plan =====
+(function initElectricBorder() {
+  const card = document.querySelector('.plan-card.plan-featured');
+  if (!card) return;
+
+  const el = document.createElement('canvas');
+  el.className = 'plan-electric-canvas';
+  el.setAttribute('aria-hidden', 'true');
+  card.prepend(el);
+
+  const ctx = el.getContext('2d');
+  const PAD = 3;
+  const R   = 22;
+
+  function resize() {
+    el.width  = card.offsetWidth  + PAD * 2;
+    el.height = card.offsetHeight + PAD * 2;
+  }
+  resize();
+  new ResizeObserver(resize).observe(card);
+
+  // Sample rounded-rect perimeter
+  function perimeterPts(w, h, r, n) {
+    const segs = [
+      { type: 'line', x1: r,   y1: 0,   x2: w-r, y2: 0   },
+      { type: 'arc',  cx: w-r, cy: r,   a0: -Math.PI/2, a1: 0           },
+      { type: 'line', x1: w,   y1: r,   x2: w,   y2: h-r },
+      { type: 'arc',  cx: w-r, cy: h-r, a0: 0,           a1: Math.PI/2  },
+      { type: 'line', x1: w-r, y1: h,   x2: r,   y2: h   },
+      { type: 'arc',  cx: r,   cy: h-r, a0: Math.PI/2,   a1: Math.PI    },
+      { type: 'line', x1: 0,   y1: h-r, x2: 0,   y2: r   },
+      { type: 'arc',  cx: r,   cy: r,   a0: Math.PI,     a1: 3*Math.PI/2 },
+    ];
+    const totalLen = 2*(w-2*r + h-2*r) + 4*r*(Math.PI/2);
+    const pts = [];
+    for (const seg of segs) {
+      const len   = seg.type === 'line'
+        ? Math.hypot(seg.x2-seg.x1, seg.y2-seg.y1)
+        : r * Math.PI / 2;
+      const steps = Math.max(3, Math.round(n * len / totalLen));
+      for (let i = 0; i < steps; i++) {
+        const t = i / steps;
+        if (seg.type === 'line') {
+          pts.push([PAD + seg.x1 + (seg.x2-seg.x1)*t, PAD + seg.y1 + (seg.y2-seg.y1)*t]);
+        } else {
+          const a = seg.a0 + (seg.a1-seg.a0)*t;
+          pts.push([PAD + seg.cx + Math.cos(a)*r, PAD + seg.cy + Math.sin(a)*r]);
+        }
+      }
+    }
+    return pts;
+  }
+
+  const LAYERS = [
+    { color: '#ff2222', glow: 16, lw: 1.5, chaos: 5   },
+    { color: '#cc0000', glow: 10, lw: 0.9, chaos: 3   },
+    { color: '#ff6633', glow: 24, lw: 0.4, chaos: 7   },
+  ];
+
+  let frame = 0;
+  function draw() {
+    const cw = el.width, ch = el.height;
+    ctx.clearRect(0, 0, cw, ch);
+
+    const pts = perimeterPts(cw - PAD*2, ch - PAD*2, R, 90);
+
+    for (const { color, glow, lw, chaos } of LAYERS) {
+      const jitter = pts.map(([x, y]) => [
+        x + (Math.random() - 0.5) * chaos,
+        y + (Math.random() - 0.5) * chaos,
+      ]);
+
+      ctx.beginPath();
+      ctx.moveTo(jitter[0][0], jitter[0][1]);
+      for (let i = 1; i < jitter.length; i++) ctx.lineTo(jitter[i][0], jitter[i][1]);
+      ctx.closePath();
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth   = lw;
+      ctx.shadowColor = '#cc0000';
+      ctx.shadowBlur  = glow;
+      ctx.globalAlpha = 0.55 + Math.sin(frame * 0.06) * 0.22;
+      ctx.stroke();
+    }
+
+    ctx.shadowBlur  = 0;
+    ctx.globalAlpha = 1;
+    frame++;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ===== Lead form =====
 document.getElementById('form-lead').addEventListener('submit', async (ev) => {
   ev.preventDefault();
   const form = ev.target;
-  const btn = form.querySelector('button[type="submit"]');
+  const btn  = form.querySelector('button[type="submit"]');
   const params = new URLSearchParams(window.location.search);
 
-  btn.disabled = true;
+  btn.disabled    = true;
   btn.textContent = 'Enviando...';
   try {
     await api.post('/api/leads', {
-      nome: form.nome.value,
+      nome:     form.nome.value,
       telefone: form.telefone.value,
       objetivo: form.objetivo.value,
-      origem: 'site',
-      ref: params.get('ref') || undefined,
+      origem:   'site',
+      ref:      params.get('ref') || undefined,
     });
     toast('Recebemos seus dados! Em breve entraremos em contato.', 'success');
     form.reset();
   } catch (err) {
     toast(err.message || 'Erro ao enviar. Tente novamente.', 'error');
   } finally {
-    btn.disabled = false;
+    btn.disabled    = false;
     btn.textContent = 'Agendar aula grátis';
   }
 });
 
-carregarHorarios();
-
-// Scroll reveal
-const revealObserver = new IntersectionObserver(
+// ===== Scroll reveal =====
+const revealObs = new IntersectionObserver(
   (entries) => entries.forEach((e) => {
     if (e.isIntersecting) {
       e.target.classList.add('in-view');
-      revealObserver.unobserve(e.target);
+      revealObs.unobserve(e.target);
     }
   }),
   { threshold: 0.07, rootMargin: '0px 0px -40px 0px' }
 );
+
 document.querySelectorAll(
-  '#estrutura .card, #planos .plano-vitrine-card, #depoimentos .card, #agendar .card'
+  '.modalidade-card, .plan-card, .step-card, .depoimento-card, .gamificacao-copy, .gamificacao-visual, .faq-item'
 ).forEach((el, i) => {
-  el.classList.add('reveal');
+  if (!el.classList.contains('reveal')) el.classList.add('reveal');
   if (i % 4 === 1) el.classList.add('reveal-delay-1');
   if (i % 4 === 2) el.classList.add('reveal-delay-2');
   if (i % 4 === 3) el.classList.add('reveal-delay-3');
-  revealObserver.observe(el);
+  revealObs.observe(el);
 });
