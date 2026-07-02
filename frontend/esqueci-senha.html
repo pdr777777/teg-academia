@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Entrar — Academia TEG</title>
+  <title>Esqueci minha senha — Academia TEG</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="assets/img/favicon.png" />
@@ -15,24 +15,19 @@
   <div class="auth-wrap">
     <a href="index.html" class="brand auth-brand"><img src="assets/img/logo.png" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ACADEMIA</span></a>
 
-    <form id="form-login" class="card auth-card">
-      <h1>Bem-vindo de volta</h1>
-      <p class="text-muted" style="margin-bottom:1.75rem">Entre para acessar sua área do aluno.</p>
+    <form id="form-esqueci-senha" class="card auth-card">
+      <h1>Esqueceu sua senha?</h1>
+      <p class="text-muted" style="margin-bottom:1.75rem">Digite seu e-mail e enviaremos um link de redefinição pelo WhatsApp cadastrado.</p>
 
       <div class="field">
         <label for="email">E-mail</label>
         <input type="email" id="email" required autocomplete="email" />
       </div>
-      <div class="field">
-        <label for="senha">Senha</label>
-        <input type="password" id="senha" required autocomplete="current-password" />
-      </div>
 
-      <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+      <button type="submit" class="btn btn-primary btn-block">Enviar link</button>
 
       <div class="auth-links">
-        <a href="esqueci-senha.html">Esqueci minha senha</a>
-        <a href="matricula.html">Não tenho conta</a>
+        <a href="login.html">← Voltar para o login</a>
       </div>
     </form>
   </div>
@@ -40,6 +35,6 @@
   <script src="assets/js/icons.js"></script>
   <script src="assets/js/api.js"></script>
   <script src="assets/js/ui.js"></script>
-  <script src="assets/js/login.js"></script>
+  <script src="assets/js/esqueci-senha.js"></script>
 </body>
 </html>

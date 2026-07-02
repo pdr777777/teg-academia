@@ -1,8 +1,10 @@
 const express = require('express');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
 const { authMiddleware } = require('../middleware/authMiddleware');
+const whatsappService = require('../services/whatsappService');
 
 const router = express.Router();
 
@@ -107,6 +109,80 @@ router.post('/logout-everywhere', authMiddleware, async (req, res, next) => {
       [req.user.id]
     );
     res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/auth/esqueci-senha
+router.post('/esqueci-senha', async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'email é obrigatório' });
+
+    const { rows } = await pool.query(
+      'SELECT id, nome, telefone FROM usuarios WHERE email = $1 AND ativo = TRUE',
+      [email]
+    );
+    const user = rows[0];
+
+    if (user) {
+      const token = crypto.randomBytes(32).toString('hex');
+      const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+      const expiraEm = new Date(Date.now() + 60 * 60 * 1000);
+
+      await pool.query(
+        'UPDATE usuarios SET reset_token_hash = $1, reset_token_expira = $2 WHERE id = $3',
+        [tokenHash, expiraEm, user.id]
+      );
+
+      const linkReset = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/redefinir-senha.html?token=${token}`;
+      if (user.telefone) {
+        await whatsappService.enviar(
+          user.telefone,
+          `Olá ${user.nome}! Recebemos um pedido para redefinir sua senha.\n` +
+          `Clique no link abaixo (válido por 1 hora):\n${linkReset}\n\n` +
+          `Se não foi você, ignore esta mensagem.`
+        );
+      }
+    }
+
+    res.json({ mensagem: 'Se o e-mail existir, enviaremos um link de redefinição pelo WhatsApp cadastrado.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/auth/redefinir-senha
+router.post('/redefinir-senha', async (req, res, next) => {
+  try {
+    const { token, novaSenha } = req.body;
+    if (!token || !novaSenha) {
+      return res.status(400).json({ error: 'token e novaSenha são obrigatórios' });
+    }
+    if (novaSenha.length < 8 || !/[a-zA-Z]/.test(novaSenha) || !/[0-9]/.test(novaSenha)) {
+      return res.status(400).json({ error: 'Senha deve ter no mínimo 8 caracteres com letra e número' });
+    }
+
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const { rows } = await pool.query(
+      'SELECT id FROM usuarios WHERE reset_token_hash = $1 AND reset_token_expira > NOW()',
+      [tokenHash]
+    );
+    const user = rows[0];
+    if (!user) {
+      return res.status(400).json({ error: 'Token inválido ou expirado' });
+    }
+
+    const senha_hash = await bcrypt.hash(novaSenha, 12);
+    await pool.query(
+      `UPDATE usuarios
+       SET senha_hash = $1, senha_alterada_em = NOW(), reset_token_hash = NULL, reset_token_expira = NULL
+       WHERE id = $2`,
+      [senha_hash, user.id]
+    );
+
+    res.json({ mensagem: 'Senha redefinida com sucesso.' });
   } catch (err) {
     next(err);
   }
