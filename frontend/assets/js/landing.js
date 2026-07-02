@@ -1,29 +1,27 @@
 ﻿// Mobile menu
 document.getElementById('btn-mobile-menu').innerHTML = Icons.icon('menu', { size: 20 });
 
-// ===== Stat alunos =====
-document.getElementById('stat-alunos').textContent = '500+';
+// ===== Count-up stats =====
+function countUp(el, end, suffix, duration) {
+  if (!el) return;
+  const start = performance.now();
+  (function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.round(end * eased) + suffix;
+    if (t < 1) requestAnimationFrame(step);
+  })(start);
+}
 
-// ===== Modalidades =====
-const MODALIDADES = [
-  { icon: 'dumbbell',   titulo: 'Musculação',      desc: 'Equipamentos de última geração, renovados anualmente para o melhor desempenho.' },
-  { icon: 'flame',      titulo: 'Cross Training',  desc: 'Espaço funcional completo para treinos de alta intensidade e superação.' },
-  { icon: 'users',      titulo: 'Aulas Coletivas', desc: 'Spinning, jump, dança e muito mais — grade variada todos os dias.' },
-  { icon: 'activity',   titulo: 'Funcional',        desc: 'Treinamento funcional para força, mobilidade e equilíbrio corporal.' },
-  { icon: 'zap',        titulo: 'HIIT',             desc: 'Alta intensidade para maximizar resultados em menos tempo de treino.' },
-  { icon: 'heart',      titulo: 'Yoga',             desc: 'Flexibilidade, equilíbrio e bem-estar para corpo e mente.' },
-  { icon: 'music',      titulo: 'Dança',            desc: 'Zumba e aulas de dança para treinar com alegria e motivação.' },
-  { icon: 'user-check', titulo: 'Personal',         desc: 'Acompanhamento individual com protocolo personalizado para você.' },
-];
-
-document.getElementById('modalidades-grid').innerHTML = MODALIDADES.map((m) => `
-  <div class="modalidade-card reveal">
-    <div class="modalidade-icon">${Icons.icon(m.icon, { size: 22 })}</div>
-    <h3>${m.titulo}</h3>
-    <p>${m.desc}</p>
-    <button class="btn-modalidade">Ver mais ${Icons.icon('arrow-right', { size: 11 })}</button>
-  </div>
-`).join('');
+const statsBar = document.querySelector('.hero-stats-bar');
+if (statsBar) {
+  new IntersectionObserver(function(entries, obs) {
+    if (!entries[0].isIntersecting) return;
+    obs.disconnect();
+    countUp(document.getElementById('stat-alunos'),     500, '+', 1800);
+    countUp(document.getElementById('stat-modalidades'), 15, '+', 1400);
+  }, { threshold: 0.4 }).observe(statsBar);
+}
 
 // ===== Depoimentos =====
 const DEPOIMENTOS = [
