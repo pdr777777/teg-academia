@@ -1,5 +1,84 @@
 document.getElementById('btn-mobile-menu').innerHTML = Icons.icon('menu', { size: 20 });
 
+// ===== PrismaticBurst background =====
+(function () {
+  const canvas = document.querySelector('.hero-burst-canvas');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  const COLORS = ['#b10000', '#d74600', '#cc2200', '#ff4400', '#9e0000'];
+  const RAY_COUNT = 22;
+  const SPEED = 0.28;
+  const INTENSITY = 1.8;
+  let angle = 0;
+  let raf;
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width  = canvas.offsetWidth  * dpr;
+    canvas.height = canvas.offsetHeight * dpr;
+  }
+  window.addEventListener('resize', () => { resize(); });
+  resize();
+
+  function hex2rgb(hex) {
+    return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+  }
+
+  function draw() {
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    const cx = w * 0.74;
+    const cy = h * 0.48;
+    const maxLen = Math.hypot(w, h) * 1.1;
+
+    for (let i = 0; i < RAY_COUNT; i++) {
+      const a = (i / RAY_COUNT) * Math.PI * 2 + angle;
+      const [r, g, b] = hex2rgb(COLORS[i % COLORS.length]);
+      const pulse = 0.65 + 0.35 * Math.sin(i * 1.73 + angle * 2.5);
+      const alpha = 0.18 * INTENSITY * pulse;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(a);
+
+      const grad = ctx.createLinearGradient(0, 0, maxLen, 0);
+      grad.addColorStop(0,    `rgba(${r},${g},${b},${Math.min(alpha * 3, 0.9)})`);
+      grad.addColorStop(0.08, `rgba(${r},${g},${b},${alpha * 1.5})`);
+      grad.addColorStop(0.28, `rgba(${r},${g},${b},${alpha * 0.5})`);
+      grad.addColorStop(0.6,  `rgba(${r},${g},${b},${alpha * 0.15})`);
+      grad.addColorStop(1,    `rgba(${r},${g},${b},0)`);
+
+      const tipW  = maxLen * 0.06 * (0.35 + 0.65 * Math.abs(Math.sin(i * 0.88)));
+      const baseW = tipW * 0.07;
+
+      ctx.beginPath();
+      ctx.moveTo(0, -baseW);
+      ctx.lineTo(maxLen, -tipW / 2);
+      ctx.lineTo(maxLen,  tipW / 2);
+      ctx.lineTo(0,  baseW);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Soft center glow
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxLen * 0.35);
+    glow.addColorStop(0,   'rgba(200,40,0,0.12)');
+    glow.addColorStop(0.4, 'rgba(150,20,0,0.05)');
+    glow.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, w, h);
+
+    angle += SPEED * 0.004;
+    raf = requestAnimationFrame(draw);
+  }
+
+  draw();
+})();
+
 document.getElementById('stat-alunos').textContent = '500+';
 
 const ESTRUTURA = [
