@@ -23,6 +23,7 @@
   height: 100%;
   pointer-events: none;
   z-index: 0;
+  mix-blend-mode: lighten;
 }
 .hero-inner { position: relative; z-index: 1; }
 
