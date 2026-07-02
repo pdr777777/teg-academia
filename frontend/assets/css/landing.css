@@ -47,17 +47,6 @@
 .btn-lg { padding: 0.9rem 1.75rem; font-size: 1rem; }
 
 
-/* ===== Hero strands canvas ===== */
-#teg-strands {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-  mix-blend-mode: screen;
-}
-
 /* ===== Hero ===== */
 .hero {
   position: relative;
