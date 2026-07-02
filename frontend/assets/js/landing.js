@@ -84,3 +84,23 @@ document.getElementById('form-lead').addEventListener('submit', async (ev) => {
 });
 
 carregarHorarios();
+
+// Scroll reveal
+const revealObserver = new IntersectionObserver(
+  (entries) => entries.forEach((e) => {
+    if (e.isIntersecting) {
+      e.target.classList.add('in-view');
+      revealObserver.unobserve(e.target);
+    }
+  }),
+  { threshold: 0.07, rootMargin: '0px 0px -40px 0px' }
+);
+document.querySelectorAll(
+  '#estrutura .card, #planos .plano-vitrine-card, #depoimentos .card, #agendar .card'
+).forEach((el, i) => {
+  el.classList.add('reveal');
+  if (i % 4 === 1) el.classList.add('reveal-delay-1');
+  if (i % 4 === 2) el.classList.add('reveal-delay-2');
+  if (i % 4 === 3) el.classList.add('reveal-delay-3');
+  revealObserver.observe(el);
+});

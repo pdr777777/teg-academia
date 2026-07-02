@@ -1,36 +1,144 @@
-.dash-hero { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
-.dash-hero h1 { margin: 0.2rem 0 0.6rem; }
-.dash-hero-xp { display: flex; align-items: center; gap: 0.9rem; }
-.dash-hero-xp .icon { color: var(--color-primary); width: 28px; height: 28px; }
-.dash-hero-xp strong { display: block; font-size: 1.2rem; }
-.dash-hero-xp span { font-size: 0.82rem; }
+/* ===== Dashboard hero ===== */
+.dash-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-surface), #141414);
+}
+.dash-hero::after {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(255,138,0,.08), transparent 70%);
+  pointer-events: none;
+}
+.dash-hero h1 {
+  margin: 0.2rem 0 0.6rem;
+  font-size: 1.65rem;
+  letter-spacing: -0.025em;
+}
 
-.stat-cards .stat-card { display: flex; flex-direction: column; gap: 0.4rem; }
-.stat-icon { color: var(--color-primary); margin-bottom: 0.2rem; }
-.stat-card strong { font-size: 1.4rem; }
-.stat-card span { font-size: 0.82rem; }
-
-.dash-lower { align-items: start; }
-
-.calendario-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.4rem; }
-.cal-dia {
-  aspect-ratio: 1;
-  border-radius: var(--radius-sm);
-  background: var(--color-surface-2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.78rem;
+/* ===== XP block ===== */
+.dash-xp-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 220px;
+}
+.dash-xp-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.dash-xp-row strong {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: -0.02em;
+}
+.dash-seq-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
   color: var(--color-muted);
 }
-.cal-dia.treinou { background: var(--color-primary-soft); color: var(--color-primary); font-weight: 700; border: 1px solid var(--color-primary); }
+.dash-xp-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.dash-xp-bar {
+  height: 6px;
+  background: var(--color-surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+  width: 100%;
+}
+.dash-xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6600, #ff8a00, #ffaa40);
+  border-radius: 999px;
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.dash-xp-next {
+  font-size: 0.72rem;
+  color: var(--color-muted);
+}
+
+/* ===== Stat cards ===== */
+.stat-cards { margin-top: 1.25rem; }
+.stat-cards .stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.stat-cards .stat-card:hover {
+  border-color: rgba(255,138,0,.25);
+  transform: translateY(-2px);
+}
+.stat-icon { color: var(--color-primary); margin-bottom: 0.25rem; }
+.stat-card strong { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.025em; }
+.stat-card span { font-size: 0.8rem; color: var(--color-muted); }
+
+/* ===== Lower grid ===== */
+.dash-lower { align-items: start; }
+
+/* ===== Calendário ===== */
+.calendario-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.35rem; }
+.cal-dia {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background: var(--color-surface-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.74rem;
+  color: var(--color-muted);
+  transition: background-color 0.15s;
+}
+.cal-dia.treinou {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-weight: 700;
+  border: 1px solid rgba(255,138,0,.2);
+}
 .cal-dia.vazio { visibility: hidden; }
 
+/* ===== Conquistas ===== */
 .conquista-item { display: flex; align-items: center; gap: 0.8rem; }
 .conquista-item .icon-badge {
   width: 38px; height: 38px; border-radius: 50%;
-  background: var(--color-primary-soft); color: var(--color-primary);
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  border: 1px solid rgba(255,138,0,.15);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
 .conquista-item strong { display: block; font-size: 0.9rem; }
 .conquista-item span { color: var(--color-muted); font-size: 0.78rem; }
 
-.btn-checkin { width: 100%; padding: 1.1rem; font-size: 1rem; margin-top: 1.5rem; }
+/* ===== Check-in button ===== */
+.btn-checkin {
+  width: 100%;
+  padding: 1.1rem;
+  font-size: 1rem;
+  margin-top: 1.5rem;
+  border-radius: var(--radius-lg);
+  letter-spacing: -0.01em;
+  transition: background-color 0.15s, transform 0.1s, box-shadow 0.2s;
+}
+.btn-checkin:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  box-shadow: 0 6px 24px rgba(255,138,0,.28);
+  transform: translateY(-1px);
+}
+.btn-checkin:active:not(:disabled) {
+  transform: scale(0.99);
+  box-shadow: none;
+}

@@ -36,12 +36,20 @@
           <h1 id="dash-nome">—</h1>
           <span class="badge badge-primary" id="dash-plano-badge"></span>
         </div>
-        <div class="dash-hero-xp">
-          <span data-icon="zap"></span>
-          <div>
+        <div class="dash-xp-block">
+          <div class="dash-xp-row">
+            <span data-icon="zap" data-icon-size="18" class="text-primary"></span>
             <strong id="dash-xp">0 XP</strong>
-            <span class="text-muted">Sequência atual: <span id="dash-sequencia">0</span> dias</span>
+            <span class="badge badge-muted" id="dash-nivel">Nível 1</span>
           </div>
+          <div class="dash-xp-bar-wrap">
+            <div class="dash-xp-bar"><div class="dash-xp-fill" id="dash-xp-fill" style="width:0%"></div></div>
+            <span class="dash-xp-next" id="dash-xp-next">0 XP até o próximo nível</span>
+          </div>
+          <span class="dash-seq-label">
+            <span data-icon="flame" data-icon-size="13" class="text-primary"></span>
+            <span id="dash-sequencia">0</span> dias de sequência
+          </span>
         </div>
       </div>
 

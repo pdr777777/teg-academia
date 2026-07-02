@@ -1,5 +1,19 @@
 document.getElementById('btn-logout').addEventListener('click', logout);
 
+const XP_LEVELS = [0, 500, 1200, 2500, 5000, 9000, 15000];
+
+function calcXpLevel(xp) {
+  let level = 1;
+  for (let i = 0; i < XP_LEVELS.length; i++) {
+    if (xp >= XP_LEVELS[i]) level = i + 1;
+    else break;
+  }
+  const cur = XP_LEVELS[level - 1] || 0;
+  const next = XP_LEVELS[level] || cur * 2;
+  const pct = Math.min(((xp - cur) / (next - cur)) * 100, 100);
+  return { level, pct, remaining: next - xp };
+}
+
 function saudacaoHora() {
   const h = new Date().getHours();
   if (h < 12) return 'Bom dia';
@@ -13,8 +27,16 @@ async function carregarDashboard() {
 
     document.getElementById('saudacao').textContent = `${saudacaoHora()},`;
     document.getElementById('dash-nome').textContent = d.nome;
-    document.getElementById('dash-xp').textContent = `${d.xp} XP`;
+    document.getElementById('dash-xp').textContent = `${d.xp.toLocaleString('pt-BR')} XP`;
     document.getElementById('dash-sequencia').textContent = d.sequencia_atual;
+
+    const lvl = calcXpLevel(d.xp);
+    document.getElementById('dash-nivel').textContent = `Nível ${lvl.level}`;
+    document.getElementById('dash-xp-next').textContent = `${lvl.remaining.toLocaleString('pt-BR')} XP até o próximo nível`;
+    setTimeout(() => {
+      const fill = document.getElementById('dash-xp-fill');
+      if (fill) fill.style.width = `${lvl.pct.toFixed(1)}%`;
+    }, 100);
 
     const planoBadge = document.getElementById('dash-plano-badge');
     planoBadge.textContent = d.plano_nome
