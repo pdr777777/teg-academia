@@ -327,7 +327,7 @@ document.querySelectorAll('.plan-card').forEach((card, i) => {
   card.prepend(el);
 
   const ctx = el.getContext('2d');
-  const PAD = 3;
+  const PAD = 6;
   const R   = 22;
 
   function resize() {
@@ -337,73 +337,120 @@ document.querySelectorAll('.plan-card').forEach((card, i) => {
   resize();
   new ResizeObserver(resize).observe(card);
 
-  // Sample rounded-rect perimeter
-  function perimeterPts(w, h, r, n) {
-    const segs = [
-      { type: 'line', x1: r,   y1: 0,   x2: w-r, y2: 0   },
-      { type: 'arc',  cx: w-r, cy: r,   a0: -Math.PI/2, a1: 0           },
-      { type: 'line', x1: w,   y1: r,   x2: w,   y2: h-r },
-      { type: 'arc',  cx: w-r, cy: h-r, a0: 0,           a1: Math.PI/2  },
-      { type: 'line', x1: w-r, y1: h,   x2: r,   y2: h   },
-      { type: 'arc',  cx: r,   cy: h-r, a0: Math.PI/2,   a1: Math.PI    },
-      { type: 'line', x1: 0,   y1: h-r, x2: 0,   y2: r   },
-      { type: 'arc',  cx: r,   cy: r,   a0: Math.PI,     a1: 3*Math.PI/2 },
+  // Draw a rounded-rect path on ctx
+  function roundedRectPath(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.arcTo(x + w, y,       x + w, y + r,       r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.arcTo(x + w, y + h,   x + w - r, y + h,   r);
+    ctx.lineTo(x + r, y + h);
+    ctx.arcTo(x,      y + h,   x,         y + h - r, r);
+    ctx.lineTo(x, y + r);
+    ctx.arcTo(x,      y,       x + r,     y,         r);
+    ctx.closePath();
+  }
+
+  // Perimeter point sampler (N points uniformly along the border)
+  function perimeterPts(x0, y0, w, h, r, N) {
+    const segments = [
+      { len: w - 2*r,        pt: t => [x0 + r + t*(w-2*r),   y0] },
+      { len: (Math.PI/2)*r,  pt: t => [x0+w-r + Math.cos(-Math.PI/2 + t*Math.PI/2)*r, y0+r + Math.sin(-Math.PI/2 + t*Math.PI/2)*r] },
+      { len: h - 2*r,        pt: t => [x0 + w,                y0 + r + t*(h-2*r)] },
+      { len: (Math.PI/2)*r,  pt: t => [x0+w-r + Math.cos(t*Math.PI/2)*r,           y0+h-r + Math.sin(t*Math.PI/2)*r] },
+      { len: w - 2*r,        pt: t => [x0 + w-r - t*(w-2*r), y0 + h] },
+      { len: (Math.PI/2)*r,  pt: t => [x0+r + Math.cos(Math.PI/2 + t*Math.PI/2)*r, y0+h-r + Math.sin(Math.PI/2 + t*Math.PI/2)*r] },
+      { len: h - 2*r,        pt: t => [x0,                    y0 + h-r - t*(h-2*r)] },
+      { len: (Math.PI/2)*r,  pt: t => [x0+r + Math.cos(Math.PI + t*Math.PI/2)*r,   y0+r + Math.sin(Math.PI + t*Math.PI/2)*r] },
     ];
-    const totalLen = 2*(w-2*r + h-2*r) + 4*r*(Math.PI/2);
+    const total = segments.reduce((s, g) => s + g.len, 0);
     const pts = [];
-    for (const seg of segs) {
-      const len   = seg.type === 'line'
-        ? Math.hypot(seg.x2-seg.x1, seg.y2-seg.y1)
-        : r * Math.PI / 2;
-      const steps = Math.max(3, Math.round(n * len / totalLen));
-      for (let i = 0; i < steps; i++) {
-        const t = i / steps;
-        if (seg.type === 'line') {
-          pts.push([PAD + seg.x1 + (seg.x2-seg.x1)*t, PAD + seg.y1 + (seg.y2-seg.y1)*t]);
-        } else {
-          const a = seg.a0 + (seg.a1-seg.a0)*t;
-          pts.push([PAD + seg.cx + Math.cos(a)*r, PAD + seg.cy + Math.sin(a)*r]);
-        }
-      }
+    for (const seg of segments) {
+      const count = Math.max(2, Math.round(N * seg.len / total));
+      for (let i = 0; i < count; i++) pts.push(seg.pt(i / count));
     }
     return pts;
   }
 
-  const LAYERS = [
-    { color: '#ff2222', glow: 16, lw: 1.5, chaos: 5   },
-    { color: '#cc0000', glow: 10, lw: 0.9, chaos: 3   },
-    { color: '#ff6633', glow: 24, lw: 0.4, chaos: 7   },
-  ];
+  let phase = 0;
 
-  let frame = 0;
+  // Active sparks: short lightning bolts that burst outward from a border point
+  const sparks = [];
+  function spawnSpark(pts) {
+    const idx  = Math.floor(Math.random() * pts.length);
+    const [x, y] = pts[idx];
+    const angle = Math.random() * Math.PI * 2;
+    const len   = 8 + Math.random() * 16;
+    sparks.push({ x, y, angle, len, life: 1 });
+  }
+
   function draw() {
     const cw = el.width, ch = el.height;
     ctx.clearRect(0, 0, cw, ch);
 
-    const pts = perimeterPts(cw - PAD*2, ch - PAD*2, R, 90);
+    const bx = PAD, by = PAD;
+    const bw = cw - PAD * 2, bh = ch - PAD * 2;
 
-    for (const { color, glow, lw, chaos } of LAYERS) {
-      const jitter = pts.map(([x, y]) => [
-        x + (Math.random() - 0.5) * chaos,
-        y + (Math.random() - 0.5) * chaos,
-      ]);
+    // --- Layer 1: solid glowing base border ---
+    roundedRectPath(bx, by, bw, bh, R);
+    ctx.strokeStyle = '#cc0000';
+    ctx.lineWidth   = 1.5;
+    ctx.shadowColor = '#cc0000';
+    ctx.shadowBlur  = 18;
+    ctx.globalAlpha = 0.7 + Math.sin(phase * 2) * 0.15;
+    ctx.stroke();
 
+    // --- Layer 2: outer bloom ---
+    roundedRectPath(bx, by, bw, bh, R);
+    ctx.strokeStyle = '#ff0000';
+    ctx.lineWidth   = 3;
+    ctx.shadowColor = '#ff0000';
+    ctx.shadowBlur  = 40;
+    ctx.globalAlpha = 0.18 + Math.sin(phase * 1.7 + 1) * 0.06;
+    ctx.stroke();
+
+    // --- Layer 3: jittered electric line (low chaos, phase-driven) ---
+    const pts = perimeterPts(bx, by, bw, bh, R, 100);
+    ctx.beginPath();
+    pts.forEach(([x, y], i) => {
+      // phase-based wave jitter — looks electric, not random scribble
+      const wave = Math.sin(i * 0.35 + phase * 4) * 1.5
+                 + Math.sin(i * 0.7  + phase * 6.3) * 0.8;
+      const nx = x + wave * (Math.random() > 0.92 ? 3 : 0.4);
+      const ny = y + wave * (Math.random() > 0.92 ? 3 : 0.4);
+      i === 0 ? ctx.moveTo(nx, ny) : ctx.lineTo(nx, ny);
+    });
+    ctx.closePath();
+    ctx.strokeStyle = '#ff3333';
+    ctx.lineWidth   = 1;
+    ctx.shadowColor = '#ff2200';
+    ctx.shadowBlur  = 10;
+    ctx.globalAlpha = 0.5 + Math.sin(phase * 3.1) * 0.2;
+    ctx.stroke();
+
+    // --- Sparks ---
+    if (Math.random() < 0.06) spawnSpark(pts);
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const s = sparks[i];
+      s.life -= 0.06;
+      if (s.life <= 0) { sparks.splice(i, 1); continue; }
+      const ex = s.x + Math.cos(s.angle) * s.len * (1 - s.life);
+      const ey = s.y + Math.sin(s.angle) * s.len * (1 - s.life);
       ctx.beginPath();
-      ctx.moveTo(jitter[0][0], jitter[0][1]);
-      for (let i = 1; i < jitter.length; i++) ctx.lineTo(jitter[i][0], jitter[i][1]);
-      ctx.closePath();
-
-      ctx.strokeStyle = color;
-      ctx.lineWidth   = lw;
-      ctx.shadowColor = '#cc0000';
-      ctx.shadowBlur  = glow;
-      ctx.globalAlpha = 0.55 + Math.sin(frame * 0.06) * 0.22;
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(ex, ey);
+      ctx.strokeStyle = '#ff4444';
+      ctx.lineWidth   = 0.8;
+      ctx.shadowColor = '#ff0000';
+      ctx.shadowBlur  = 8;
+      ctx.globalAlpha = s.life * 0.8;
       ctx.stroke();
     }
 
     ctx.shadowBlur  = 0;
     ctx.globalAlpha = 1;
-    frame++;
+    phase += 0.025;
     requestAnimationFrame(draw);
   }
   draw();
