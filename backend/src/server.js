@@ -28,7 +28,7 @@ const app = express();
 app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? ['https://teg-academia-three.vercel.app', 'https://teg-academia-app.vercel.app']
+    ? ['https://teg-academia-three.vercel.app', 'https://teg-academia-app.vercel.app', 'https://teg-academia.pages.dev']
     : '*',
 }));
 app.use(express.json());
