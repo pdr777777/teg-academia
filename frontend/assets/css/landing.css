@@ -543,11 +543,10 @@
 /* Electric border canvas on featured plan */
 .plan-electric-canvas {
   position: absolute;
-  inset: -2px;
-  width: calc(100% + 4px);
-  height: calc(100% + 4px);
+  inset: -12px;              /* deve bater exato com PAD=12 no JS */
+  width: calc(100% + 24px);
+  height: calc(100% + 24px);
   pointer-events: none;
-  border-radius: 22px;
   z-index: 0;
 }
 .plan-card.plan-featured > *:not(.plan-electric-canvas):not(.plan-badge) {

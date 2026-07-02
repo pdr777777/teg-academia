@@ -316,144 +316,107 @@ document.querySelectorAll('.plan-card').forEach((card, i) => {
   }
 });
 
-// ===== Electric Border on featured plan =====
+// ===== Electric Border =====
 (function initElectricBorder() {
   const card = document.querySelector('.plan-card.plan-featured');
   if (!card) return;
 
-  const el = document.createElement('canvas');
-  el.className = 'plan-electric-canvas';
-  el.setAttribute('aria-hidden', 'true');
-  card.prepend(el);
+  const canvas = document.createElement('canvas');
+  canvas.className = 'plan-electric-canvas';
+  canvas.setAttribute('aria-hidden', 'true');
+  card.prepend(canvas);
 
-  const ctx = el.getContext('2d');
-  const PAD = 6;
-  const R   = 22;
+  const ctx    = canvas.getContext('2d');
+  const PAD    = 12;  // deve bater com inset: -12px no CSS
+  const BR     = 20;  // border-radius
+  const COLOR  = '#a90000';
+  const SPEED  = 1.2;
+  const CHAOS  = 0.16;
+  const THICK  = 2;
+  const CHAOS_PX = CHAOS * 40; // ~6.4 px de desvio máximo
 
   function resize() {
-    el.width  = card.offsetWidth  + PAD * 2;
-    el.height = card.offsetHeight + PAD * 2;
+    canvas.width  = card.offsetWidth  + PAD * 2;
+    canvas.height = card.offsetHeight + PAD * 2;
   }
   resize();
   new ResizeObserver(resize).observe(card);
 
-  // Draw a rounded-rect path on ctx
-  function roundedRectPath(x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.arcTo(x + w, y,       x + w, y + r,       r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.arcTo(x + w, y + h,   x + w - r, y + h,   r);
-    ctx.lineTo(x + r, y + h);
-    ctx.arcTo(x,      y + h,   x,         y + h - r, r);
-    ctx.lineTo(x, y + r);
-    ctx.arcTo(x,      y,       x + r,     y,         r);
-    ctx.closePath();
-  }
-
-  // Perimeter point sampler (N points uniformly along the border)
-  function perimeterPts(x0, y0, w, h, r, N) {
-    const segments = [
-      { len: w - 2*r,        pt: t => [x0 + r + t*(w-2*r),   y0] },
-      { len: (Math.PI/2)*r,  pt: t => [x0+w-r + Math.cos(-Math.PI/2 + t*Math.PI/2)*r, y0+r + Math.sin(-Math.PI/2 + t*Math.PI/2)*r] },
-      { len: h - 2*r,        pt: t => [x0 + w,                y0 + r + t*(h-2*r)] },
-      { len: (Math.PI/2)*r,  pt: t => [x0+w-r + Math.cos(t*Math.PI/2)*r,           y0+h-r + Math.sin(t*Math.PI/2)*r] },
-      { len: w - 2*r,        pt: t => [x0 + w-r - t*(w-2*r), y0 + h] },
-      { len: (Math.PI/2)*r,  pt: t => [x0+r + Math.cos(Math.PI/2 + t*Math.PI/2)*r, y0+h-r + Math.sin(Math.PI/2 + t*Math.PI/2)*r] },
-      { len: h - 2*r,        pt: t => [x0,                    y0 + h-r - t*(h-2*r)] },
-      { len: (Math.PI/2)*r,  pt: t => [x0+r + Math.cos(Math.PI + t*Math.PI/2)*r,   y0+r + Math.sin(Math.PI + t*Math.PI/2)*r] },
+  // Perímetro: retorna array de {x, y, nx, ny} com normais outward
+  function perimeter(W, H, r, N) {
+    const segs = [
+      { len: W-2*r, fn: t => [PAD+r+t*(W-2*r), PAD,     0, -1] },
+      { len: r*Math.PI/2, fn: t => { const a=-Math.PI/2+t*Math.PI/2; return [PAD+W-r+Math.cos(a)*r, PAD+r+Math.sin(a)*r, Math.cos(a), Math.sin(a)]; }},
+      { len: H-2*r, fn: t => [PAD+W,   PAD+r+t*(H-2*r),  1,  0] },
+      { len: r*Math.PI/2, fn: t => { const a=t*Math.PI/2;             return [PAD+W-r+Math.cos(a)*r, PAD+H-r+Math.sin(a)*r, Math.cos(a), Math.sin(a)]; }},
+      { len: W-2*r, fn: t => [PAD+W-r-t*(W-2*r), PAD+H,  0,  1] },
+      { len: r*Math.PI/2, fn: t => { const a=Math.PI/2+t*Math.PI/2;  return [PAD+r+Math.cos(a)*r, PAD+H-r+Math.sin(a)*r, Math.cos(a), Math.sin(a)]; }},
+      { len: H-2*r, fn: t => [PAD,   PAD+H-r-t*(H-2*r), -1,  0] },
+      { len: r*Math.PI/2, fn: t => { const a=Math.PI+t*Math.PI/2;    return [PAD+r+Math.cos(a)*r, PAD+r+Math.sin(a)*r, Math.cos(a), Math.sin(a)]; }},
     ];
-    const total = segments.reduce((s, g) => s + g.len, 0);
+    const total = segs.reduce((s, g) => s + g.len, 0);
     const pts = [];
-    for (const seg of segments) {
-      const count = Math.max(2, Math.round(N * seg.len / total));
-      for (let i = 0; i < count; i++) pts.push(seg.pt(i / count));
+    for (const seg of segs) {
+      const cnt = Math.max(3, Math.round(N * seg.len / total));
+      for (let i = 0; i < cnt; i++) pts.push(seg.fn(i / cnt));
     }
     return pts;
   }
 
-  let phase = 0;
-
-  // Active sparks: short lightning bolts that burst outward from a border point
-  const sparks = [];
-  function spawnSpark(pts) {
-    const idx  = Math.floor(Math.random() * pts.length);
-    const [x, y] = pts[idx];
-    const angle = Math.random() * Math.PI * 2;
-    const len   = 8 + Math.random() * 16;
-    sparks.push({ x, y, angle, len, life: 1 });
+  // Onda triangular — dá ângulos nítidos (relâmpago), não curvas suaves
+  function triWave(t) {
+    return 2 * Math.abs(t - Math.floor(t + 0.5));
   }
 
-  function draw() {
-    const cw = el.width, ch = el.height;
+  // Noise angular: combinação de triangle waves em frequências primas
+  function lightning(t, ph) {
+    return (
+      (triWave(t * 7.3  + ph * 0.9)  - 0.5) * 0.55 +
+      (triWave(t * 19.7 + ph * 1.4)  - 0.5) * 0.30 +
+      (triWave(t * 43.1 + ph * 2.1)  - 0.5) * 0.15
+    );
+  }
+
+  let phase = 0;
+
+  function frame() {
+    const cw = canvas.width, ch = canvas.height;
     ctx.clearRect(0, 0, cw, ch);
 
-    const bx = PAD, by = PAD;
-    const bw = cw - PAD * 2, bh = ch - PAD * 2;
+    const pts = perimeter(cw - PAD*2, ch - PAD*2, BR, 240);
+    const N   = pts.length;
 
-    // --- Layer 1: solid glowing base border ---
-    roundedRectPath(bx, by, bw, bh, R);
-    ctx.strokeStyle = '#cc0000';
-    ctx.lineWidth   = 1.5;
-    ctx.shadowColor = '#cc0000';
-    ctx.shadowBlur  = 18;
-    ctx.globalAlpha = 0.7 + Math.sin(phase * 2) * 0.15;
-    ctx.stroke();
-
-    // --- Layer 2: outer bloom ---
-    roundedRectPath(bx, by, bw, bh, R);
-    ctx.strokeStyle = '#ff0000';
-    ctx.lineWidth   = 3;
-    ctx.shadowColor = '#ff0000';
-    ctx.shadowBlur  = 40;
-    ctx.globalAlpha = 0.18 + Math.sin(phase * 1.7 + 1) * 0.06;
-    ctx.stroke();
-
-    // --- Layer 3: jittered electric line (low chaos, phase-driven) ---
-    const pts = perimeterPts(bx, by, bw, bh, R, 100);
-    ctx.beginPath();
-    pts.forEach(([x, y], i) => {
-      // phase-based wave jitter — looks electric, not random scribble
-      const wave = Math.sin(i * 0.35 + phase * 4) * 1.5
-                 + Math.sin(i * 0.7  + phase * 6.3) * 0.8;
-      const nx = x + wave * (Math.random() > 0.92 ? 3 : 0.4);
-      const ny = y + wave * (Math.random() > 0.92 ? 3 : 0.4);
-      i === 0 ? ctx.moveTo(nx, ny) : ctx.lineTo(nx, ny);
+    // Desloca cada ponto na direção da normal (perpendicular à borda)
+    const disp = pts.map(([x, y, nx, ny], i) => {
+      const t = i / N;
+      const d = lightning(t, phase) * CHAOS_PX;
+      return [x + nx * d, y + ny * d];
     });
-    ctx.closePath();
-    ctx.strokeStyle = '#ff3333';
-    ctx.lineWidth   = 1;
-    ctx.shadowColor = '#ff2200';
-    ctx.shadowBlur  = 10;
-    ctx.globalAlpha = 0.5 + Math.sin(phase * 3.1) * 0.2;
-    ctx.stroke();
 
-    // --- Sparks ---
-    if (Math.random() < 0.06) spawnSpark(pts);
-    for (let i = sparks.length - 1; i >= 0; i--) {
-      const s = sparks[i];
-      s.life -= 0.06;
-      if (s.life <= 0) { sparks.splice(i, 1); continue; }
-      const ex = s.x + Math.cos(s.angle) * s.len * (1 - s.life);
-      const ey = s.y + Math.sin(s.angle) * s.len * (1 - s.life);
+    const drawPass = (lw, blur, alpha) => {
       ctx.beginPath();
-      ctx.moveTo(s.x, s.y);
-      ctx.lineTo(ex, ey);
-      ctx.strokeStyle = '#ff4444';
-      ctx.lineWidth   = 0.8;
-      ctx.shadowColor = '#ff0000';
-      ctx.shadowBlur  = 8;
-      ctx.globalAlpha = s.life * 0.8;
+      ctx.moveTo(disp[0][0], disp[0][1]);
+      for (let i = 1; i < N; i++) ctx.lineTo(disp[i][0], disp[i][1]);
+      ctx.closePath();
+      ctx.strokeStyle = COLOR;
+      ctx.lineWidth   = lw;
+      ctx.shadowColor = COLOR;
+      ctx.shadowBlur  = blur;
+      ctx.globalAlpha = alpha;
       ctx.stroke();
-    }
+    };
+
+    drawPass(12, 60, 0.08);                              // halo externo
+    drawPass(4,  30, 0.22);                              // glow médio
+    drawPass(THICK, 12, 0.85 + Math.sin(phase*3)*0.1);  // linha core
 
     ctx.shadowBlur  = 0;
     ctx.globalAlpha = 1;
-    phase += 0.025;
-    requestAnimationFrame(draw);
+    phase += 0.014 * SPEED;
+    requestAnimationFrame(frame);
   }
-  draw();
+
+  frame();
 })();
 
 // ===== Lead form =====
