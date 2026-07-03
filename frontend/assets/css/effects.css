@@ -148,3 +148,66 @@ span:not([class*="icon"]):not([data-icon]):not(.text-primary):not(.eyebrow):not(
   .hero-visual,
   .hero-copy { transform: none !important; }
 }
+
+/* ─── SpotlightCard (react-bits) ─── */
+.spotlight-card {
+  position: relative;
+}
+.spotlight-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    300px circle at var(--sx, 50%) var(--sy, 50%),
+    rgba(204, 0, 0, 0.22),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  z-index: 3;
+}
+.spotlight-card:hover::before {
+  opacity: 1;
+}
+
+/* ─── Glassmorphism cards ─── */
+.card,
+.plan-card,
+.depoimento-card {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(17, 17, 17, 0.65);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+.plan-card.plan-featured {
+  background: rgba(22, 22, 22, 0.82);
+  border-color: var(--color-red) !important;
+}
+
+/* ─── Scroll progress bar ─── */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, #cc0000, #ff5500, #ff8a00);
+  z-index: 99999;
+  pointer-events: none;
+  will-change: width;
+  box-shadow: 0 0 10px rgba(204, 0, 0, 0.5);
+}
+
+/* ─── Noise grain overlay ─── */
+#noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9983;
+  opacity: 0.038;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}

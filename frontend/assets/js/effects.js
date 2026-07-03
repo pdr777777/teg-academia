@@ -120,6 +120,190 @@
 
 
 /* ══════════════════════════════════════════════════
+   4A. NOISE GRAIN OVERLAY
+   ══════════════════════════════════════════════════ */
+(function () {
+  var el = document.createElement('div');
+  el.id = 'noise-overlay';
+  document.body.appendChild(el);
+})();
+
+
+/* ══════════════════════════════════════════════════
+   4B. SCROLL PROGRESS BAR
+   ══════════════════════════════════════════════════ */
+(function () {
+  var bar = document.createElement('div');
+  bar.id = 'scroll-progress';
+  document.body.appendChild(bar);
+
+  var ticking = false;
+  window.addEventListener('scroll', function () {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () {
+      var scrolled = window.scrollY;
+      var total    = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = total > 0 ? ((scrolled / total) * 100) + '%' : '0%';
+      ticking = false;
+    });
+  }, { passive: true });
+})();
+
+
+/* ══════════════════════════════════════════════════
+   4C. SPOTLIGHT CARD (react-bits)
+   Radial glow follows cursor on gallery cards.
+   ══════════════════════════════════════════════════ */
+(function () {
+  if (window.matchMedia('(hover: none)').matches) return;
+
+  function attachSpotlight() {
+    document.querySelectorAll('.spotlight-card').forEach(function (el) {
+      el.addEventListener('mousemove', function (e) {
+        var r = el.getBoundingClientRect();
+        el.style.setProperty('--sx', (e.clientX - r.left) + 'px');
+        el.style.setProperty('--sy', (e.clientY - r.top)  + 'px');
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachSpotlight);
+  } else {
+    attachSpotlight();
+  }
+})();
+
+
+/* ══════════════════════════════════════════════════
+   4D. GALLERY DRAG SCROLL
+   Click-drag on desktop to scroll the gallery.
+   ══════════════════════════════════════════════════ */
+(function () {
+  function initGallery() {
+    var track = document.querySelector('.gallery-track');
+    if (!track || window.matchMedia('(hover: none)').matches) return;
+
+    var isDown = false, startX = 0, scrollLeft = 0;
+
+    track.addEventListener('mousedown', function (e) {
+      isDown    = true;
+      startX    = e.pageX - track.offsetLeft;
+      scrollLeft = track.scrollLeft;
+      track.style.userSelect   = 'none';
+      track.style.scrollSnapType = 'none';
+    });
+    document.addEventListener('mouseup', function () {
+      if (!isDown) return;
+      isDown = false;
+      track.style.userSelect    = '';
+      track.style.scrollSnapType = 'x mandatory';
+    });
+    track.addEventListener('mouseleave', function () {
+      if (!isDown) return;
+      isDown = false;
+      track.style.userSelect    = '';
+      track.style.scrollSnapType = 'x mandatory';
+    });
+    track.addEventListener('mousemove', function (e) {
+      if (!isDown) return;
+      e.preventDefault();
+      var x    = e.pageX - track.offsetLeft;
+      var walk = (x - startX) * 1.5;
+      track.scrollLeft = scrollLeft - walk;
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGallery);
+  } else {
+    initGallery();
+  }
+})();
+
+
+/* ══════════════════════════════════════════════════
+   4E. WORD SPLIT ANIMATION
+   Section headings animate word-by-word on reveal.
+   Each word fades up with a staggered delay.
+   ══════════════════════════════════════════════════ */
+(function () {
+  if (!window.IntersectionObserver) return;
+
+  function makeWord(text, i) {
+    var span = document.createElement('span');
+    span.className = 'w-anim';
+    span.style.cssText =
+      'display:inline-block;' +
+      'opacity:0;' +
+      'transform:translateY(14px);' +
+      'transition:' +
+        'transform .7s cubic-bezier(.16,1,.3,1) ' + (100 + i * 60) + 'ms,' +
+        'opacity .5s ease ' + (100 + i * 60) + 'ms;';
+    if (text !== null) span.textContent = text;
+    return span;
+  }
+
+  function splitEl(el) {
+    if (el.dataset.wsplit) return;
+    el.dataset.wsplit = '1';
+
+    var nodes = Array.from(el.childNodes);
+    el.innerHTML = '';
+    var idx = 0;
+
+    nodes.forEach(function (node) {
+      if (node.nodeType === 3) {
+        // Text node — split by word boundaries
+        var parts = node.textContent.split(/(\s+)/);
+        parts.forEach(function (p) {
+          if (!p) return;
+          if (/^\s+$/.test(p)) {
+            el.appendChild(document.createTextNode(p));
+          } else {
+            el.appendChild(makeWord(p, idx++));
+          }
+        });
+      } else if (node.nodeType === 1) {
+        if (node.tagName === 'BR') {
+          el.appendChild(document.createElement('br'));
+        } else {
+          // Treat entire element (e.g. .text-primary span) as one word block
+          var wrap = makeWord(null, idx++);
+          wrap.appendChild(node.cloneNode(true));
+          el.appendChild(wrap);
+        }
+      }
+    });
+
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        el.querySelectorAll('.w-anim').forEach(function (span) {
+          span.style.opacity   = '1';
+          span.style.transform = 'none';
+        });
+        obs.disconnect();
+      });
+    }, { threshold: 0.25, rootMargin: '0px 0px -30px 0px' });
+
+    obs.observe(el);
+  }
+
+  function initWordSplit() {
+    document.querySelectorAll('.section-head h2').forEach(splitEl);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWordSplit);
+  } else {
+    initWordSplit();
+  }
+})();
+
+
+/* ══════════════════════════════════════════════════
    4. NAV SCROLL SHRINK
    Nav becomes denser and more opaque on scroll —
    common on Linear, Vercel, landonorris.com.
