@@ -5,6 +5,12 @@ const state = {
   token: null,
 };
 
+const PLANOS_FALLBACK = [
+  { id: 1, nome: 'Mensal',     descricao: 'Acesso completo a todas as modalidades. Cancele quando quiser.',      preco_mensal: 119.90, duracao_dias: 30  },
+  { id: 2, nome: 'Trimestral', descricao: 'Economia de R$30 em relação ao mensal. Renovação a cada 3 meses.',    preco_mensal: 109.90, duracao_dias: 90  },
+  { id: 3, nome: 'Anual',      descricao: 'Melhor custo-benefício. Até R$240 de economia em 12 meses no Pix.',   preco_mensal:  99.90, duracao_dias: 365 },
+];
+
 function irParaStep(n) {
   document.querySelectorAll('.step-section').forEach((s) => (s.style.display = 'none'));
   document.getElementById(
@@ -23,33 +29,37 @@ document.querySelectorAll('.step-back').forEach((btn) => {
   btn.addEventListener('click', () => irParaStep(Number(btn.dataset.back)));
 });
 
+function renderPlanos(grid) {
+  grid.innerHTML = state.planos.map((p) => `
+    <div class="card plano-card" data-plano-id="${p.id}">
+      <div class="plano-nome">${p.nome}</div>
+      <div class="plano-desc">${p.descricao || ''}</div>
+      <div class="plano-preco">${formatMoeda(p.preco_mensal)}<span>/mês</span></div>
+      <div class="plano-duracao">Vigência de ${p.duracao_dias} dias</div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.plano-card').forEach((card) => {
+    card.addEventListener('click', () => selecionarPlano(Number(card.dataset.planoId)));
+  });
+
+  const preSelecionado = Number(params.get('plano'));
+  if (preSelecionado && state.planos.some((p) => p.id === preSelecionado)) {
+    selecionarPlano(preSelecionado);
+  }
+}
+
 async function carregarPlanos() {
   const grid = document.getElementById('planos-grid');
   try {
     state.planos = await api.get('/api/planos');
     if (!state.planos.length) {
-      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">Nenhum plano disponível no momento.</div>';
-      return;
+      state.planos = PLANOS_FALLBACK;
     }
-    grid.innerHTML = state.planos.map((p) => `
-      <div class="card plano-card" data-plano-id="${p.id}">
-        <div class="plano-nome">${p.nome}</div>
-        <div class="plano-desc">${p.descricao || ''}</div>
-        <div class="plano-preco">${formatMoeda(p.preco_mensal)}<span>/mês</span></div>
-        <div class="plano-duracao">Vigência de ${p.duracao_dias} dias</div>
-      </div>
-    `).join('');
-
-    grid.querySelectorAll('.plano-card').forEach((card) => {
-      card.addEventListener('click', () => selecionarPlano(Number(card.dataset.planoId)));
-    });
-
-    const preSelecionado = Number(params.get('plano'));
-    if (preSelecionado && state.planos.some((p) => p.id === preSelecionado)) {
-      selecionarPlano(preSelecionado);
-    }
+    renderPlanos(grid);
   } catch (err) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">Não foi possível carregar os planos agora.</div>';
+    state.planos = PLANOS_FALLBACK;
+    renderPlanos(grid);
   }
 }
 
