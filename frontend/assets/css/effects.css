@@ -9,21 +9,15 @@
   --grad-primary-hover: linear-gradient(135deg, #aa0000 0%, #e07000 100%);
 }
 
-/* Botão primário: gradient background */
 .btn-primary {
   background: var(--grad-primary) !important;
-  border: none;
 }
 .btn-primary:hover:not(:disabled) {
   background: var(--grad-primary-hover) !important;
   box-shadow: 0 6px 24px rgba(204,0,0,.35), 0 6px 24px rgba(255,138,0,.20);
 }
 
-/* .text-primary em headings: gradient no texto */
-h1 .text-primary,
-h2 .text-primary,
-h3 .text-primary,
-h4 .text-primary {
+h1 .text-primary, h2 .text-primary, h3 .text-primary, h4 .text-primary {
   background: var(--grad-primary);
   -webkit-background-clip: text;
   background-clip: text;
@@ -31,16 +25,13 @@ h4 .text-primary {
   display: inline;
 }
 
-/* Eyebrow labels */
 .eyebrow {
   background: var(--grad-primary);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-/* Ícones dentro do eyebrow precisam manter cor (SVG fill) */
-.eyebrow svg,
-.eyebrow [data-icon] { -webkit-text-fill-color: initial; }
+.eyebrow svg, .eyebrow [data-icon] { -webkit-text-fill-color: initial; }
 
 /* Nav scrolled — border em vermelho */
 .topnav.scrolled {
