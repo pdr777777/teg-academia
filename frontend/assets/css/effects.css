@@ -76,7 +76,8 @@ h1 .text-primary, h2 .text-primary, h3 .text-primary, h4 .text-primary {
 }
 
 /* ─── Shiny em todo o texto do site ─── */
-p, li, td, th, label, span:not([class*="icon"]):not([data-icon]),
+p, li, td, th, label,
+span:not([class*="icon"]):not([data-icon]):not(.text-primary):not(.eyebrow):not(.badge),
 .hero-lead, .hero-stat span, .depoimento-card p,
 .gam-feature span, .step-card p, .faq-body p,
 .section-head p, .footer-brand p {
