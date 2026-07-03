@@ -3,66 +3,6 @@
    Inspired by landonorris.com & lusion.co
    ===================================================== */
 
-/* Hide default cursor when custom cursor is active */
-body.custom-cursor,
-body.custom-cursor * { cursor: none !important; }
-
-/* ─── Ambient glow — lusion.co style ─── */
-#cursor-glow {
-  position: fixed;
-  top: 0; left: 0;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(204, 0, 0, 0.11) 0%, transparent 65%);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9990;
-  will-change: transform;
-  mix-blend-mode: screen;
-}
-
-/* ─── Cursor ring (lagged) — landonorris.com style ─── */
-#cursor-ring {
-  position: fixed;
-  top: 0; left: 0;
-  width: 34px;
-  height: 34px;
-  border: 1.5px solid rgba(255, 138, 0, 0.6);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9998;
-  will-change: transform;
-  transition: width 0.25s cubic-bezier(.16,1,.3,1),
-              height 0.25s cubic-bezier(.16,1,.3,1),
-              border-color 0.2s,
-              opacity 0.2s;
-}
-
-/* ─── Cursor dot (instant) ─── */
-#cursor-dot {
-  position: fixed;
-  top: 0; left: 0;
-  width: 5px;
-  height: 5px;
-  background: #ff8a00;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  will-change: transform;
-  transition: transform 0.1s, background 0.15s;
-}
-
-/* Hover states — ring expands, dot turns white */
-#cursor-ring.is-hover {
-  width: 54px;
-  height: 54px;
-  border-color: rgba(255, 138, 0, 0.9);
-}
-#cursor-dot.is-hover {
-  background: #fff;
-  transform: scale(1.6) !important;
-}
-
 /* ─── Text reveal — clip-path wipe (lusion.co style) ─── */
 .text-reveal-wrap {
   overflow: hidden;
@@ -97,11 +37,3 @@ body.custom-cursor * { cursor: none !important; }
   .hero-copy { transform: none !important; }
 }
 
-/* ─── On touch/no-hover devices — disable cursor ─── */
-@media (hover: none), (pointer: coarse) {
-  #cursor-ring,
-  #cursor-dot,
-  #cursor-glow { display: none !important; }
-  body.custom-cursor,
-  body.custom-cursor * { cursor: auto !important; }
-}

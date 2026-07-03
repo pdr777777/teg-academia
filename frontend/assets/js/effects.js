@@ -2,43 +2,11 @@
    Inspired by landonorris.com & lusion.co */
 
 /* ══════════════════════════════════════════════════
-   1. CUSTOM CURSOR + AMBIENT GLOW (lusion.co)
+   1. MAGNETIC BUTTONS (landonorris.com)
    ══════════════════════════════════════════════════ */
 (function () {
   if (window.matchMedia('(hover: none)').matches) return;
 
-  var glow = document.createElement('div');  glow.id = 'cursor-glow';
-  var ring = document.createElement('div');  ring.id = 'cursor-ring';
-  var dot  = document.createElement('div');  dot.id  = 'cursor-dot';
-  document.body.appendChild(glow);
-  document.body.appendChild(ring);
-  document.body.appendChild(dot);
-  document.body.classList.add('custom-cursor');
-
-  var mx = -500, my = -500;
-  var rx = -500, ry = -500;
-  var gx = -500, gy = -500;
-
-  document.addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; });
-
-  (function tick() {
-    rx += (mx - rx) * 0.11;
-    ry += (my - ry) * 0.11;
-    gx += (mx - gx) * 0.055;
-    gy += (my - gy) * 0.055;
-    ring.style.transform = 'translate(' + (rx - 17) + 'px,' + (ry - 17) + 'px)';
-    dot.style.transform  = 'translate(' + (mx - 2.5) + 'px,' + (my - 2.5) + 'px)';
-    glow.style.transform = 'translate(' + (gx - 250) + 'px,' + (gy - 250) + 'px)';
-    requestAnimationFrame(tick);
-  })();
-
-  document.addEventListener('mouseover', function (e) {
-    var hit = e.target.closest('a, button, .btn, input, textarea, select, label, [role="button"], [tabindex]');
-    ring.classList.toggle('is-hover', !!hit);
-    dot.classList.toggle('is-hover',  !!hit);
-  });
-
-  /* ── Magnetic buttons (landonorris.com) ── */
   function attachMagnetic(selector) {
     document.querySelectorAll(selector).forEach(function (el) {
       el.addEventListener('mousemove', function (e) {
