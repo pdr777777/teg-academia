@@ -53,22 +53,24 @@ h1 .text-primary, h2 .text-primary, h3 .text-primary, h4 .text-primary {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shiny-sweep 8s linear infinite;
+  animation-delay: 0s;
 }
-/* "propósito" — gradiente vermelho→laranja com shine */
+/* "propósito" — mesmo timing de stops do branco, cores laranja/vermelho */
 .shiny-text .text-primary {
   background: linear-gradient(
     120deg,
-    #cc0000 20%,
-    rgba(255,160,40,0.82) 44%,
-    #ffcc00 50%,
-    rgba(255,160,40,0.82) 56%,
-    #ff8a00 80%
+    #cc0000               30%,
+    rgba(255,110,0, 0.82) 46%,
+    #ffcc00               50%,
+    rgba(255,110,0, 0.82) 54%,
+    #ff8a00               70%
   );
   background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shiny-sweep 8s linear infinite;
+  animation-delay: 0s;
 }
 @keyframes shiny-sweep {
   0%   { background-position: 150% center; }
