@@ -7,26 +7,37 @@
 .shiny-text {
   background: linear-gradient(
     120deg,
-    #ffffff 25%,
-    rgba(255, 255, 255, 0.45) 43%,
+    #ffffff 30%,
+    rgba(255, 255, 255, 0.4) 46%,
     #fffbe8 50%,
-    rgba(255, 255, 255, 0.45) 57%,
-    #ffffff 75%
+    rgba(255, 255, 255, 0.4) 54%,
+    #ffffff 70%
   );
-  background-size: 250% 100%;
-  background-position: 150% center;
+  background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: shiny-sweep 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: shiny-sweep 8s linear infinite;
 }
-/* Preserva a cor laranja do span interno */
+/* "propósito" em laranja também com shiny */
 .shiny-text .text-primary {
-  -webkit-text-fill-color: var(--color-primary);
+  background: linear-gradient(
+    120deg,
+    #ff8a00 30%,
+    rgba(255, 210, 80, 0.75) 46%,
+    #ffd044 50%,
+    rgba(255, 210, 80, 0.75) 54%,
+    #ff8a00 70%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shiny-sweep 8s linear infinite;
 }
 @keyframes shiny-sweep {
-  0%,  25% { background-position:  150% center; }
-  75%, 100% { background-position: -150% center; }
+  0%   { background-position: 150% center; }
+  100% { background-position: -150% center; }
 }
 
 /* ─── Text reveal — clip-path wipe (lusion.co style) ─── */
