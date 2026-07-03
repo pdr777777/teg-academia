@@ -3,6 +3,34 @@
    Inspired by landonorris.com & lusion.co
    ===================================================== */
 
+/* ─── Shiny Text (react-bits style) ─── */
+.shiny-text {
+  position: relative;
+  overflow: hidden;
+  /* isolate so mix-blend-mode only affects children of this element */
+  isolation: isolate;
+}
+.shiny-text::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent  20%,
+    rgba(255, 255, 255, 0.58) 50%,
+    transparent  80%
+  );
+  background-size: 300% 100%;
+  background-position: 200% 0;
+  animation: shiny-sweep 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+@keyframes shiny-sweep {
+  0%,  30% { background-position:  200% 0; }   /* pause before sweep */
+  70%, 100% { background-position: -100% 0; }   /* pause after sweep  */
+}
+
 /* ─── Text reveal — clip-path wipe (lusion.co style) ─── */
 .text-reveal-wrap {
   overflow: hidden;
