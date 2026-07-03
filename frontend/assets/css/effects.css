@@ -77,7 +77,27 @@ body.custom-cursor * { cursor: none !important; }
   to   { transform: translateY(0);    opacity: 1; }
 }
 
-/* ─── On touch/no-hover devices — disable everything ─── */
+/* ─── Nav scroll shrink ─── */
+.topnav {
+  transition: height 0.3s cubic-bezier(.4,0,.2,1),
+              background 0.3s,
+              border-color 0.3s,
+              box-shadow 0.3s;
+}
+.topnav.scrolled {
+  height: 54px;
+  background: rgba(10, 10, 10, 0.96);
+  border-bottom-color: rgba(255,138,0,0.12);
+  box-shadow: 0 1px 32px rgba(0,0,0,0.5);
+}
+
+/* ─── Parallax — disable on mobile so layout stays solid ─── */
+@media (max-width: 900px) {
+  .hero-visual,
+  .hero-copy { transform: none !important; }
+}
+
+/* ─── On touch/no-hover devices — disable cursor ─── */
 @media (hover: none), (pointer: coarse) {
   #cursor-ring,
   #cursor-dot,
