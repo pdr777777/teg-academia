@@ -5,30 +5,28 @@
 
 /* ─── Shiny Text (react-bits style) ─── */
 .shiny-text {
-  position: relative;
-  overflow: hidden;
-  /* isolate so mix-blend-mode only affects children of this element */
-  isolation: isolate;
-}
-.shiny-text::after {
-  content: '';
-  position: absolute;
-  inset: 0;
   background: linear-gradient(
-    110deg,
-    transparent  20%,
-    rgba(255, 255, 255, 0.58) 50%,
-    transparent  80%
+    120deg,
+    #ffffff 25%,
+    rgba(255, 255, 255, 0.45) 43%,
+    #fffbe8 50%,
+    rgba(255, 255, 255, 0.45) 57%,
+    #ffffff 75%
   );
-  background-size: 300% 100%;
-  background-position: 200% 0;
+  background-size: 250% 100%;
+  background-position: 150% center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   animation: shiny-sweep 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  mix-blend-mode: overlay;
-  pointer-events: none;
+}
+/* Preserva a cor laranja do span interno */
+.shiny-text .text-primary {
+  -webkit-text-fill-color: var(--color-primary);
 }
 @keyframes shiny-sweep {
-  0%,  30% { background-position:  200% 0; }   /* pause before sweep */
-  70%, 100% { background-position: -100% 0; }   /* pause after sweep  */
+  0%,  25% { background-position:  150% center; }
+  75%, 100% { background-position: -150% center; }
 }
 
 /* ─── Text reveal — clip-path wipe (lusion.co style) ─── */
