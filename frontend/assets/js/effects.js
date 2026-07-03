@@ -2,6 +2,17 @@
    Inspired by landonorris.com & lusion.co */
 
 /* ══════════════════════════════════════════════════
+   0. SITE-WIDE SHINE OVERLAY
+   Um único div fixo com mix-blend-mode varre luz
+   por toda a página continuamente.
+   ══════════════════════════════════════════════════ */
+(function () {
+  var shine = document.createElement('div');
+  shine.id = 'site-shine';
+  document.body.appendChild(shine);
+})();
+
+/* ══════════════════════════════════════════════════
    1. MAGNETIC BUTTONS (landonorris.com)
    ══════════════════════════════════════════════════ */
 (function () {

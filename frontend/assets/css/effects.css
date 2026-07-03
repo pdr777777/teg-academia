@@ -1,16 +1,60 @@
 /* =====================================================
-   effects.css — cursor + magnetic + glow
+   effects.css — cursor + magnetic + glow + shine
    Inspired by landonorris.com & lusion.co
    ===================================================== */
 
-/* ─── Shiny Text (react-bits style) ─── */
+/* ─── Gradiente vermelho→laranja em todos os elementos primários ─── */
+:root {
+  --grad-primary: linear-gradient(135deg, #cc0000 0%, #ff8a00 100%);
+  --grad-primary-hover: linear-gradient(135deg, #aa0000 0%, #e07000 100%);
+}
+
+/* Botão primário: gradient background */
+.btn-primary {
+  background: var(--grad-primary) !important;
+  border: none;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--grad-primary-hover) !important;
+  box-shadow: 0 6px 24px rgba(204,0,0,.35), 0 6px 24px rgba(255,138,0,.20);
+}
+
+/* .text-primary em headings: gradient no texto */
+h1 .text-primary,
+h2 .text-primary,
+h3 .text-primary,
+h4 .text-primary {
+  background: var(--grad-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline;
+}
+
+/* Eyebrow labels */
+.eyebrow {
+  background: var(--grad-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+/* Ícones dentro do eyebrow precisam manter cor (SVG fill) */
+.eyebrow svg,
+.eyebrow [data-icon] { -webkit-text-fill-color: initial; }
+
+/* Nav scrolled — border em vermelho */
+.topnav.scrolled {
+  border-bottom-color: rgba(204,0,0,0.18);
+}
+
+/* ─── Shiny Text (react-bits style) — hero h1 ─── */
 .shiny-text {
   background: linear-gradient(
     120deg,
     #ffffff 30%,
-    rgba(255, 255, 255, 0.4) 46%,
+    rgba(255,255,255,0.38) 46%,
     #fffbe8 50%,
-    rgba(255, 255, 255, 0.4) 54%,
+    rgba(255,255,255,0.38) 54%,
     #ffffff 70%
   );
   background-size: 300% 100%;
@@ -19,15 +63,15 @@
   -webkit-text-fill-color: transparent;
   animation: shiny-sweep 8s linear infinite;
 }
-/* "propósito" em laranja também com shiny */
+/* "propósito" — gradiente vermelho→laranja com shine */
 .shiny-text .text-primary {
   background: linear-gradient(
     120deg,
-    #ff8a00 30%,
-    rgba(255, 210, 80, 0.75) 46%,
-    #ffd044 50%,
-    rgba(255, 210, 80, 0.75) 54%,
-    #ff8a00 70%
+    #cc0000 20%,
+    rgba(255,160,40,0.82) 44%,
+    #ffcc00 50%,
+    rgba(255,160,40,0.82) 56%,
+    #ff8a00 80%
   );
   background-size: 300% 100%;
   -webkit-background-clip: text;
@@ -40,18 +84,27 @@
   100% { background-position: -150% center; }
 }
 
-/* ─── Text reveal — clip-path wipe (lusion.co style) ─── */
-.text-reveal-wrap {
-  overflow: hidden;
-  display: block;
+/* ─── Site-wide shine overlay — passa luz em todo o site ─── */
+#site-shine {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9985;
+  background: linear-gradient(
+    110deg,
+    transparent        22%,
+    rgba(255,255,255,0.03) 45%,
+    rgba(255,255,255,0.10) 50%,
+    rgba(255,255,255,0.03) 55%,
+    transparent        78%
+  );
+  background-size: 300% 100%;
+  animation: site-shine 10s linear infinite;
+  mix-blend-mode: overlay;
 }
-.text-reveal-wrap .text-reveal-inner {
-  display: block;
-  animation: text-reveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-@keyframes text-reveal {
-  from { transform: translateY(105%); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+@keyframes site-shine {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
 }
 
 /* ─── Nav scroll shrink ─── */
@@ -63,14 +116,23 @@
 }
 .topnav.scrolled {
   height: 54px;
-  background: rgba(10, 10, 10, 0.96);
-  border-bottom-color: rgba(255,138,0,0.12);
+  background: rgba(10,10,10,0.96);
   box-shadow: 0 1px 32px rgba(0,0,0,0.5);
 }
 
-/* ─── Parallax — disable on mobile so layout stays solid ─── */
+/* ─── Text reveal ─── */
+.text-reveal-wrap { overflow: hidden; display: block; }
+.text-reveal-wrap .text-reveal-inner {
+  display: block;
+  animation: text-reveal 0.9s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes text-reveal {
+  from { transform: translateY(105%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ─── Parallax — disable on mobile ─── */
 @media (max-width: 900px) {
   .hero-visual,
   .hero-copy { transform: none !important; }
 }
-
