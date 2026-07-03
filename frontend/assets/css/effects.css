@@ -84,6 +84,26 @@ h4 .text-primary {
   100% { background-position: -150% center; }
 }
 
+/* ─── Shiny em todo o texto do site ─── */
+p, li, td, th, label, span:not([class*="icon"]):not([data-icon]),
+.hero-lead, .hero-stat span, .depoimento-card p,
+.gam-feature span, .step-card p, .faq-body p,
+.section-head p, .footer-brand p {
+  background: linear-gradient(
+    120deg,
+    rgba(240,240,240,1) 30%,
+    rgba(255,255,255,0.5) 46%,
+    rgba(255,252,230,1) 50%,
+    rgba(255,255,255,0.5) 54%,
+    rgba(240,240,240,1) 70%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shiny-sweep 8s linear infinite;
+}
+
 /* ─── Site-wide shine overlay — passa luz em todo o site ─── */
 #site-shine {
   position: fixed;
