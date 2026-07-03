@@ -28,11 +28,11 @@ h1 .text-primary, h2 .text-primary, h3 .text-primary, h4 .text-primary,
 .gam-notification {
   background: linear-gradient(
     120deg,
-    #cc0000               30%,
-    rgba(255,110,0, 0.82) 46%,
-    #ffcc00               50%,
-    rgba(255,110,0, 0.82) 54%,
-    #ff8a00               70%
+    #8b0000               30%,
+    rgba(210,25,0,  0.85) 46%,
+    #ff3300               50%,
+    rgba(210,25,0,  0.85) 54%,
+    #cc0000               70%
   );
   background-size: 300% 100%;
   -webkit-background-clip: text;
@@ -68,15 +68,15 @@ h1 .text-primary, h2 .text-primary, h3 .text-primary, h4 .text-primary,
   animation: shiny-sweep 8s linear infinite;
   animation-delay: 0s;
 }
-/* "propósito" — mesmo timing de stops do branco, cores laranja/vermelho */
+/* "propósito" — mesmo timing de stops do branco, puxado pro vermelho */
 .shiny-text .text-primary {
   background: linear-gradient(
     120deg,
-    #cc0000               30%,
-    rgba(255,110,0, 0.82) 46%,
-    #ffcc00               50%,
-    rgba(255,110,0, 0.82) 54%,
-    #ff8a00               70%
+    #8b0000               30%,
+    rgba(210,25,0,  0.85) 46%,
+    #ff3300               50%,
+    rgba(210,25,0,  0.85) 54%,
+    #cc0000               70%
   );
   background-size: 300% 100%;
   -webkit-background-clip: text;
