@@ -28,6 +28,8 @@ const app = express();
 app.use(helmet());
 const ALLOWED_ORIGINS = [
   'https://teg-academia.pages.dev',
+  'https://teg-academia.com.br',
+  'https://www.teg-academia.com.br',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:5500',
@@ -36,13 +38,17 @@ const ALLOWED_ORIGINS = [
   'http://127.0.0.1:3000',
 ];
 
+function isOriginAllowed(origin) {
+  if (!origin) return true; // file:// ou server-to-server
+  if (ALLOWED_ORIGINS.includes(origin)) return true;
+  // aceita preview deploys do Cloudflare Pages: *.teg-academia.pages.dev
+  if (/^https:\/\/[a-z0-9-]+\.teg-academia\.pages\.dev$/.test(origin)) return true;
+  return false;
+}
+
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? (origin, cb) => {
-        // allow null (file://) and listed origins
-        if (!origin || ALLOWED_ORIGINS.includes(origin)) cb(null, true);
-        else cb(new Error('Not allowed by CORS'));
-      }
+    ? (origin, cb) => isOriginAllowed(origin) ? cb(null, true) : cb(new Error('Not allowed by CORS'))
     : '*',
   credentials: true,
 }));
