@@ -26,9 +26,9 @@ document.getElementById('btn-copiar').addEventListener('click', async () => {
 async function carregarStats() {
   try {
     const stats = await api.get('/api/indicacoes/stats');
-    document.getElementById('stat-total').textContent = stats.total;
-    document.getElementById('stat-convertidos').textContent = stats.convertidos;
-    document.getElementById('stat-pendentes').textContent = stats.pendentes;
+    animateNumber(document.getElementById('stat-total'), stats.total);
+    animateNumber(document.getElementById('stat-convertidos'), stats.convertidos);
+    animateNumber(document.getElementById('stat-pendentes'), stats.pendentes);
   } catch (err) {
     // mantém zeros
   }

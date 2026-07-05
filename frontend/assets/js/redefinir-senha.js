@@ -20,8 +20,7 @@ document.getElementById('form-redefinir-senha').addEventListener('submit', async
     return;
   }
 
-  btn.disabled = true;
-  btn.textContent = 'Redefinindo...';
+  setBtnLoading(btn, 'Redefinindo...');
 
   try {
     const { mensagem } = await api.post('/api/auth/redefinir-senha', { token, novaSenha: senha });
@@ -29,7 +28,6 @@ document.getElementById('form-redefinir-senha').addEventListener('submit', async
     setTimeout(() => { window.location.href = 'login.html'; }, 1500);
   } catch (err) {
     toast(err.message || 'Não foi possível redefinir a senha.', 'error');
-    btn.disabled = false;
-    btn.textContent = 'Redefinir senha';
+    resetBtnLoading(btn);
   }
 });

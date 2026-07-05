@@ -31,7 +31,7 @@ async function carregarTreino() {
     }
 
     lista.innerHTML = exercicios.map((te) => `
-      <div class="card exercicio-card">
+      <div class="card exercicio-card" data-reveal>
         <div class="exercicio-video">${embedVideo(te.exercicio.video_url)}</div>
         <div class="exercicio-body">
           <div class="exercicio-head">
@@ -48,6 +48,7 @@ async function carregarTreino() {
         </div>
       </div>
     `).join('');
+    initReveal();
   } catch (err) {
     lista.innerHTML = '<div class="empty-state">Não foi possível carregar seu treino agora.</div>';
   }

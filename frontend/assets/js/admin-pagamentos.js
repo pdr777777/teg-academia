@@ -51,7 +51,7 @@ document.getElementById('btn-cancelar-modal').addEventListener('click', () => {
 document.getElementById('btn-confirmar-modal').addEventListener('click', async () => {
   const metodo = document.getElementById('select-metodo').value;
   const btn = document.getElementById('btn-confirmar-modal');
-  btn.disabled = true;
+  setBtnLoading(btn, 'Confirmando...');
   try {
     await api.patch(`/api/pagamentos/${pagamentoSelecionadoId}/confirmar`, { metodo });
     modal.style.display = 'none';
@@ -60,7 +60,7 @@ document.getElementById('btn-confirmar-modal').addEventListener('click', async (
   } catch (err) {
     toast(err.message || 'Erro ao confirmar pagamento.', 'error');
   } finally {
-    btn.disabled = false;
+    resetBtnLoading(btn);
   }
 });
 

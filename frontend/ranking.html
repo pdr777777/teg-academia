@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/aluno.css" />
   <link rel="stylesheet" href="assets/css/ranking.css" />
+  <link rel="stylesheet" href="assets/css/app-effects.css" />
 </head>
 <body>
 
@@ -42,7 +43,7 @@
 
     <div id="minha-posicao-card" class="card minha-posicao"></div>
 
-    <div class="table-wrap" style="margin-top:1.25rem">
+    <div class="table-wrap" style="margin-top:1.25rem" data-reveal>
       <table>
         <thead>
           <tr><th>#</th><th>Aluno</th><th>Treinos</th><th>XP</th><th>Sequência</th></tr>
@@ -53,7 +54,7 @@
       </table>
     </div>
 
-    <section class="card" style="margin-top:2rem">
+    <section class="card" style="margin-top:2rem" data-reveal>
       <h2 style="margin-bottom:1rem">Conquistas</h2>
       <div id="conquistas-grid" class="grid grid-4"></div>
     </section>
@@ -62,6 +63,7 @@
   <script src="assets/js/icons.js"></script>
   <script src="assets/js/api.js"></script>
   <script src="assets/js/ui.js"></script>
+  <script src="assets/js/app-effects.js"></script>
   <script src="assets/js/auth-guard.js"></script>
   <script src="assets/js/ranking.js"></script>
 </body>

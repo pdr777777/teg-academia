@@ -77,6 +77,8 @@ document.getElementById('tabs-ranking').addEventListener('click', (ev) => {
   carregarRanking(btn.dataset.tipo);
 });
 
+initTabsIndicator(document.getElementById('tabs-ranking'));
+
 (async function init() {
   try {
     const me = await api.get('/api/auth/me');

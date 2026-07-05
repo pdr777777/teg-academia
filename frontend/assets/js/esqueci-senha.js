@@ -1,8 +1,7 @@
 document.getElementById('form-esqueci-senha').addEventListener('submit', async (ev) => {
   ev.preventDefault();
   const btn = ev.target.querySelector('button[type="submit"]');
-  btn.disabled = true;
-  btn.textContent = 'Enviando...';
+  setBtnLoading(btn, 'Enviando...');
 
   try {
     const { mensagem } = await api.post('/api/auth/esqueci-senha', {
@@ -13,7 +12,6 @@ document.getElementById('form-esqueci-senha').addEventListener('submit', async (
   } catch (err) {
     toast(err.message || 'Não foi possível enviar o link.', 'error');
   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Enviar link';
+    resetBtnLoading(btn);
   }
 });

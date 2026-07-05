@@ -1,8 +1,7 @@
 document.getElementById('form-login').addEventListener('submit', async (ev) => {
   ev.preventDefault();
   const btn = ev.target.querySelector('button[type="submit"]');
-  btn.disabled = true;
-  btn.textContent = 'Entrando...';
+  setBtnLoading(btn, 'Entrando...');
 
   try {
     const { token, user } = await api.post('/api/auth/login', {
@@ -13,7 +12,6 @@ document.getElementById('form-login').addEventListener('submit', async (ev) => {
     window.location.href = ['admin', 'dono'].includes(user.role) ? 'admin/index.html' : 'dashboard.html';
   } catch (err) {
     toast(err.message || 'Não foi possível entrar.', 'error');
-    btn.disabled = false;
-    btn.textContent = 'Entrar';
+    resetBtnLoading(btn);
   }
 });

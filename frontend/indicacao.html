@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/aluno.css" />
   <link rel="stylesheet" href="assets/css/indicacao.css" />
+  <link rel="stylesheet" href="assets/css/app-effects.css" />
 </head>
 <body>
 
@@ -45,24 +46,24 @@
     </div>
 
     <div class="grid grid-3 stats-indicacao">
-      <div class="card stat-card">
+      <div class="card stat-card" data-reveal>
         <span class="stat-icon"><span data-icon="users"></span></span>
         <strong id="stat-total">0</strong>
         <span class="text-muted">Total indicados</span>
       </div>
-      <div class="card stat-card">
+      <div class="card stat-card" data-reveal>
         <span class="stat-icon" style="color:var(--color-success)"><span data-icon="user-check"></span></span>
         <strong id="stat-convertidos">0</strong>
         <span class="text-muted">Convertidos</span>
       </div>
-      <div class="card stat-card">
+      <div class="card stat-card" data-reveal>
         <span class="stat-icon" style="color:var(--color-warning)"><span data-icon="clock"></span></span>
         <strong id="stat-pendentes">0</strong>
         <span class="text-muted">Pendentes</span>
       </div>
     </div>
 
-    <section class="card" style="margin-top:1.5rem">
+    <section class="card" style="margin-top:1.5rem" data-reveal>
       <h2 style="margin-bottom:1rem">Suas indicações</h2>
       <div class="table-wrap">
         <table>
@@ -78,6 +79,7 @@
   <script src="assets/js/icons.js"></script>
   <script src="assets/js/api.js"></script>
   <script src="assets/js/ui.js"></script>
+  <script src="assets/js/app-effects.js"></script>
   <script src="assets/js/auth-guard.js"></script>
   <script src="assets/js/indicacao.js"></script>
 </body>

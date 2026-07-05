@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/aluno.css" />
   <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/app-effects.css" />
 </head>
 <body>
 
@@ -54,22 +55,22 @@
       </div>
 
       <div class="grid grid-4 stat-cards">
-        <div class="card stat-card">
+        <div class="card stat-card" data-reveal>
           <span class="stat-icon"><span data-icon="calendar"></span></span>
           <strong id="stat-vencimento">—</strong>
           <span class="text-muted">Vencimento do plano</span>
         </div>
-        <div class="card stat-card">
+        <div class="card stat-card" data-reveal>
           <span class="stat-icon"><span data-icon="trending-up"></span></span>
           <strong id="stat-freq-mes">0</strong>
           <span class="text-muted">Dias treinados no mês</span>
         </div>
-        <div class="card stat-card">
+        <div class="card stat-card" data-reveal>
           <span class="stat-icon"><span data-icon="dumbbell"></span></span>
           <strong id="stat-total-treinos">0</strong>
           <span class="text-muted">Treinos no total</span>
         </div>
-        <div class="card stat-card">
+        <div class="card stat-card" data-reveal>
           <span class="stat-icon"><span data-icon="flame"></span></span>
           <strong id="stat-maior-sequencia">0</strong>
           <span class="text-muted">Maior sequência</span>
@@ -78,7 +79,7 @@
     </section>
 
     <div class="grid grid-2 dash-lower">
-      <section id="frequencia-mes" class="card">
+      <section id="frequencia-mes" class="card" data-reveal>
         <div class="row-between" style="margin-bottom:1rem">
           <h2>Frequência do mês</h2>
           <span data-icon="calendar" data-icon-size="18" class="text-muted"></span>
@@ -86,7 +87,7 @@
         <div class="calendario-grid" id="calendario-grid"></div>
       </section>
 
-      <section id="conquistas-recentes" class="card">
+      <section id="conquistas-recentes" class="card" data-reveal>
         <div class="row-between" style="margin-bottom:1rem">
           <h2>Conquistas recentes</h2>
           <span data-icon="award" data-icon-size="18" class="text-muted"></span>
@@ -103,6 +104,7 @@
   <script src="assets/js/icons.js"></script>
   <script src="assets/js/api.js"></script>
   <script src="assets/js/ui.js"></script>
+  <script src="assets/js/app-effects.js"></script>
   <script src="assets/js/auth-guard.js"></script>
   <script src="assets/js/dashboard.js"></script>
 </body>

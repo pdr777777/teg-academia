@@ -13,9 +13,13 @@ const PLANOS_FALLBACK = [
 
 function irParaStep(n) {
   document.querySelectorAll('.step-section').forEach((s) => (s.style.display = 'none'));
-  document.getElementById(
+  const secao = document.getElementById(
     n === 1 ? 'step-plano' : n === 2 ? 'step-dados' : 'step-confirmacao'
-  ).style.display = 'block';
+  );
+  secao.style.display = 'block';
+  secao.classList.remove('step-enter');
+  void secao.offsetWidth;
+  secao.classList.add('step-enter');
 
   document.querySelectorAll('.step-item').forEach((el) => {
     const step = Number(el.dataset.step);
@@ -31,13 +35,14 @@ document.querySelectorAll('.step-back').forEach((btn) => {
 
 function renderPlanos(grid) {
   grid.innerHTML = state.planos.map((p) => `
-    <div class="card plano-card" data-plano-id="${p.id}">
+    <div class="card plano-card" data-plano-id="${p.id}" data-reveal>
       <div class="plano-nome">${p.nome}</div>
       <div class="plano-desc">${p.descricao || ''}</div>
       <div class="plano-preco">${formatMoeda(p.preco_mensal)}<span>/mês</span></div>
       <div class="plano-duracao">Vigência de ${p.duracao_dias} dias</div>
     </div>
   `).join('');
+  initReveal();
 
   grid.querySelectorAll('.plano-card').forEach((card) => {
     card.addEventListener('click', () => selecionarPlano(Number(card.dataset.planoId)));
@@ -74,8 +79,7 @@ function selecionarPlano(id) {
 document.getElementById('form-dados').addEventListener('submit', async (ev) => {
   ev.preventDefault();
   const btn = ev.target.querySelector('button[type="submit"]');
-  btn.disabled = true;
-  btn.textContent = 'Aguarde...';
+  setBtnLoading(btn, 'Aguarde...');
 
   try {
     const { token } = await api.post('/api/auth/registro', {
@@ -91,12 +95,10 @@ document.getElementById('form-dados').addEventListener('submit', async (ev) => {
     localStorage.setItem('token', token);
     renderResumo();
     irParaStep(3);
+    resetBtnLoading(btn);
   } catch (err) {
     toast(err.message || 'Erro ao criar sua conta.', 'error');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = 'Continuar<span data-icon="arrow-right"></span>';
-    fillIcons();
+    resetBtnLoading(btn);
   }
 });
 
@@ -111,8 +113,7 @@ function renderResumo() {
 
 document.getElementById('btn-confirmar').addEventListener('click', async () => {
   const btn = document.getElementById('btn-confirmar');
-  btn.disabled = true;
-  btn.textContent = 'Confirmando...';
+  setBtnLoading(btn, 'Confirmando...');
 
   try {
     await api.post('/api/matriculas', { plano_id: state.planoSelecionado.id });
@@ -121,8 +122,7 @@ document.getElementById('btn-confirmar').addEventListener('click', async () => {
     fillIcons();
   } catch (err) {
     toast(err.message || 'Erro ao confirmar matrícula.', 'error');
-    btn.disabled = false;
-    btn.textContent = 'Confirmar matrícula';
+    resetBtnLoading(btn);
   }
 });
 

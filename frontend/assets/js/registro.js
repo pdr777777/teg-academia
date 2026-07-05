@@ -13,8 +13,7 @@ document.getElementById('form-registro').addEventListener('submit', async (ev) =
     return;
   }
 
-  btn.disabled    = true;
-  btn.textContent = 'Criando conta...';
+  setBtnLoading(btn, 'Criando conta...');
 
   try {
     const { token, user } = await api.post('/api/auth/registro', {
@@ -39,7 +38,6 @@ document.getElementById('form-registro').addEventListener('submit', async (ev) =
 
   } catch (err) {
     toast(err.message || 'Erro ao criar conta. Tente novamente.', 'error');
-    btn.disabled    = false;
-    btn.textContent = 'Criar conta';
+    resetBtnLoading(btn);
   }
 });

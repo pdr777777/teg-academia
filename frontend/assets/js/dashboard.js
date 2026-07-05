@@ -27,7 +27,7 @@ async function carregarDashboard() {
 
     document.getElementById('saudacao').textContent = `${saudacaoHora()},`;
     document.getElementById('dash-nome').textContent = d.nome;
-    document.getElementById('dash-xp').textContent = `${d.xp.toLocaleString('pt-BR')} XP`;
+    animateNumber(document.getElementById('dash-xp'), d.xp, { format: (v) => `${Math.round(v).toLocaleString('pt-BR')} XP` });
     document.getElementById('dash-sequencia').textContent = d.sequencia_atual;
 
     const lvl = calcXpLevel(d.xp);
@@ -44,9 +44,9 @@ async function carregarDashboard() {
       : 'Sem plano ativo';
 
     document.getElementById('stat-vencimento').textContent = formatData(d.data_vencimento);
-    document.getElementById('stat-freq-mes').textContent = d.dias_treinados_mes;
-    document.getElementById('stat-total-treinos').textContent = d.total_treinos;
-    document.getElementById('stat-maior-sequencia').textContent = d.maior_sequencia;
+    animateNumber(document.getElementById('stat-freq-mes'), d.dias_treinados_mes);
+    animateNumber(document.getElementById('stat-total-treinos'), d.total_treinos);
+    animateNumber(document.getElementById('stat-maior-sequencia'), d.maior_sequencia);
 
     const lista = document.getElementById('lista-conquistas');
     lista.innerHTML = d.conquistas_recentes.length
@@ -91,6 +91,8 @@ document.getElementById('btn-checkin').addEventListener('click', async (ev) => {
   try {
     await api.post('/api/frequencias/checkin', {});
     toast('Treino registrado! +50 XP', 'success');
+    btn.classList.add('success-burst');
+    setTimeout(() => btn.classList.remove('success-burst'), 600);
     await Promise.all([carregarDashboard(), carregarCalendario()]);
   } catch (err) {
     toast(err.message || 'Erro ao registrar check-in.', 'error');
