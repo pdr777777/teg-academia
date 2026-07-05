@@ -860,6 +860,13 @@
   .whatsapp-float { padding: 1rem; }
   .whatsapp-float-label { display: none; }
   .gallery-card { width: 240px; height: 300px; }
+  .hero-copy h1 { font-size: 2.15rem; }
+  .hero-stats-bar { padding: 1rem 0; }
+  .hero-stat strong { font-size: 1.25rem; }
+  .depoimento-card { padding: 1.25rem; }
+  .plan-card { padding: 1.5rem; }
+  .step-card { padding: 1.25rem; }
+  .section-head h2 { font-size: 1.9rem; }
 }
 
 /* ===== Scroll reveal ===== */
@@ -881,9 +888,9 @@
   .hero { min-height: auto; }
   .hero-inner {
     grid-template-columns: 1fr;
-    padding-top: 4rem;
-    padding-bottom: 3rem;
-    gap: 2.5rem;
+    padding-top: 3.5rem;
+    padding-bottom: 2.5rem;
+    gap: 2rem;
   }
   .hero-visual { order: -1; }
   .hero-visual-inner { animation: none; }
@@ -892,6 +899,10 @@
   .hero-stat-divider { display: none; }
   .hero-stats { flex-wrap: wrap; }
   .hero-stat { min-width: 40%; }
+  .hero-copy h1 { font-size: 2.6rem; letter-spacing: 0.02em; }
+  .hero-lead { font-size: 1rem; margin-bottom: 1.75rem; }
+  .hero-actions { flex-direction: column; gap: 0.75rem; }
+  .hero-actions .btn { width: 100%; justify-content: center; }
 
   .gamificacao-inner  { grid-template-columns: 1fr; }
   .gamificacao-visual { order: -1; }

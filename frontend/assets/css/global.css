@@ -342,4 +342,6 @@ tbody tr:hover { background: var(--color-surface-2); }
   }
   .topnav-links.open { display: flex; }
   .topnav-links a { width: 100%; }
+  .section { padding: 3rem 0; }
+  .section-head { margin-bottom: 2rem; }
 }
