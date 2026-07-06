@@ -11,6 +11,10 @@ const PLANOS_FALLBACK = [
   { id: 3, nome: 'Anual',      preco_mensal:  99.90, duracao_dias: 365 },
 ];
 
+function brl(valor) {
+  return 'R$' + valor.toFixed(2).replace('.', ',');
+}
+
 function getPlanMeta(plano) {
   const d = plano.duracao_dias;
   if (d <= 30) return {
@@ -27,7 +31,7 @@ function getPlanMeta(plano) {
   };
   if (d <= 90) return {
     badge: 'Mais popular',
-    nota: `3x ${formatMoeda(plano.preco_mensal)} no crédito`,
+    nota: `3x ${brl(plano.preco_mensal)} no crédito`,
     features: [
       'Acesso a todas as modalidades',
       'Acompanhamento de professores',
@@ -39,7 +43,7 @@ function getPlanMeta(plano) {
   };
   return {
     badge: '🔥 Economize R$240/ano',
-    nota: `12x ${formatMoeda(plano.preco_mensal)} recorrente no Pix`,
+    nota: `12x ${brl(plano.preco_mensal)} recorrente no Pix`,
     features: [
       'Acesso a todas as modalidades',
       'Acompanhamento de professores',
@@ -81,8 +85,7 @@ function renderPlanos(grid) {
         ${meta.badge ? `<div class="plano-badge${meta.destaque ? '' : ' plano-badge-fire'}">${meta.badge}</div>` : ''}
         <div class="plano-nome">${p.nome}</div>
         <div class="plano-preco">
-          <span class="plano-currency">R$</span>${String(p.preco_mensal.toFixed(2)).replace('.', ',').replace(/,(\d{2})$/, '<span class="plano-cents">,$1</span>')}
-          <span class="plano-period">/mês</span>
+          <span class="plano-currency">R$</span><span class="plano-amount">${Math.floor(p.preco_mensal)}</span><span class="plano-cents">,${String(p.preco_mensal.toFixed(2)).split('.')[1]}</span><span class="plano-period">/mês</span>
         </div>
         <p class="plano-nota">${meta.nota}</p>
         <ul class="plano-features">
