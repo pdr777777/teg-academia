@@ -24,8 +24,15 @@ if (statsBar) {
   new IntersectionObserver(function(entries, obs) {
     if (!entries[0].isIntersecting) return;
     obs.disconnect();
-    countUp(document.getElementById('stat-alunos'),     500, '+', 1800);
-    countUp(document.getElementById('stat-modalidades'), 15, '+', 1400);
+    api.get('/api/admin/stats')
+      .then(function(data) {
+        countUp(document.getElementById('stat-alunos'),     data.alunos_ativos  || 500, '+', 1800);
+        countUp(document.getElementById('stat-modalidades'), data.modalidades    || 15,  '+', 1400);
+      })
+      .catch(function() {
+        countUp(document.getElementById('stat-alunos'),     500, '+', 1800);
+        countUp(document.getElementById('stat-modalidades'), 15,  '+', 1400);
+      });
   }, { threshold: 0.4 }).observe(statsBar);
 }
 

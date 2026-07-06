@@ -74,8 +74,11 @@ router.patch('/:id/pipeline', authMiddleware, requireRole('admin', 'dono'), asyn
       return res.status(400).json({ error: 'Status inválido' });
     }
 
+    // CTE captura status_anterior ANTES do update
     const { rows: [lead] } = await pool.query(
-      `UPDATE leads SET status_pipeline = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
+      `WITH anterior AS (SELECT status_pipeline FROM leads WHERE id = $2)
+       UPDATE leads SET status_pipeline = $1, updated_at = NOW() WHERE id = $2
+       RETURNING *, (SELECT status_pipeline FROM anterior) AS status_anterior`,
       [status_novo, req.params.id]
     );
     if (!lead) return res.status(404).json({ error: 'Lead não encontrado' });
@@ -83,7 +86,7 @@ router.patch('/:id/pipeline', authMiddleware, requireRole('admin', 'dono'), asyn
     await pool.query(
       `INSERT INTO pipeline_historico (lead_id, status_anterior, status_novo, observacao, usuario_id)
        VALUES ($1, $2, $3, $4, $5)`,
-      [lead.id, lead.status_pipeline, status_novo, observacao, req.user.id]
+      [lead.id, lead.status_anterior, status_novo, observacao, req.user.id]
     );
 
     res.json(lead);

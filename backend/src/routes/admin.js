@@ -4,6 +4,22 @@ const { authMiddleware, requireRole } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
+// GET /api/admin/stats — métricas públicas para a landing page
+router.get('/stats', async (req, res, next) => {
+  try {
+    const [alunos, planos] = await Promise.all([
+      pool.query(`SELECT COUNT(*)::int AS total FROM matriculas WHERE status = 'ativa'`),
+      pool.query(`SELECT COUNT(*)::int AS total FROM planos WHERE ativo = true`),
+    ]);
+    res.json({
+      alunos_ativos: alunos.rows[0].total,
+      modalidades: planos.rows[0].total,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/admin/dashboard — métricas do dono
 router.get('/dashboard', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
   try {
