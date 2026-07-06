@@ -158,91 +158,50 @@
   position: relative;
   animation: float 5s ease-in-out infinite;
 }
-/* ===== Phone mockup — prévia real do site rodando dentro de um iframe,
-   escalado para caber na tela do celular (mesmo CSS responsivo do site real,
-   não é uma réplica ilustrativa) ===== */
-.phone-mockup {
-  position: relative;
-  flex-shrink: 0;
-  width: 17.5em;
-  height: 36.4em;
-  font-size: 15px;
-  background: linear-gradient(155deg, #2e2e2e, #0a0a0a 45%, #050505);
-  border-radius: 2.6em;
-  padding: 0.9em;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.06),
-    0 0 0 2px #000,
-    0 30px 70px rgba(0,0,0,.6),
-    0 0 60px rgba(204,0,0,.10),
-    inset 0 0 0 1px rgba(255,255,255,.05);
-}
-.phone-mockup::before {
-  content: '';
-  position: absolute;
-  right: -0.15em;
-  top: 8em;
-  width: 0.2em;
-  height: 3.6em;
-  background: #161616;
-  border-radius: 0 0.15em 0.15em 0;
-}
-.phone-mockup::after {
-  content: '';
-  position: absolute;
-  left: -0.15em;
-  top: 6.2em;
-  width: 0.2em;
-  height: 2em;
-  background: #161616;
-  border-radius: 0.15em 0 0 0.15em;
-  box-shadow: 0 2.8em 0 #161616, 0 5.2em 0 #161616;
-}
-.phone-screen {
-  position: relative;
+.hero-card {
   width: 100%;
+  max-width: 310px;
+  background: var(--color-surface);
+  border: 1px solid rgba(255,138,0,.15);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow:
+    0 0 0 1px rgba(255,138,0,.06),
+    0 0 40px rgba(204,0,0,.08),
+    0 24px 64px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.05);
+}
+.hero-card-days {
+  display: flex;
+  gap: 0.4rem;
+  margin: 1.25rem 0 1.5rem;
+}
+.day-dot {
+  flex: 1;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--color-surface-2);
+}
+.day-dot.filled {
+  background: linear-gradient(90deg, var(--color-red), var(--color-primary));
+  box-shadow: 0 0 6px rgba(255,138,0,.4);
+}
+.hero-card-xp-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.hero-card-xp-label span { font-size: 0.78rem; color: var(--color-muted); }
+.hero-card-xp-label strong { font-size: 0.88rem; font-weight: 700; color: var(--color-primary); }
+.xp-bar { height: 7px; background: var(--color-surface-2); border-radius: 999px; overflow: hidden; }
+.xp-bar-fill {
   height: 100%;
-  background: #0a0a0a;
-  border-radius: 2.1em;
-  overflow: hidden;
-}
-.phone-site-preview {
-  position: absolute;
-  top: 0;
-  left: 0;
-  border: 0;
-  background: #0a0a0a;
-  transform: scale(0.62);
-  transform-origin: top left;
-  pointer-events: none;
-}
-.phone-notch {
-  position: absolute;
-  top: 0.55em;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 5.6em;
-  height: 1.5em;
-  background: #050505;
+  background: linear-gradient(90deg, var(--color-red), #ff6600, var(--color-primary));
   border-radius: 999px;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+  transform-origin: left;
+  animation: xp-slide-in 1.5s 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
-.phone-home-indicator {
-  position: absolute;
-  bottom: 0.5em;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 5em;
-  height: 0.28em;
-  background: rgba(255,255,255,.32);
-  border-radius: 999px;
-}
-
-/* A própria página, quando carregada dentro do iframe de prévia acima,
-   esconde seu próprio hero-visual — evita aninhar celular-dentro-de-celular */
-.is-preview-frame .hero-visual { display: none; }
-.is-preview-frame .hero-inner { grid-template-columns: 1fr; }
-.is-preview-frame .whatsapp-float { display: none; }
 
 /* Hero badges */
 .hero-badge-float {
@@ -260,16 +219,16 @@
   white-space: nowrap;
 }
 .hero-badge-top {
-  top: -22px;
-  right: -14px;
+  top: -28px;
+  right: -36px;
   color: var(--color-primary);
   border-color: rgba(255,138,0,.2);
   background: rgba(255,138,0,.06);
   animation: badge-pop 0.5s 0.9s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 .hero-badge-bottom {
-  bottom: -18px;
-  left: -14px;
+  bottom: -24px;
+  left: -32px;
   color: var(--color-red);
   border-color: rgba(204,0,0,.25);
   background: rgba(204,0,0,.06);
@@ -920,9 +879,6 @@
 
 /* ===== Responsive ===== */
 @media (max-width: 1100px) {
-  /* coluna do hero-visual fica mais estreita — encolhe o mockup pra caber */
-  .phone-mockup { font-size: 12.5px; }
-  .phone-site-preview { transform: scale(0.517); }
 }
 
 @media (max-width: 900px) {
@@ -933,9 +889,9 @@
     padding-bottom: 2.5rem;
     gap: 2rem;
   }
-  /* abaixo de 900px o visitante já está no mobile — mostrar um celular
-     com uma prévia do próprio mobile seria redundante, então some com o mockup */
-  .hero-visual { display: none; }
+  .hero-visual { order: -1; }
+  .hero-visual-inner { animation: none; }
+  .hero-badge-float { display: none; }
   .hero-stats { gap: 1.5rem; }
   .hero-stat-divider { display: none; }
   .hero-stats { flex-wrap: wrap; }
