@@ -125,7 +125,7 @@ const WA = 'https://wa.me/5567993009296?text=';
 const PLAN_MSGS = [
   'Olá!+Tenho+interesse+no+plano+Mensal+da+Academia+TEG+(R%24119%2C90%2Fmês+no+Pix).+Pode+me+ajudar+a+finalizar+minha+matrícula%3F',
   'Olá!+Tenho+interesse+no+plano+Trimestral+da+Academia+TEG+(3x+R%24109%2C90).+Pode+me+ajudar+a+finalizar+minha+matrícula%3F',
-  'Olá!+Tenho+interesse+no+plano+Anual+da+Academia+TEG+(12x+R%24099%2C90+no+Pix+recorrente).+Pode+me+ajudar+a+finalizar+minha+matrícula%3F',
+  'Olá!+Tenho+interesse+no+plano+Anual+da+Academia+TEG+(12x+R%24099%2C90+parcelado+no+cart%C3%A3o).+Pode+me+ajudar+a+finalizar+minha+matrícula%3F',
 ];
 
 document.querySelectorAll('.plan-card').forEach((card, i) => {
