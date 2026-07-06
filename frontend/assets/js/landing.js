@@ -139,6 +139,7 @@ document.querySelectorAll('.plan-card').forEach((card, i) => {
 
 // ===== Electric Border =====
 (function initElectricBorder() {
+  if (window.self !== window.top) return; // roda dentro do phone-mockup do hero — invisível, não vale o RAF contínuo
   const card = document.querySelector('.plan-card.plan-featured');
   if (!card) return;
 
