@@ -119,6 +119,21 @@ router.patch('/alunos/:id/senha', authMiddleware, requireRole('admin', 'dono'), 
   }
 });
 
+// GET /api/admin/planos — todos os planos incluindo inativos
+router.get('/planos', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT p.*, COUNT(m.id) FILTER (WHERE m.status = 'ativa')::int AS alunos_ativos
+       FROM planos p
+       LEFT JOIN matriculas m ON m.plano_id = p.id
+       GROUP BY p.id ORDER BY p.preco_mensal`
+    );
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // POST /api/admin/matriculas — admin matricula um aluno manualmente
 router.post('/matriculas', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
   try {

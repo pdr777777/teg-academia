@@ -31,6 +31,31 @@ router.get('/meu', authMiddleware, async (req, res, next) => {
   }
 });
 
+// GET /api/treinos (admin/professor — lista todos os treinos)
+router.get('/', authMiddleware, requireRole('professor', 'admin', 'dono'), async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT t.id, t.nome, t.descricao, t.professor_id,
+              COUNT(te.id)::int AS exercicios_count,
+              json_agg(
+                json_build_object(
+                  'id', te.id, 'ordem', te.ordem, 'series', te.series,
+                  'repeticoes', te.repeticoes, 'carga', te.carga,
+                  'descanso_segundos', te.descanso_segundos,
+                  'exercicio', json_build_object('id', e.id, 'nome', e.nome, 'grupo_muscular', e.grupo_muscular)
+                ) ORDER BY te.ordem
+              ) FILTER (WHERE te.id IS NOT NULL) AS exercicios
+       FROM treinos t
+       LEFT JOIN treino_exercicios te ON te.treino_id = t.id
+       LEFT JOIN exercicios e ON e.id = te.exercicio_id
+       GROUP BY t.id ORDER BY t.created_at DESC`
+    );
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // POST /api/treinos (professor/admin)
 router.post('/', authMiddleware, requireRole('professor', 'admin', 'dono'), async (req, res, next) => {
   try {
