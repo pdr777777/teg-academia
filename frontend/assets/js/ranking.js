@@ -87,5 +87,5 @@ initTabsIndicator(document.getElementById('tabs-ranking'));
     // segue sem destaque de "você" se falhar
   }
   carregarRanking('semanal');
-  carregarConquistas();
+  if (usuarioId) carregarConquistas();
 })();

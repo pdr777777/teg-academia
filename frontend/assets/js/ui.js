@@ -28,7 +28,7 @@ function iniciais(nome) {
 
 function logout() {
   localStorage.removeItem('token');
-  window.location.href = 'login.html';
+  window.location.href = '/login.html';
 }
 
 function debounce(fn, ms = 350) {
