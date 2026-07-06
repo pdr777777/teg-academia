@@ -8,14 +8,25 @@
   margin-bottom: 1.5rem;
   position: relative;
   overflow: hidden;
+  padding: 1.75rem;
+  border-color: rgba(255,138,0,.13);
   background: linear-gradient(135deg, var(--color-surface), #141414);
+  box-shadow: 0 0 0 1px rgba(255,138,0,.04), 0 16px 48px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.04);
+}
+.dash-hero::before {
+  content: '';
+  position: absolute;
+  bottom: -60px; left: -60px;
+  width: 260px; height: 260px;
+  background: radial-gradient(circle, rgba(204,0,0,.07), transparent 70%);
+  pointer-events: none;
 }
 .dash-hero::after {
   content: '';
   position: absolute;
   top: -40px; right: -40px;
   width: 240px; height: 240px;
-  background: radial-gradient(circle, rgba(255,138,0,.08), transparent 70%);
+  background: radial-gradient(circle, rgba(255,138,0,.09), transparent 70%);
   pointer-events: none;
 }
 .dash-hero h1 {
@@ -84,7 +95,7 @@
   border-color: rgba(255,138,0,.25);
   transform: translateY(-2px);
 }
-.stat-icon { color: var(--color-primary); margin-bottom: 0.25rem; }
+.stat-cards .stat-icon { margin-bottom: 0.4rem; }
 .stat-card strong { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.025em; }
 .stat-card span { font-size: 0.8rem; color: var(--color-muted); }
 
@@ -95,18 +106,24 @@
 .calendario-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.35rem; }
 .cal-dia {
   aspect-ratio: 1;
-  border-radius: 6px;
+  border-radius: 7px;
   background: var(--color-surface-2);
   display: flex; align-items: center; justify-content: center;
   font-size: 0.74rem;
   color: var(--color-muted);
-  transition: background-color 0.15s;
+  transition: background-color 0.15s, transform 0.15s;
 }
+.cal-dia:not(.vazio):hover { background: #1e1e1e; transform: scale(1.06); }
 .cal-dia.treinou {
-  background: var(--color-primary-soft);
+  background: linear-gradient(135deg, rgba(255,138,0,.22), rgba(255,138,0,.1));
   color: var(--color-primary);
   font-weight: 700;
-  border: 1px solid rgba(255,138,0,.2);
+  border: 1px solid rgba(255,138,0,.28);
+  box-shadow: 0 0 10px rgba(255,138,0,.1);
+}
+.cal-dia.hoje:not(.treinou) {
+  border: 1px dashed rgba(255,138,0,.45);
+  color: var(--color-text);
 }
 .cal-dia.vazio { visibility: hidden; }
 
@@ -131,11 +148,11 @@
   margin-top: 1.5rem;
   border-radius: var(--radius-lg);
   letter-spacing: -0.01em;
-  transition: background-color 0.15s, transform 0.1s, box-shadow 0.2s;
+  transition: filter 0.15s, transform 0.1s, box-shadow 0.2s;
 }
 .btn-checkin:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-  box-shadow: 0 6px 24px rgba(255,138,0,.28);
+  filter: brightness(1.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 8px 30px rgba(255,138,0,.32);
   transform: translateY(-1px);
 }
 .btn-checkin:active:not(:disabled) {

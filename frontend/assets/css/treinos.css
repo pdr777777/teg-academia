@@ -1,5 +1,5 @@
-.exercicio-card { padding: 0; overflow: hidden; transition: border-color 0.2s, transform 0.2s; }
-.exercicio-card:hover { border-color: rgba(255,138,0,.25); transform: translateY(-2px); }
+.exercicio-card { padding: 0; overflow: hidden; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s; }
+.exercicio-card:hover { border-color: rgba(255,138,0,.25); transform: translateY(-2px); box-shadow: 0 14px 40px rgba(0,0,0,.35); }
 .exercicio-video {
   aspect-ratio: 16/9;
   background: var(--color-surface-2);

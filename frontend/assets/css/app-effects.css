@@ -157,11 +157,11 @@
 }
 
 /* ───────────────────────── Foco acessível e consistente ───────────────────────── */
+/* Inputs já têm ring de foco no global.css — outline só onde não há ring */
 .btn:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
-.tab:focus-visible {
+.tab:focus-visible,
+.topnav-links a:focus-visible,
+.sidebar-nav a:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }

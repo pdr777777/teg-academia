@@ -10,9 +10,6 @@
   mix-blend-mode: screen;
 }
 
-.text-primary { color: var(--color-primary); }
-.text-muted   { color: var(--color-muted); }
-
 /* ===== Palette extensions ===== */
 :root {
   --color-red:      #cc0000;
@@ -240,7 +237,7 @@
 
 /* ===== Section utilities ===== */
 .section-alt {
-  background: transparent;
+  background: linear-gradient(180deg, rgba(255,255,255,.012), transparent 30%, transparent 70%, rgba(255,255,255,.012));
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
 }
@@ -628,7 +625,7 @@
   max-height: 0;
   transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
 }
-.faq-item.open .faq-body { max-height: 240px; }
+.faq-item.open .faq-body { max-height: 400px; }
 .faq-body p {
   padding-bottom: 1.35rem;
   color: var(--color-muted);
