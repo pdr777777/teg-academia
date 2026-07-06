@@ -6,10 +6,50 @@ const state = {
 };
 
 const PLANOS_FALLBACK = [
-  { id: 1, nome: 'Mensal',     descricao: 'Acesso completo a todas as modalidades. Cancele quando quiser.',      preco_mensal: 119.90, duracao_dias: 30  },
-  { id: 2, nome: 'Trimestral', descricao: 'Economia de R$30 em relação ao mensal. Renovação a cada 3 meses.',    preco_mensal: 109.90, duracao_dias: 90  },
-  { id: 3, nome: 'Anual',      descricao: 'Melhor custo-benefício. Até R$240 de economia em 12 meses no Pix.',   preco_mensal:  99.90, duracao_dias: 365 },
+  { id: 1, nome: 'Mensal',     preco_mensal: 119.90, duracao_dias: 30  },
+  { id: 2, nome: 'Trimestral', preco_mensal: 109.90, duracao_dias: 90  },
+  { id: 3, nome: 'Anual',      preco_mensal:  99.90, duracao_dias: 365 },
 ];
+
+function getPlanMeta(plano) {
+  const d = plano.duracao_dias;
+  if (d <= 30) return {
+    badge: null,
+    nota: 'Ou R$129,90 no cartão de crédito',
+    features: [
+      'Acesso a todas as modalidades',
+      'Acompanhamento de professores',
+      'Área do aluno com sistema XP',
+      'Grade de aulas em tempo real',
+      'Sem fidelidade mínima',
+    ],
+    destaque: false,
+  };
+  if (d <= 90) return {
+    badge: 'Mais popular',
+    nota: `3x ${formatMoeda(plano.preco_mensal)} no crédito`,
+    features: [
+      'Acesso a todas as modalidades',
+      'Acompanhamento de professores',
+      'Área do aluno com sistema XP',
+      'Grade de aulas em tempo real',
+      'Economia de R$30 vs mensal',
+    ],
+    destaque: true,
+  };
+  return {
+    badge: '🔥 Economize R$240/ano',
+    nota: `12x ${formatMoeda(plano.preco_mensal)} recorrente no Pix`,
+    features: [
+      'Acesso a todas as modalidades',
+      'Acompanhamento de professores',
+      'Área do aluno com sistema XP',
+      'Grade de aulas em tempo real',
+      'Prioridade em agendamentos',
+    ],
+    destaque: false,
+  };
+}
 
 function irParaStep(n) {
   document.querySelectorAll('.step-section').forEach((s) => (s.style.display = 'none'));
@@ -34,15 +74,26 @@ document.querySelectorAll('.step-back').forEach((btn) => {
 });
 
 function renderPlanos(grid) {
-  grid.innerHTML = state.planos.map((p) => `
-    <div class="card plano-card" data-plano-id="${p.id}" data-reveal>
-      <div class="plano-nome">${p.nome}</div>
-      <div class="plano-desc">${p.descricao || ''}</div>
-      <div class="plano-preco">${formatMoeda(p.preco_mensal)}<span>/mês</span></div>
-      <div class="plano-duracao">Vigência de ${p.duracao_dias} dias</div>
-    </div>
-  `).join('');
+  grid.innerHTML = state.planos.map((p) => {
+    const meta = getPlanMeta(p);
+    return `
+      <div class="plano-card${meta.destaque ? ' plano-destaque' : ''}" data-plano-id="${p.id}" data-reveal>
+        ${meta.badge ? `<div class="plano-badge${meta.destaque ? '' : ' plano-badge-fire'}">${meta.badge}</div>` : ''}
+        <div class="plano-nome">${p.nome}</div>
+        <div class="plano-preco">
+          <span class="plano-currency">R$</span>${String(p.preco_mensal.toFixed(2)).replace('.', ',').replace(/,(\d{2})$/, '<span class="plano-cents">,$1</span>')}
+          <span class="plano-period">/mês</span>
+        </div>
+        <p class="plano-nota">${meta.nota}</p>
+        <ul class="plano-features">
+          ${meta.features.map((f) => `<li><span data-icon="check" data-icon-size="14"></span>${f}</li>`).join('')}
+        </ul>
+        <button class="btn ${meta.destaque ? 'btn-primary' : 'btn-outline'} btn-block plano-cta">Começar agora</button>
+      </div>
+    `;
+  }).join('');
   initReveal();
+  fillIcons();
 
   grid.querySelectorAll('.plano-card').forEach((card) => {
     card.addEventListener('click', () => selecionarPlano(Number(card.dataset.planoId)));
