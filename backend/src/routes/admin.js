@@ -95,4 +95,27 @@ router.patch('/alunos/:id/toggle', authMiddleware, requireRole('admin', 'dono'),
   }
 });
 
+// PATCH /api/admin/alunos/:id/senha (redefinir senha pelo admin)
+router.patch('/alunos/:id/senha', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+  try {
+    const { nova_senha } = req.body;
+    if (!nova_senha || nova_senha.length < 6) {
+      return res.status(400).json({ error: 'Senha deve ter no mínimo 6 caracteres' });
+    }
+    const bcrypt = require('bcryptjs');
+    const senha_hash = await bcrypt.hash(nova_senha, 10);
+    const agora = Math.floor(Date.now() / 1000);
+
+    const { rows: [user] } = await pool.query(
+      `UPDATE usuarios SET senha_hash = $1, senha_alterada_em = NOW(), reset_token_hash = NULL, reset_token_expira = NULL, updated_at = NOW()
+       WHERE id = $2 AND role = 'aluno' RETURNING id, nome`,
+      [senha_hash, req.params.id]
+    );
+    if (!user) return res.status(404).json({ error: 'Aluno não encontrado' });
+    res.json({ ok: true, nome: user.nome });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;
