@@ -34,6 +34,16 @@ router.post('/', authMiddleware, async (req, res, next) => {
     await whatsappService.enviarBoasVindas(user.telefone, user.nome, plano.nome);
     await xpService.adicionarXP(req.user.id, 100, 'matricula');
 
+    const { rows: [indicacao] } = await pool.query(
+      `UPDATE indicacoes SET status = 'convertido', convertido_em = NOW()
+       WHERE indicado_id = $1 AND status = 'pendente'
+       RETURNING indicador_id`,
+      [req.user.id]
+    );
+    if (indicacao) {
+      await xpService.adicionarXP(indicacao.indicador_id, 200, 'indicacao');
+    }
+
     res.status(201).json(matricula);
   } catch (err) {
     next(err);

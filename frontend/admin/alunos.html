@@ -46,7 +46,7 @@
       <div class="table-wrap" data-reveal>
         <table>
           <thead>
-            <tr><th>Aluno</th><th>Plano</th><th>Vencimento</th><th>XP</th><th>Sequência</th><th>Status</th><th></th></tr>
+            <tr><th>Aluno</th><th>Plano</th><th>Vencimento</th><th>XP</th><th>Sequência</th><th>Status</th><th style="width:120px"></th></tr>
           </thead>
           <tbody id="alunos-body">
             <tr><td colspan="7" class="loading-row"><span class="spinner"></span></td></tr>
@@ -55,6 +55,30 @@
       </div>
     </div>
   </div>
+
+  <dialog id="dialog-matricula" class="admin-dialog">
+    <form id="form-matricula" method="dialog">
+      <h2 id="dialog-titulo">Matricular aluno</h2>
+      <input type="hidden" id="mat-usuario-id" />
+      <input type="hidden" id="mat-matricula-id" />
+
+      <label class="field-label">Plano</label>
+      <select id="mat-plano" class="input" required></select>
+
+      <label class="field-label" style="margin-top:1rem">Pagamento</label>
+      <select id="mat-metodo" class="input">
+        <option value="">Pendente (confirmar depois)</option>
+        <option value="dinheiro">Dinheiro</option>
+        <option value="pix">Pix</option>
+        <option value="cartao">Cartão</option>
+      </select>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" id="btn-dialog-cancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-dialog-confirm">Confirmar</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="../assets/js/icons.js"></script>
   <script src="../assets/js/api.js"></script>
