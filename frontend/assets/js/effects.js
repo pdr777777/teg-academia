@@ -12,10 +12,16 @@
   document.body.appendChild(shine);
 })();
 
+/* Quando este arquivo roda dentro do iframe de prévia do hero (o próprio
+   site embutido em miniatura), pula os efeitos que custam CPU/rede à toa —
+   nada disso é visível ou interativo dentro da tela do celular decorativo. */
+var IS_PREVIEW_FRAME = window.self !== window.top;
+
 /* ══════════════════════════════════════════════════
    1. MAGNETIC BUTTONS (landonorris.com)
    ══════════════════════════════════════════════════ */
 (function () {
+  if (IS_PREVIEW_FRAME) return;
   if (window.matchMedia('(hover: none)').matches) return;
 
   function attachMagnetic(selector) {
@@ -49,6 +55,7 @@
    creating depth as the user scrolls.
    ══════════════════════════════════════════════════ */
 (function () {
+  if (IS_PREVIEW_FRAME) return;
   var heroVisual = document.querySelector('.hero-visual');
   var heroCopy   = document.querySelector('.hero-copy');
   if (!heroVisual || !heroCopy) return;
