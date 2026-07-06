@@ -6,9 +6,9 @@ const state = {
 };
 
 const PLANOS_FALLBACK = [
-  { id: 1, nome: 'Mensal',     preco_mensal: 119.90, duracao_dias: 30  },
-  { id: 2, nome: 'Trimestral', preco_mensal: 109.90, duracao_dias: 90  },
-  { id: 3, nome: 'Anual',      preco_mensal:  99.90, duracao_dias: 365 },
+  { id: 1, nome: 'Mensal', preco_mensal: 119.90, duracao_dias: 30, descricao: 'Cartão de débito ou crédito (R$129,90), ou Pix/dinheiro com desconto de 7,6%' },
+  { id: 2, nome: 'Trimestral', preco_mensal: 109.90, duracao_dias: 90, descricao: '3x de R$109,90 no crédito' },
+  { id: 3, nome: 'Anual', preco_mensal: 99.90, duracao_dias: 365, descricao: '12x R$109,90 recorrente no cartão, 12x R$99,90 parcelado (necessário limite de R$1.198,80), ou 12x R$109,90 recorrente no Pix' },
 ];
 
 function brl(valor) {
@@ -19,7 +19,7 @@ function getPlanMeta(plano) {
   const d = plano.duracao_dias;
   if (d <= 30) return {
     badge: null,
-    nota: 'Ou R$129,90 no cartão de crédito',
+    nota: plano.descricao || 'Ou R$129,90 no cartão de crédito',
     features: [
       'Acesso a todas as modalidades',
       'Acompanhamento de professores',
@@ -31,7 +31,7 @@ function getPlanMeta(plano) {
   };
   if (d <= 90) return {
     badge: 'Mais popular',
-    nota: `3x ${brl(plano.preco_mensal)} no crédito`,
+    nota: plano.descricao || `3x ${brl(plano.preco_mensal)} no crédito`,
     features: [
       'Acesso a todas as modalidades',
       'Acompanhamento de professores',
@@ -43,7 +43,7 @@ function getPlanMeta(plano) {
   };
   return {
     badge: '🔥 Economize R$240/ano',
-    nota: `12x ${brl(plano.preco_mensal)} recorrente no Pix`,
+    nota: plano.descricao || `12x ${brl(plano.preco_mensal)} recorrente no cartão`,
     features: [
       'Acesso a todas as modalidades',
       'Acompanhamento de professores',
