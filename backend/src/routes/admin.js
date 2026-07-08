@@ -1,6 +1,7 @@
 const express = require('express');
 const pool = require('../config/db');
 const { authMiddleware, requireRole } = require('../middleware/authMiddleware');
+const xpService = require('../services/xpService');
 
 const router = express.Router();
 
@@ -67,7 +68,7 @@ router.get('/alunos', authMiddleware, requireRole('admin', 'dono'), async (req, 
 
     const { rows } = await pool.query(
       `SELECT u.id, u.nome, u.email, u.telefone, u.ativo, u.xp, u.sequencia_atual, u.created_at,
-              m.status as matricula_status, m.data_vencimento, p.nome as plano_nome
+              m.id as matricula_id, m.status as matricula_status, m.data_vencimento, p.nome as plano_nome
        FROM usuarios u
        LEFT JOIN matriculas m ON m.usuario_id = u.id AND m.status = 'ativa'
        LEFT JOIN planos p ON p.id = m.plano_id
@@ -90,6 +91,135 @@ router.patch('/alunos/:id/toggle', authMiddleware, requireRole('admin', 'dono'),
     );
     if (!user) return res.status(404).json({ error: 'Aluno não encontrado' });
     res.json(user);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PATCH /api/admin/alunos/:id/senha (redefinir senha pelo admin)
+router.patch('/alunos/:id/senha', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+  try {
+    const { nova_senha } = req.body;
+    if (!nova_senha || nova_senha.length < 6) {
+      return res.status(400).json({ error: 'Senha deve ter no mínimo 6 caracteres' });
+    }
+    const bcrypt = require('bcryptjs');
+    const senha_hash = await bcrypt.hash(nova_senha, 10);
+    const agora = Math.floor(Date.now() / 1000);
+
+    const { rows: [user] } = await pool.query(
+      `UPDATE usuarios SET senha_hash = $1, senha_alterada_em = NOW(), reset_token_hash = NULL, reset_token_expira = NULL, updated_at = NOW()
+       WHERE id = $2 AND role = 'aluno' RETURNING id, nome`,
+      [senha_hash, req.params.id]
+    );
+    if (!user) return res.status(404).json({ error: 'Aluno não encontrado' });
+    res.json({ ok: true, nome: user.nome });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/admin/planos — todos os planos incluindo inativos
+router.get('/planos', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT p.*, COUNT(m.id) FILTER (WHERE m.status = 'ativa')::int AS alunos_ativos
+       FROM planos p
+       LEFT JOIN matriculas m ON m.plano_id = p.id
+       GROUP BY p.id ORDER BY p.preco_mensal`
+    );
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/admin/matriculas — admin matricula um aluno manualmente
+router.post('/matriculas', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+  try {
+    const { usuario_id, plano_id, metodo_pagamento } = req.body;
+    if (!usuario_id || !plano_id) return res.status(400).json({ error: 'usuario_id e plano_id são obrigatórios' });
+
+    const { rows: [plano] } = await pool.query('SELECT * FROM planos WHERE id = $1 AND ativo = TRUE', [plano_id]);
+    if (!plano) return res.status(404).json({ error: 'Plano não encontrado' });
+
+    const { rows: [aluno] } = await pool.query("SELECT id, nome FROM usuarios WHERE id = $1 AND role = 'aluno'", [usuario_id]);
+    if (!aluno) return res.status(404).json({ error: 'Aluno não encontrado' });
+
+    const data_vencimento = new Date();
+    data_vencimento.setDate(data_vencimento.getDate() + plano.duracao_dias);
+
+    // Pago na hora → ativa; sem método → suspensa até confirmar pagamento
+    const statusMatricula = metodo_pagamento ? 'ativa' : 'suspensa';
+    const statusPagamento = metodo_pagamento ? 'pago' : 'pendente';
+
+    const { rows: [matricula] } = await pool.query(
+      `INSERT INTO matriculas (usuario_id, plano_id, data_vencimento, status)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [usuario_id, plano_id, data_vencimento, statusMatricula]
+    );
+
+    await pool.query(
+      `INSERT INTO pagamentos (matricula_id, usuario_id, valor, status, metodo, data_pagamento)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [matricula.id, usuario_id, plano.preco_mensal, statusPagamento,
+       metodo_pagamento || null, metodo_pagamento ? new Date() : null]
+    );
+
+    if (statusMatricula === 'ativa') {
+      await xpService.adicionarXP(usuario_id, 100, 'matricula');
+      const { rows: [indicacao] } = await pool.query(
+        `UPDATE indicacoes SET status = 'convertido', convertido_em = NOW()
+         WHERE indicado_id = $1 AND status = 'pendente'
+         RETURNING indicador_id`,
+        [usuario_id]
+      );
+      if (indicacao) {
+        await xpService.adicionarXP(indicacao.indicador_id, 200, 'indicacao');
+      }
+    }
+
+    res.status(201).json({ ...matricula, plano_nome: plano.nome, aluno_nome: aluno.nome });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PATCH /api/admin/matriculas/:id/renovar — renova/estende matrícula existente
+router.patch('/matriculas/:id/renovar', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+  try {
+    const { plano_id, metodo_pagamento } = req.body;
+
+    const { rows: [matricula] } = await pool.query(
+      'SELECT * FROM matriculas WHERE id = $1',
+      [req.params.id]
+    );
+    if (!matricula) return res.status(404).json({ error: 'Matrícula não encontrada' });
+
+    const planId = plano_id || matricula.plano_id;
+    const { rows: [plano] } = await pool.query('SELECT * FROM planos WHERE id = $1 AND ativo = TRUE', [planId]);
+    if (!plano) return res.status(404).json({ error: 'Plano não encontrado' });
+
+    // Vencimento parte da data atual ou do vencimento atual (o que for maior)
+    const base = new Date(Math.max(new Date(), new Date(matricula.data_vencimento)));
+    const nova_vencimento = new Date(base);
+    nova_vencimento.setDate(nova_vencimento.getDate() + plano.duracao_dias);
+
+    const { rows: [atualizada] } = await pool.query(
+      `UPDATE matriculas SET plano_id = $1, data_vencimento = $2, status = 'ativa', updated_at = NOW()
+       WHERE id = $3 RETURNING *`,
+      [planId, nova_vencimento, req.params.id]
+    );
+
+    const statusPagamento = metodo_pagamento ? 'pago' : 'pendente';
+    await pool.query(
+      `INSERT INTO pagamentos (matricula_id, usuario_id, valor, status, metodo, data_pagamento)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [matricula.id, matricula.usuario_id, plano.preco_mensal, statusPagamento,
+       metodo_pagamento || null, metodo_pagamento ? new Date() : null]
+    );
+
+    res.json({ ...atualizada, plano_nome: plano.nome });
   } catch (err) {
     next(err);
   }

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Treinos — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../assets/img/favicon.png" />
+  <link rel="stylesheet" href="../assets/css/global.css" />
+  <link rel="stylesheet" href="../assets/css/admin.css" />
+  <link rel="stylesheet" href="../assets/css/app-effects.css" />
+</head>
+<body>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><img src="../assets/img/logo.svg" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ADMIN</span></div>
+      <nav class="sidebar-nav">
+        <a href="index.html"><span data-icon="grid" data-icon-size="18"></span>Dashboard</a>
+        <a href="alunos.html"><span data-icon="users" data-icon-size="18"></span>Alunos</a>
+        <a href="treinos.html" class="active"><span data-icon="dumbbell" data-icon-size="18"></span>Treinos</a>
+        <a href="planos.html"><span data-icon="package" data-icon-size="18"></span>Planos</a>
+        <a href="crm.html"><span data-icon="columns" data-icon-size="18"></span>CRM</a>
+        <a href="pagamentos.html"><span data-icon="credit-card" data-icon-size="18"></span>Pagamentos</a>
+      </nav>
+      <div class="sidebar-foot">
+        <a href="#" id="btn-logout"><span data-icon="log-out" data-icon-size="18"></span>Sair</a>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="page-head">
+        <button class="btn btn-ghost btn-sm sidebar-toggle" id="btn-sidebar-toggle" data-icon="menu"></button>
+        <div>
+          <h1>Treinos</h1>
+          <p>Monte treinos e atribua aos alunos.</p>
+        </div>
+      </div>
+
+      <div class="treinos-layout">
+
+        <!-- Coluna esquerda: lista de treinos -->
+        <div class="treinos-lista card" data-reveal>
+          <div class="row-between" style="margin-bottom:1rem">
+            <h2>Treinos cadastrados</h2>
+            <button class="btn btn-primary btn-sm" id="btn-novo-treino">
+              <span data-icon="plus" data-icon-size="14"></span>Novo
+            </button>
+          </div>
+          <div id="lista-treinos">
+            <div class="loading-row"><span class="spinner"></span></div>
+          </div>
+        </div>
+
+        <!-- Coluna direita: detalhes + atribuir -->
+        <div id="treino-detalhe" class="card" data-reveal style="display:none">
+          <div class="row-between" style="margin-bottom:1rem">
+            <div>
+              <h2 id="detalhe-nome">—</h2>
+              <p class="text-muted" id="detalhe-desc" style="font-size:.85rem"></p>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="btn-fechar-detalhe" title="Fechar">
+              <span data-icon="x" data-icon-size="16"></span>
+            </button>
+          </div>
+
+          <div id="detalhe-exercicios" class="stack gap-sm" style="margin-bottom:1.5rem"></div>
+
+          <div class="separator" style="margin-bottom:1.25rem"></div>
+
+          <h3 style="margin-bottom:.75rem;font-size:.95rem">Atribuir a um aluno</h3>
+          <div class="row gap-sm">
+            <div class="search-field" style="flex:1;position:relative">
+              <span data-icon="search" data-icon-size="16" style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--color-muted)"></span>
+              <input type="text" id="busca-aluno-treino" class="input" placeholder="Buscar aluno..." style="padding-left:2.5rem" />
+            </div>
+            <button class="btn btn-primary" id="btn-atribuir" disabled>Atribuir</button>
+          </div>
+          <div id="lista-alunos-treino" class="stack gap-xs" style="margin-top:.75rem;max-height:260px;overflow-y:auto"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog criar treino -->
+  <dialog id="dialog-treino" class="admin-dialog" style="max-width:560px">
+    <form id="form-treino" method="dialog">
+      <h2>Novo treino</h2>
+
+      <label class="field-label">Nome do treino <span class="text-danger">*</span></label>
+      <input type="text" id="treino-nome-input" class="input" placeholder="ex: Treino A — Peito e Tríceps" required />
+
+      <label class="field-label" style="margin-top:.9rem">Descrição</label>
+      <input type="text" id="treino-desc-input" class="input" placeholder="Observações gerais" />
+
+      <div class="row-between" style="margin-top:1.25rem;margin-bottom:.6rem">
+        <h3 style="font-size:.9rem">Exercícios</h3>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-add-exercicio">
+          <span data-icon="plus" data-icon-size="13"></span>Adicionar
+        </button>
+      </div>
+      <div id="exercicios-form-list" class="stack gap-sm"></div>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" id="btn-treino-cancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-treino-confirm">Criar treino</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/app-effects.js"></script>
+  <script src="../assets/js/admin-guard.js"></script>
+  <script src="../assets/js/admin-treinos.js"></script>
+</body>
+</html>

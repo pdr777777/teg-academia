@@ -1,6 +1,7 @@
 const express = require('express');
 const pool = require('../config/db');
 const { authMiddleware, requireRole } = require('../middleware/authMiddleware');
+const xpService = require('../services/xpService');
 
 const router = express.Router();
 
@@ -30,6 +31,27 @@ router.patch('/:id/confirmar', authMiddleware, requireRole('admin', 'dono'), asy
       [metodo, req.params.id]
     );
     if (!pag) return res.status(404).json({ error: 'Pagamento não encontrado' });
+
+    // Ativa matricula suspensa (criada pelo admin sem pagamento imediato)
+    const { rows: [matriculaAtivada] } = await pool.query(
+      `UPDATE matriculas SET status = 'ativa', updated_at = NOW()
+       WHERE id = $1 AND status = 'suspensa'
+       RETURNING usuario_id`,
+      [pag.matricula_id]
+    );
+    if (matriculaAtivada) {
+      await xpService.adicionarXP(matriculaAtivada.usuario_id, 100, 'matricula');
+      const { rows: [indicacao] } = await pool.query(
+        `UPDATE indicacoes SET status = 'convertido', convertido_em = NOW()
+         WHERE indicado_id = $1 AND status = 'pendente'
+         RETURNING indicador_id`,
+        [matriculaAtivada.usuario_id]
+      );
+      if (indicacao) {
+        await xpService.adicionarXP(indicacao.indicador_id, 200, 'indicacao');
+      }
+    }
+
     res.json(pag);
   } catch (err) {
     next(err);

@@ -74,10 +74,14 @@ async function carregarCalendario() {
     const totalDias = new Date(agora.getFullYear(), agora.getMonth() + 1, 0).getDate();
     const primeiroDiaSemana = new Date(agora.getFullYear(), agora.getMonth(), 1).getDay();
 
+    const diaHoje = agora.getDate();
     let html = '';
     for (let i = 0; i < primeiroDiaSemana; i++) html += '<div class="cal-dia vazio"></div>';
     for (let dia = 1; dia <= totalDias; dia++) {
-      html += `<div class="cal-dia${diasTreinados.has(dia) ? ' treinou' : ''}">${dia}</div>`;
+      const classes = ['cal-dia'];
+      if (diasTreinados.has(dia)) classes.push('treinou');
+      if (dia === diaHoje) classes.push('hoje');
+      html += `<div class="${classes.join(' ')}">${dia}</div>`;
     }
     grid.innerHTML = html;
   } catch (err) {

@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alunos — Admin</title>
+  <title>Planos — Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="../assets/img/favicon.png" />
@@ -18,9 +18,9 @@
       <div class="brand"><img src="../assets/img/logo.svg" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ADMIN</span></div>
       <nav class="sidebar-nav">
         <a href="index.html"><span data-icon="grid" data-icon-size="18"></span>Dashboard</a>
-        <a href="alunos.html" class="active"><span data-icon="users" data-icon-size="18"></span>Alunos</a>
+        <a href="alunos.html"><span data-icon="users" data-icon-size="18"></span>Alunos</a>
         <a href="treinos.html"><span data-icon="dumbbell" data-icon-size="18"></span>Treinos</a>
-        <a href="planos.html"><span data-icon="package" data-icon-size="18"></span>Planos</a>
+        <a href="planos.html" class="active"><span data-icon="package" data-icon-size="18"></span>Planos</a>
         <a href="crm.html"><span data-icon="columns" data-icon-size="18"></span>CRM</a>
         <a href="pagamentos.html"><span data-icon="credit-card" data-icon-size="18"></span>Pagamentos</a>
       </nav>
@@ -33,51 +33,53 @@
       <div class="page-head">
         <button class="btn btn-ghost btn-sm sidebar-toggle" id="btn-sidebar-toggle" data-icon="menu"></button>
         <div>
-          <h1>Alunos</h1>
-          <p>Gerencie a base de alunos matriculados.</p>
+          <h1>Planos</h1>
+          <p>Gerencie os planos de matrícula da academia.</p>
         </div>
-      </div>
-
-      <div class="filters-row">
-        <div class="search-field">
-          <span data-icon="search" data-icon-size="16"></span>
-          <input type="text" id="busca-aluno" placeholder="Buscar por nome ou e-mail..." />
-        </div>
+        <button class="btn btn-primary btn-sm" id="btn-novo-plano">
+          <span data-icon="plus" data-icon-size="14"></span>Novo plano
+        </button>
       </div>
 
       <div class="table-wrap" data-reveal>
         <table>
           <thead>
-            <tr><th>Aluno</th><th>Plano</th><th>Vencimento</th><th>XP</th><th>Sequência</th><th>Status</th><th style="width:120px"></th></tr>
+            <tr><th>Nome</th><th>Duração</th><th>Preço/mês</th><th>Alunos ativos</th><th>Status</th><th style="width:80px"></th></tr>
           </thead>
-          <tbody id="alunos-body">
-            <tr><td colspan="7" class="loading-row"><span class="spinner"></span></td></tr>
+          <tbody id="planos-body">
+            <tr><td colspan="6" class="loading-row"><span class="spinner"></span></td></tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <dialog id="dialog-matricula" class="admin-dialog">
-    <form id="form-matricula" method="dialog">
-      <h2 id="dialog-titulo">Matricular aluno</h2>
-      <input type="hidden" id="mat-usuario-id" />
-      <input type="hidden" id="mat-matricula-id" />
+  <!-- Dialog criar/editar plano -->
+  <dialog id="dialog-plano" class="admin-dialog">
+    <form id="form-plano" method="dialog">
+      <h2 id="dialog-plano-titulo">Novo plano</h2>
+      <input type="hidden" id="plano-edit-id" />
 
-      <label class="field-label">Plano</label>
-      <select id="mat-plano" class="input" required></select>
+      <label class="field-label">Nome <span class="text-danger">*</span></label>
+      <input type="text" id="plano-nome" class="input" placeholder="ex: Mensal, Trimestral" required />
 
-      <label class="field-label" style="margin-top:1rem">Pagamento</label>
-      <select id="mat-metodo" class="input">
-        <option value="">Pendente (confirmar depois)</option>
-        <option value="dinheiro">Dinheiro</option>
-        <option value="pix">Pix</option>
-        <option value="cartao">Cartão</option>
-      </select>
+      <label class="field-label" style="margin-top:.9rem">Descrição</label>
+      <input type="text" id="plano-descricao" class="input" placeholder="Texto exibido na página de matrícula" />
+
+      <div class="row gap-sm" style="margin-top:.9rem">
+        <div style="flex:1">
+          <label class="field-label">Preço mensal (R$) <span class="text-danger">*</span></label>
+          <input type="number" id="plano-preco" class="input" placeholder="119.90" step="0.01" min="0" required />
+        </div>
+        <div style="flex:1">
+          <label class="field-label">Duração (dias) <span class="text-danger">*</span></label>
+          <input type="number" id="plano-duracao" class="input" placeholder="30" min="1" required />
+        </div>
+      </div>
 
       <div class="dialog-actions">
-        <button type="button" class="btn btn-ghost" id="btn-dialog-cancel">Cancelar</button>
-        <button type="submit" class="btn btn-primary" id="btn-dialog-confirm">Confirmar</button>
+        <button type="button" class="btn btn-ghost" id="btn-plano-cancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-plano-confirm">Salvar</button>
       </div>
     </form>
   </dialog>
@@ -87,6 +89,6 @@
   <script src="../assets/js/ui.js"></script>
   <script src="../assets/js/app-effects.js"></script>
   <script src="../assets/js/admin-guard.js"></script>
-  <script src="../assets/js/admin-alunos.js"></script>
+  <script src="../assets/js/admin-planos.js"></script>
 </body>
 </html>

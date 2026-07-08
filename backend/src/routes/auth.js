@@ -54,8 +54,8 @@ router.post('/registro', async (req, res, next) => {
 
     if (indicador_id) {
       await pool.query(
-        `INSERT INTO indicacoes (indicador_id) VALUES ($1)`,
-        [indicador_id]
+        `INSERT INTO indicacoes (indicador_id, indicado_id) VALUES ($1, $2)`,
+        [indicador_id, user.id]
       );
     }
 
