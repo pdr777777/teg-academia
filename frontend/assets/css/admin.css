@@ -21,6 +21,54 @@
 .chart-bar-col:hover .chart-bar-value { color: var(--color-text); }
 .chart-bar-label { font-size: 0.76rem; color: var(--color-muted); text-transform: uppercase; }
 
+/* ===== Gráfico de linha suave com área (sem dependências) ===== */
+.line-chart-wrap { position: relative; padding-top: 2.75rem; }
+.line-chart { width: 100%; height: 200px; display: block; overflow: visible; }
+.line-chart-line {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 2px 6px rgba(255,138,0,.35));
+}
+.line-chart-guide { stroke: var(--color-border); stroke-width: 1; stroke-dasharray: 3 4; }
+.line-chart-dot {
+  fill: var(--color-surface);
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  transition: r 0.15s, fill 0.15s;
+  cursor: pointer;
+}
+.line-chart-dot:hover { fill: var(--color-primary); r: 6.5; }
+.line-chart-dot.last { fill: var(--color-primary); }
+.line-chart-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.6rem;
+  font-size: 0.72rem;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.line-chart-badge {
+  position: absolute;
+  top: 0;
+  right: 4px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.8rem;
+  text-align: right;
+  box-shadow: 0 8px 22px rgba(0,0,0,.28);
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  line-height: 1.25;
+}
+.line-chart-badge span { font-size: 0.68rem; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.line-chart-badge strong { font-size: 0.95rem; color: var(--color-primary); }
+
 /* ===== Filtros ===== */
 .filters-row { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
 .filters-row .search-field { position: relative; flex: 1; min-width: 220px; }

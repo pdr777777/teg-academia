@@ -119,6 +119,80 @@ function resetBtnLoading(btn) {
   }
 }
 
+/* ===== Gráfico de linha suave com área (sem dependências) =====
+   dados: [{ mes: 'YYYY-MM', valor: number }]
+   opts: { format(valor), gradientId } */
+function renderLineChart(containerId, dados, opts) {
+  opts = opts || {};
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  if (!dados || !dados.length) {
+    el.innerHTML = '<div class="empty-state">Sem dados registrados ainda.</div>';
+    return;
+  }
+
+  var format = opts.format || function (v) { return Math.round(v).toLocaleString('pt-BR'); };
+  var gradientId = opts.gradientId || (containerId + '-fill');
+
+  var W = 640, H = 220, PAD_X = 8, PAD_TOP = 40, PAD_BOTTOM = 8;
+  var values = dados.map(function (d) { return Number(d.valor) || 0; });
+  var max = Math.max.apply(null, values.concat([1]));
+  var innerW = W - PAD_X * 2;
+  var innerH = H - PAD_TOP - PAD_BOTTOM;
+  var stepX = dados.length > 1 ? innerW / (dados.length - 1) : 0;
+  var baseline = PAD_TOP + innerH;
+
+  var points = values.map(function (v, i) {
+    return { x: PAD_X + stepX * i, y: baseline - (v / max) * innerH, v: v };
+  });
+
+  var linePath = 'M ' + points[0].x + ' ' + points[0].y;
+  for (var i = 0; i < points.length - 1; i++) {
+    var p0 = points[i], p1 = points[i + 1];
+    var midX = (p0.x + p1.x) / 2;
+    linePath += ' C ' + midX + ' ' + p0.y + ', ' + midX + ' ' + p1.y + ', ' + p1.x + ' ' + p1.y;
+  }
+  var last = points[points.length - 1];
+  var areaPath = linePath + ' L ' + last.x + ' ' + baseline + ' L ' + points[0].x + ' ' + baseline + ' Z';
+
+  var ultimo = dados[dados.length - 1];
+
+  el.innerHTML =
+    '<div class="line-chart-wrap">' +
+      '<div class="line-chart-badge"><span>' + ultimo.label + '</span><strong>' + format(ultimo.valor) + '</strong></div>' +
+      '<svg class="line-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
+        '<defs><linearGradient id="' + gradientId + '" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="var(--color-primary)" stop-opacity="0.38" />' +
+          '<stop offset="100%" stop-color="var(--color-primary)" stop-opacity="0" />' +
+        '</linearGradient></defs>' +
+        '<line class="line-chart-guide" x1="' + last.x + '" y1="4" x2="' + last.x + '" y2="' + last.y + '" />' +
+        '<path class="line-chart-area" style="fill:url(#' + gradientId + ')" d="' + areaPath + '"></path>' +
+        '<path class="line-chart-line" d="' + linePath + '"></path>' +
+        points.map(function (p, i) {
+          return '<circle class="line-chart-dot' + (i === points.length - 1 ? ' last' : '') + '" cx="' + p.x + '" cy="' + p.y + '" r="5">' +
+            '<title>' + dados[i].label + ': ' + format(p.v) + '</title></circle>';
+        }).join('') +
+      '</svg>' +
+      '<div class="line-chart-labels">' + dados.map(function (d) { return '<span>' + d.label + '</span>'; }).join('') + '</div>' +
+    '</div>';
+
+  var lineEl = el.querySelector('.line-chart-line');
+  var areaEl = el.querySelector('.line-chart-area');
+  if (REDUCE_MOTION) return;
+  var len = lineEl.getTotalLength();
+  lineEl.style.strokeDasharray = len;
+  lineEl.style.strokeDashoffset = len;
+  areaEl.style.opacity = '0';
+  requestAnimationFrame(function () {
+    setTimeout(function () {
+      lineEl.style.transition = 'stroke-dashoffset 1.1s cubic-bezier(.16,1,.3,1)';
+      lineEl.style.strokeDashoffset = '0';
+      areaEl.style.transition = 'opacity 0.9s ease 0.35s';
+      areaEl.style.opacity = '1';
+    }, 50);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   initReveal();
   initRipple();

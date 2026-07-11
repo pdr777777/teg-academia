@@ -26,33 +26,13 @@ async function carregarDashboard() {
       animateNumber(el, Number(d[c.key]) || 0, { format: c.money ? formatMoeda : undefined });
     });
 
-    renderGrafico(d.grafico_faturamento);
+    renderLineChart('grafico-faturamento', d.grafico_faturamento.map((g) => ({
+      label: `${g.mes.slice(5)}/${g.mes.slice(2, 4)}`,
+      valor: Number(g.faturamento),
+    })), { format: formatMoeda });
   } catch (err) {
     container.innerHTML = '<div class="empty-state" style="grid-column:1/-1">Não foi possível carregar os dados.</div>';
   }
-}
-
-function renderGrafico(dados) {
-  const el = document.getElementById('grafico-faturamento');
-  if (!dados.length) {
-    el.innerHTML = '<div class="empty-state">Sem faturamento registrado ainda.</div>';
-    return;
-  }
-  const max = Math.max(...dados.map((d) => Number(d.faturamento)), 1);
-  el.innerHTML = dados.map((d) => `
-    <div class="chart-bar-col">
-      <span class="chart-bar-value">${formatMoeda(d.faturamento)}</span>
-      <div class="chart-bar" style="height:0" data-height="${Math.max(4, (Number(d.faturamento) / max) * 100)}"></div>
-      <span class="chart-bar-label">${d.mes.slice(5)}/${d.mes.slice(2, 4)}</span>
-    </div>
-  `).join('');
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      el.querySelectorAll('.chart-bar').forEach((bar) => {
-        bar.style.height = `${bar.dataset.height}%`;
-      });
-    }, 50);
-  });
 }
 
 carregarDashboard();
