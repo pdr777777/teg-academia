@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pagamentos — Admin</title>
+  <title>Equipe — TEG Academia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="../assets/img/favicon.png" />
@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="../assets/css/app-effects.css" />
   <script src="../assets/js/theme.js"></script>
 </head>
-<body>
+<body data-require-role="dono">
 
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
@@ -24,8 +24,8 @@
         <a href="treinos.html"><span data-icon="dumbbell" data-icon-size="18"></span>Treinos</a>
         <a href="planos.html"><span data-icon="package" data-icon-size="18"></span>Planos</a>
         <a href="crm.html"><span data-icon="columns" data-icon-size="18"></span>CRM</a>
-        <a href="pagamentos.html" class="active"><span data-icon="credit-card" data-icon-size="18"></span>Pagamentos</a>
-        <a href="equipe.html" data-role-dono><span data-icon="briefcase" data-icon-size="18"></span>Equipe</a>
+        <a href="pagamentos.html"><span data-icon="credit-card" data-icon-size="18"></span>Pagamentos</a>
+        <a href="equipe.html" class="active" data-role-dono><span data-icon="briefcase" data-icon-size="18"></span>Equipe</a>
         <a href="configuracoes.html"><span data-icon="sliders" data-icon-size="18"></span>Configurações</a>
       </nav>
       <div class="sidebar-foot">
@@ -38,58 +38,61 @@
       <div class="page-head">
         <button class="btn btn-ghost btn-sm sidebar-toggle" id="btn-sidebar-toggle" data-icon="menu"></button>
         <div>
-          <h1>Pagamentos</h1>
-          <p>Confirme pagamentos recebidos manualmente.</p>
+          <h1>Equipe</h1>
+          <p>Quem trabalha na academia — recepção, professores e administradores.</p>
         </div>
-      </div>
-
-      <div class="filters-row">
-        <select id="filtro-status">
-          <option value="">Todos os status</option>
-          <option value="pendente">Pendente</option>
-          <option value="pago">Pago</option>
-          <option value="cancelado">Cancelado</option>
-        </select>
+        <button class="btn btn-primary" id="btn-novo-membro"><span data-icon="user-plus" data-icon-size="16"></span>Novo membro</button>
       </div>
 
       <div class="table-wrap" data-reveal>
         <table>
           <thead>
-            <tr><th>Aluno</th><th>Plano</th><th>Valor</th><th>Status</th><th>Data</th><th></th></tr>
+            <tr><th>Membro</th><th>Cargo</th><th>Status</th><th style="width:120px"></th></tr>
           </thead>
-          <tbody id="pagamentos-body">
-            <tr><td colspan="6" class="loading-row"><span class="spinner"></span></td></tr>
+          <tbody id="equipe-body">
+            <tr><td colspan="4" class="loading-row"><span class="spinner"></span></td></tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- Modal confirmar pagamento -->
-  <div id="modal-confirmar" class="modal-overlay" style="display:none">
-    <div class="card modal-box">
-      <h2 style="margin-bottom:1rem">Confirmar pagamento</h2>
+  <dialog id="dialog-membro" class="admin-dialog">
+    <form id="form-membro" method="dialog">
+      <h2>Novo membro da equipe</h2>
+
       <div class="field">
-        <label for="select-metodo">Método de pagamento</label>
-        <select id="select-metodo">
-          <option value="pix">Pix</option>
-          <option value="cartao">Cartão</option>
-          <option value="dinheiro">Dinheiro</option>
-          <option value="outro">Outro</option>
+        <label class="field-label">Nome</label>
+        <input type="text" id="membro-nome" required />
+      </div>
+      <div class="field">
+        <label class="field-label">E-mail</label>
+        <input type="email" id="membro-email" required />
+      </div>
+      <div class="field">
+        <label class="field-label">Cargo</label>
+        <select id="membro-role" required>
+          <option value="admin">Administrador (recepção)</option>
+          <option value="professor">Professor</option>
         </select>
       </div>
-      <div class="row gap-sm" style="justify-content:flex-end;margin-top:1rem">
-        <button class="btn btn-ghost" id="btn-cancelar-modal">Cancelar</button>
-        <button class="btn btn-primary" id="btn-confirmar-modal">Confirmar</button>
+      <div class="field">
+        <label class="field-label">Senha temporária</label>
+        <input type="text" id="membro-senha" placeholder="mín. 8 caracteres, com letra e número" required />
       </div>
-    </div>
-  </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" id="btn-membro-cancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-membro-confirm">Criar acesso</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="../assets/js/icons.js"></script>
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/ui.js"></script>
   <script src="../assets/js/app-effects.js"></script>
   <script src="../assets/js/admin-guard.js"></script>
-  <script src="../assets/js/admin-pagamentos.js"></script>
+  <script src="../assets/js/admin-equipe.js"></script>
 </body>
 </html>

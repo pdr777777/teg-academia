@@ -57,6 +57,78 @@ router.get('/dashboard', authMiddleware, requireRole('admin', 'dono'), async (re
   }
 });
 
+// GET /api/admin/financeiro — dashboard financeiro do dono
+router.get('/financeiro', authMiddleware, requireRole('dono'), async (req, res, next) => {
+  try {
+    const [ativos, faturamentoMes, faturamentoMesAnterior, inadimplentes, novos, config] = await Promise.all([
+      pool.query(`SELECT COUNT(*)::int AS total FROM matriculas WHERE status = 'ativa'`),
+      pool.query(`SELECT COALESCE(SUM(valor), 0)::numeric AS total FROM pagamentos WHERE status = 'pago' AND DATE_TRUNC('month', data_pagamento) = DATE_TRUNC('month', NOW())`),
+      pool.query(`SELECT COALESCE(SUM(valor), 0)::numeric AS total FROM pagamentos WHERE status = 'pago' AND DATE_TRUNC('month', data_pagamento) = DATE_TRUNC('month', NOW() - INTERVAL '1 month')`),
+      pool.query(`SELECT COUNT(*)::int AS total FROM matriculas WHERE status = 'vencida'`),
+      pool.query(`SELECT COUNT(*)::int AS total FROM usuarios WHERE role = 'aluno' AND DATE_TRUNC('month', created_at) = DATE_TRUNC('month', NOW())`),
+      pool.query(`SELECT * FROM configuracoes WHERE id = 1`),
+    ]);
+
+    const { rows: ticketRow } = await pool.query(
+      `SELECT COALESCE(AVG(p.valor), 0)::numeric AS ticket_medio FROM pagamentos p WHERE p.status = 'pago'`
+    );
+
+    const { rows: grafico } = await pool.query(
+      `SELECT TO_CHAR(data_pagamento, 'YYYY-MM') AS mes, SUM(valor)::numeric AS faturamento
+       FROM pagamentos WHERE status = 'pago' AND data_pagamento >= NOW() - INTERVAL '6 months'
+       GROUP BY mes ORDER BY mes`
+    );
+
+    const { rows: distribuicaoPlanos } = await pool.query(
+      `SELECT p.nome, COUNT(m.id)::int AS total
+       FROM matriculas m JOIN planos p ON p.id = m.plano_id
+       WHERE m.status = 'ativa' GROUP BY p.nome ORDER BY total DESC`
+    );
+
+    const { rows: transacoesRecentes } = await pool.query(
+      `SELECT pg.id, pg.valor, pg.status, pg.metodo, pg.data_pagamento, pg.created_at, u.nome AS aluno_nome
+       FROM pagamentos pg JOIN usuarios u ON u.id = pg.usuario_id
+       ORDER BY pg.created_at DESC LIMIT 8`
+    );
+
+    const cfg = config.rows[0];
+    const faturamento_mes = Number(faturamentoMes.rows[0].total);
+    const faturamento_mes_anterior = Number(faturamentoMesAnterior.rows[0].total);
+    const novos_mes = novos.rows[0].total;
+
+    const clamp = (n) => Math.max(0, Math.min(100, n));
+    const variacao_faturamento_pct = faturamento_mes_anterior > 0
+      ? ((faturamento_mes - faturamento_mes_anterior) / faturamento_mes_anterior) * 100
+      : null;
+
+    res.json({
+      alunos_ativos: ativos.rows[0].total,
+      faturamento_mes,
+      faturamento_mes_anterior,
+      variacao_faturamento_pct,
+      inadimplentes: inadimplentes.rows[0].total,
+      novos_mes,
+      ticket_medio: ticketRow[0].ticket_medio,
+      grafico_faturamento: grafico,
+      distribuicao_planos: distribuicaoPlanos,
+      transacoes_recentes: transacoesRecentes,
+      metas: {
+        nome_academia: cfg.nome_academia,
+        meta_faturamento_mensal: Number(cfg.meta_faturamento_mensal),
+        meta_novos_alunos_mensal: cfg.meta_novos_alunos_mensal,
+        progresso_faturamento_pct: cfg.meta_faturamento_mensal > 0
+          ? clamp((faturamento_mes / Number(cfg.meta_faturamento_mensal)) * 100)
+          : 0,
+        progresso_novos_alunos_pct: cfg.meta_novos_alunos_mensal > 0
+          ? clamp((novos_mes / cfg.meta_novos_alunos_mensal) * 100)
+          : 0,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/admin/alunos
 router.get('/alunos', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
   try {

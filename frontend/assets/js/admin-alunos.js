@@ -27,9 +27,9 @@ async function carregarAlunos(busca = '') {
             <td>${formatData(a.data_vencimento)}</td>
             <td>${a.xp}</td>
             <td>${a.sequencia_atual} dias</td>
-            <td><span class="badge ${a.ativo ? 'badge-success' : 'badge-muted'}">${a.ativo ? 'Ativo' : 'Inativo'}</span></td>
+            <td><span class="badge ${a.ativo ? 'badge-success' : 'badge-muted'}">${Icons.icon(a.ativo ? 'unlock' : 'lock', { size: 12 })}${a.ativo ? 'Liberado' : 'Bloqueado'}</span></td>
             <td style="display:flex;gap:.4rem;align-items:center">
-              <label class="switch">
+              <label class="switch" title="Liberar/Bloquear acesso à academia (catraca)">
                 <input type="checkbox" data-toggle-id="${a.id}" ${a.ativo ? 'checked' : ''} />
                 <span class="slider"></span>
               </label>
@@ -57,11 +57,11 @@ document.getElementById('alunos-body').addEventListener('change', async (ev) => 
   const id = input.dataset.toggleId;
   input.disabled = true;
   try {
-    await api.patch(`/api/admin/alunos/${id}/toggle`, {});
-    toast('Status atualizado.', 'success');
+    const aluno = await api.patch(`/api/admin/alunos/${id}/toggle`, {});
+    toast(aluno.ativo ? 'Acesso à academia liberado.' : 'Acesso à academia bloqueado.', 'success');
   } catch (err) {
     input.checked = !input.checked;
-    toast(err.message || 'Erro ao atualizar status.', 'error');
+    toast(err.message || 'Erro ao atualizar acesso.', 'error');
   } finally {
     input.disabled = false;
   }

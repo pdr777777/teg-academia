@@ -31,6 +31,44 @@
   --container: 1180px;
 }
 
+/* ===== Tema claro ===== */
+:root[data-theme="light"] {
+  --color-bg: #f6f5f3;
+  --color-surface: #ffffff;
+  --color-surface-2: #f1efec;
+  --color-border: #e4e1db;
+  --color-text: #171614;
+  --color-muted: #6b6862;
+  --color-primary-soft: rgba(255, 138, 0, 0.12);
+  --color-wine-soft: rgba(122, 31, 63, 0.10);
+  --color-coral-soft: rgba(239, 77, 77, 0.12);
+  --color-success-soft: rgba(34, 197, 94, 0.14);
+  --color-warning-soft: rgba(234, 179, 8, 0.16);
+  --color-danger-soft: rgba(239, 68, 68, 0.12);
+  --shadow-card: 0 1px 0 rgba(0,0,0,0.02) inset, 0 8px 20px rgba(20,18,15,0.06);
+}
+:root[data-theme="light"] * { scrollbar-color: #d8d5cf transparent; }
+:root[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: #d8d5cf;
+  border-color: var(--color-bg);
+}
+:root[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #c3c0b9; }
+:root[data-theme="light"] input:-webkit-autofill,
+:root[data-theme="light"] input:-webkit-autofill:hover,
+:root[data-theme="light"] input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--color-surface) inset;
+}
+:root[data-theme="light"] .topnav { background: rgba(246,245,243,0.88); }
+:root[data-theme="light"] #page-loader { background: var(--color-bg); }
+:root[data-theme="light"] .skeleton {
+  background: linear-gradient(90deg, rgba(0,0,0,.04) 25%, rgba(0,0,0,.08) 37%, rgba(0,0,0,.04) 63%);
+  background-size: 400% 100%;
+}
+:root[data-theme="light"] .toast {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 12px 32px rgba(20,18,15,.12), inset 0 1px 0 rgba(0,0,0,.02);
+}
+
 html { scroll-behavior: smooth; }
 
 body {
@@ -40,6 +78,10 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+body, .card, .sidebar, .topnav, .table-wrap, table, input, textarea, select {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 ::selection { background: rgba(255, 138, 0, 0.32); color: #fff; }

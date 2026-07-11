@@ -101,6 +101,33 @@ router.get('/me', authMiddleware, async (req, res) => {
   res.json(rows[0]);
 });
 
+// PATCH /api/auth/senha (autoatendimento — troca a própria senha)
+router.patch('/senha', authMiddleware, async (req, res, next) => {
+  try {
+    const { senha_atual, nova_senha } = req.body;
+    if (!senha_atual || !nova_senha) {
+      return res.status(400).json({ error: 'senha_atual e nova_senha são obrigatórios' });
+    }
+    if (nova_senha.length < 8 || !/[a-zA-Z]/.test(nova_senha) || !/[0-9]/.test(nova_senha)) {
+      return res.status(400).json({ error: 'Senha deve ter no mínimo 8 caracteres com letra e número' });
+    }
+
+    const { rows } = await pool.query('SELECT senha_hash FROM usuarios WHERE id = $1', [req.user.id]);
+    const senhaValida = rows[0] && (await bcrypt.compare(senha_atual, rows[0].senha_hash));
+    if (!senhaValida) return res.status(401).json({ error: 'Senha atual incorreta' });
+
+    const senha_hash = await bcrypt.hash(nova_senha, 12);
+    await pool.query(
+      'UPDATE usuarios SET senha_hash = $1, senha_alterada_em = NOW() WHERE id = $2',
+      [senha_hash, req.user.id]
+    );
+
+    res.json({ token: gerarToken({ ...req.user, senha_alterada_em: new Date() }) });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // POST /api/auth/logout-everywhere
 router.post('/logout-everywhere', authMiddleware, async (req, res, next) => {
   try {

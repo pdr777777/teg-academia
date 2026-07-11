@@ -13,7 +13,23 @@
     .then((user) => {
       if (!['admin', 'dono'].includes(user.role)) {
         window.location.href = '/dashboard.html';
+        return;
       }
+
+      const requiredRole = document.body.dataset.requireRole;
+      if (requiredRole && user.role !== requiredRole) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      if (user.role !== 'dono') {
+        document.querySelectorAll('[data-role-dono]').forEach((el) => {
+          el.style.display = 'none';
+        });
+      }
+
+      window.tegUser = user;
+      document.dispatchEvent(new CustomEvent('teg-user-ready', { detail: user }));
     })
     .catch(() => {
       localStorage.removeItem('token');

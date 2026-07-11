@@ -18,6 +18,8 @@ const indicacoesRoutes = require('./routes/indicacoes');
 const leadsRoutes = require('./routes/leads');
 const aulasRoutes = require('./routes/aulas');
 const adminRoutes = require('./routes/admin');
+const configuracoesRoutes = require('./routes/configuracoes');
+const equipeRoutes = require('./routes/equipe');
 
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
   console.warn('⚠️  JWT_SECRET fraco ou ausente — defina no .env');
@@ -72,6 +74,8 @@ app.use('/api/indicacoes', indicacoesRoutes);
 app.use('/api/leads', leadsRoutes);
 app.use('/api/aulas', aulasRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/configuracoes', configuracoesRoutes);
+app.use('/api/equipe', equipeRoutes);
 
 app.get('/health', (req, res) => res.json({ ok: true }));
 
