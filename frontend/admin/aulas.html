@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Admin — Academia TEG</title>
+  <title>Aulas — TEG Academia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="../assets/img/favicon.png" />
@@ -18,13 +18,13 @@
     <aside class="sidebar" id="sidebar">
       <div class="brand"><img src="../assets/img/logo.svg" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ADMIN</span></div>
       <nav class="sidebar-nav">
-        <a href="index.html" class="active"><span data-icon="grid" data-icon-size="18"></span>Dashboard</a>
+        <a href="index.html"><span data-icon="grid" data-icon-size="18"></span>Dashboard</a>
         <a href="financeiro.html" data-role-dono><span data-icon="wallet" data-icon-size="18"></span>Financeiro</a>
         <a href="alunos.html"><span data-icon="users" data-icon-size="18"></span>Alunos</a>
         <a href="ranking.html"><span data-icon="award" data-icon-size="18"></span>Ranking</a>
         <a href="frequencia.html"><span data-icon="clock" data-icon-size="18"></span>Frequência</a>
         <a href="treinos.html"><span data-icon="dumbbell" data-icon-size="18"></span>Treinos</a>
-        <a href="aulas.html"><span data-icon="clipboard-list" data-icon-size="18"></span>Aulas</a>
+        <a href="aulas.html" class="active"><span data-icon="clipboard-list" data-icon-size="18"></span>Aulas</a>
         <a href="planos.html"><span data-icon="package" data-icon-size="18"></span>Planos</a>
         <a href="crm.html"><span data-icon="columns" data-icon-size="18"></span>CRM</a>
         <a href="pagamentos.html"><span data-icon="credit-card" data-icon-size="18"></span>Pagamentos</a>
@@ -41,29 +41,81 @@
       <div class="page-head">
         <button class="btn btn-ghost btn-sm sidebar-toggle" id="btn-sidebar-toggle" data-icon="menu"></button>
         <div>
-          <h1>Dashboard</h1>
-          <p>Visão geral do negócio.</p>
+          <h1>Aulas</h1>
+          <p>Grade de horários das aulas coletivas — editável sem programador.</p>
         </div>
+        <button class="btn btn-primary" id="btn-nova-aula"><span data-icon="plus" data-icon-size="16"></span>Nova aula</button>
       </div>
 
-      <div class="grid grid-3 admin-stat-cards" id="admin-cards">
-        <div class="loading-row" style="grid-column:1/-1"><span class="spinner"></span></div>
-      </div>
-
-      <div class="card" style="margin-top:1.5rem" data-reveal>
-        <div class="row-between" style="margin-bottom:1.25rem">
-          <h2>Faturamento — últimos 6 meses</h2>
-        </div>
-        <div id="grafico-faturamento" class="chart-bars"></div>
+      <div class="table-wrap" data-reveal>
+        <table>
+          <thead>
+            <tr><th>Aula</th><th>Dia</th><th>Horário</th><th>Professor</th><th>Capacidade</th><th>Status</th><th style="width:90px"></th></tr>
+          </thead>
+          <tbody id="aulas-body">
+            <tr><td colspan="7" class="loading-row"><span class="spinner"></span></td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
+
+  <dialog id="dialog-aula" class="admin-dialog">
+    <form id="form-aula" method="dialog">
+      <h2 id="aula-dialog-titulo">Nova aula</h2>
+      <input type="hidden" id="aula-id" />
+
+      <div class="field">
+        <label class="field-label">Nome</label>
+        <input type="text" id="aula-nome" placeholder="Ex: Spinning" required />
+      </div>
+      <div class="grid grid-2" style="gap:0.75rem">
+        <div class="field">
+          <label class="field-label">Dia da semana</label>
+          <select id="aula-dia" required>
+            <option value="0">Domingo</option>
+            <option value="1">Segunda</option>
+            <option value="2">Terça</option>
+            <option value="3">Quarta</option>
+            <option value="4">Quinta</option>
+            <option value="5">Sexta</option>
+            <option value="6">Sábado</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Capacidade</label>
+          <input type="number" id="aula-capacidade" min="1" value="20" required />
+        </div>
+      </div>
+      <div class="grid grid-2" style="gap:0.75rem">
+        <div class="field">
+          <label class="field-label">Início</label>
+          <input type="time" id="aula-hora-inicio" required />
+        </div>
+        <div class="field">
+          <label class="field-label">Fim</label>
+          <input type="time" id="aula-hora-fim" required />
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Professor</label>
+        <select id="aula-professor">
+          <option value="">Sem professor definido</option>
+        </select>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" id="btn-aula-cancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-aula-confirm">Salvar</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="../assets/js/icons.js"></script>
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/ui.js"></script>
   <script src="../assets/js/app-effects.js"></script>
   <script src="../assets/js/admin-guard.js"></script>
-  <script src="../assets/js/admin-dashboard.js"></script>
+  <script src="../assets/js/admin-aulas.js"></script>
 </body>
 </html>

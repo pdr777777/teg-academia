@@ -1,14 +1,15 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Admin — Academia TEG</title>
+  <title>Ranking — TEG Academia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="../assets/img/favicon.png" />
   <link rel="stylesheet" href="../assets/css/global.css" />
   <link rel="stylesheet" href="../assets/css/admin.css" />
+  <link rel="stylesheet" href="../assets/css/ranking.css" />
   <link rel="stylesheet" href="../assets/css/app-effects.css" />
   <script src="../assets/js/theme.js"></script>
 </head>
@@ -18,10 +19,10 @@
     <aside class="sidebar" id="sidebar">
       <div class="brand"><img src="../assets/img/logo.svg" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ADMIN</span></div>
       <nav class="sidebar-nav">
-        <a href="index.html" class="active"><span data-icon="grid" data-icon-size="18"></span>Dashboard</a>
+        <a href="index.html"><span data-icon="grid" data-icon-size="18"></span>Dashboard</a>
         <a href="financeiro.html" data-role-dono><span data-icon="wallet" data-icon-size="18"></span>Financeiro</a>
         <a href="alunos.html"><span data-icon="users" data-icon-size="18"></span>Alunos</a>
-        <a href="ranking.html"><span data-icon="award" data-icon-size="18"></span>Ranking</a>
+        <a href="ranking.html" class="active"><span data-icon="award" data-icon-size="18"></span>Ranking</a>
         <a href="frequencia.html"><span data-icon="clock" data-icon-size="18"></span>Frequência</a>
         <a href="treinos.html"><span data-icon="dumbbell" data-icon-size="18"></span>Treinos</a>
         <a href="aulas.html"><span data-icon="clipboard-list" data-icon-size="18"></span>Aulas</a>
@@ -41,20 +42,25 @@
       <div class="page-head">
         <button class="btn btn-ghost btn-sm sidebar-toggle" id="btn-sidebar-toggle" data-icon="menu"></button>
         <div>
-          <h1>Dashboard</h1>
-          <p>Visão geral do negócio.</p>
+          <h1>Ranking</h1>
+          <p>Quem está mais engajado — o mesmo ranking que motiva o aluno.</p>
+        </div>
+        <div class="tabs" id="tabs-ranking">
+          <button class="tab" data-tipo="semanal">Semanal</button>
+          <button class="tab active" data-tipo="mensal">Mensal</button>
+          <button class="tab" data-tipo="geral">Geral</button>
         </div>
       </div>
 
-      <div class="grid grid-3 admin-stat-cards" id="admin-cards">
-        <div class="loading-row" style="grid-column:1/-1"><span class="spinner"></span></div>
-      </div>
-
-      <div class="card" style="margin-top:1.5rem" data-reveal>
-        <div class="row-between" style="margin-bottom:1.25rem">
-          <h2>Faturamento — últimos 6 meses</h2>
-        </div>
-        <div id="grafico-faturamento" class="chart-bars"></div>
+      <div class="table-wrap" data-reveal>
+        <table>
+          <thead>
+            <tr><th>#</th><th>Aluno</th><th>Treinos</th><th>XP</th><th>Sequência</th></tr>
+          </thead>
+          <tbody id="ranking-body">
+            <tr><td colspan="5" class="loading-row"><span class="spinner"></span></td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -64,6 +70,6 @@
   <script src="../assets/js/ui.js"></script>
   <script src="../assets/js/app-effects.js"></script>
   <script src="../assets/js/admin-guard.js"></script>
-  <script src="../assets/js/admin-dashboard.js"></script>
+  <script src="../assets/js/admin-ranking.js"></script>
 </body>
 </html>

@@ -323,7 +323,7 @@ label {
 }
 .sidebar .brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 800; padding: 0 0.5rem; font-size: 1rem; }
 .sidebar .brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--color-primary); }
-.sidebar-nav { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; }
+.sidebar-nav { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; overflow-y: auto; min-height: 0; }
 .sidebar-nav a {
   display: flex;
   align-items: center;
