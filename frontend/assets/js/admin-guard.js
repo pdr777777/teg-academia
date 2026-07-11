@@ -28,6 +28,21 @@
         });
       }
 
+      const sidebarFoot = document.querySelector('.sidebar-foot');
+      if (sidebarFoot && typeof iniciais === 'function') {
+        const roleLabel = user.role === 'dono' ? 'Dono da academia' : 'Administrador';
+        const userEl = document.createElement('div');
+        userEl.className = 'sidebar-user';
+        userEl.innerHTML = `
+          <span class="avatar-fallback">${iniciais(user.nome)}</span>
+          <span class="sidebar-user-info">
+            <strong>${user.nome}</strong>
+            <span>${roleLabel}</span>
+          </span>
+        `;
+        sidebarFoot.prepend(userEl);
+      }
+
       window.tegUser = user;
       document.dispatchEvent(new CustomEvent('teg-user-ready', { detail: user }));
     })

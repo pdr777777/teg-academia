@@ -161,13 +161,20 @@ function renderLineChart(containerId, dados, opts) {
     '<div class="line-chart-wrap">' +
       '<div class="line-chart-badge"><span>' + ultimo.label + '</span><strong>' + format(ultimo.valor) + '</strong></div>' +
       '<svg class="line-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
-        '<defs><linearGradient id="' + gradientId + '" x1="0" y1="0" x2="0" y2="1">' +
-          '<stop offset="0%" stop-color="var(--color-primary)" stop-opacity="0.38" />' +
-          '<stop offset="100%" stop-color="var(--color-primary)" stop-opacity="0" />' +
-        '</linearGradient></defs>' +
+        '<defs>' +
+          '<linearGradient id="' + gradientId + '" x1="0" y1="0" x2="0" y2="1">' +
+            '<stop offset="0%" stop-color="var(--color-primary)" stop-opacity="0.38" />' +
+            '<stop offset="100%" stop-color="var(--color-primary)" stop-opacity="0" />' +
+          '</linearGradient>' +
+          '<linearGradient id="' + gradientId + '-stroke" x1="0" y1="0" x2="1" y2="0">' +
+            '<stop offset="0%" stop-color="var(--color-primary)" />' +
+            '<stop offset="55%" stop-color="var(--color-coral)" />' +
+            '<stop offset="100%" stop-color="var(--color-wine)" />' +
+          '</linearGradient>' +
+        '</defs>' +
         '<line class="line-chart-guide" x1="' + last.x + '" y1="4" x2="' + last.x + '" y2="' + last.y + '" />' +
         '<path class="line-chart-area" style="fill:url(#' + gradientId + ')" d="' + areaPath + '"></path>' +
-        '<path class="line-chart-line" d="' + linePath + '"></path>' +
+        '<path class="line-chart-line" style="stroke:url(#' + gradientId + '-stroke)" d="' + linePath + '"></path>' +
         points.map(function (p, i) {
           return '<circle class="line-chart-dot' + (i === points.length - 1 ? ' last' : '') + '" cx="' + p.x + '" cy="' + p.y + '" r="5">' +
             '<title>' + dados[i].label + ': ' + format(p.v) + '</title></circle>';

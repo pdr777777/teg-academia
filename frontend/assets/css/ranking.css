@@ -36,7 +36,7 @@ tr.linha-eu td:first-child { box-shadow: inset 3px 0 0 var(--color-primary); }
 
 .avatar-fallback {
   width: 38px; height: 38px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-red), var(--color-primary));
+  background: var(--gradient-flame);
   display: flex; align-items: center; justify-content: center;
   font-size: 0.78rem; font-weight: 800; color: #fff;
   flex-shrink: 0;

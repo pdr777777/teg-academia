@@ -29,6 +29,8 @@
   --shadow-card: 0 1px 0 rgba(255,255,255,0.03) inset, 0 8px 24px rgba(0,0,0,0.35);
   --font: 'Inter', system-ui, -apple-system, sans-serif;
   --container: 1180px;
+  /* Gradiente-assinatura do admin: laranja > coral > vinho, do calor ao encorpado */
+  --gradient-flame: linear-gradient(135deg, #ffab40 0%, var(--color-primary) 32%, var(--color-coral) 68%, var(--color-wine) 100%);
 }
 
 /* ===== Tema claro ===== */
@@ -259,17 +261,18 @@ label {
 
 /* Ícone de stat-card em "tile" — adapta a cor via currentColor */
 .stat-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 11px;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--color-primary);
-  background: color-mix(in srgb, currentColor 11%, transparent);
-  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  background: linear-gradient(150deg, color-mix(in srgb, currentColor 80%, white 12%), color-mix(in srgb, currentColor 90%, black 8%));
+  box-shadow: 0 8px 20px color-mix(in srgb, currentColor 30%, transparent), inset 0 1px 0 rgba(255,255,255,.22);
   flex-shrink: 0;
 }
+.stat-icon svg { color: #fff; }
 
 /* ===== Top nav (área logada) ===== */
 .topnav {
@@ -335,7 +338,24 @@ label {
   color: var(--color-muted);
 }
 .sidebar-nav a:hover { background: var(--color-surface-2); color: var(--color-text); }
-.sidebar-nav a.active { background: var(--color-primary-soft); color: var(--color-primary); }
+.sidebar-nav a.active {
+  background: var(--gradient-flame);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(239,77,77,.28), inset 0 1px 0 rgba(255,255,255,.2);
+}
+.sidebar-foot { border-top: 1px solid var(--color-border); padding-top: 0.75rem; }
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.6rem;
+  margin-bottom: 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+}
+.sidebar-user-info { min-width: 0; }
+.sidebar-user-info strong { display: block; font-size: 0.84rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar-user-info span { font-size: 0.72rem; color: var(--color-muted); }
 .sidebar-foot a { display: flex; align-items: center; gap: 0.7rem; padding: 0.65rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.9rem; color: var(--color-muted); }
 .sidebar-foot a:hover { background: var(--color-surface-2); color: var(--color-danger); }
 .main-content { flex: 1; min-width: 0; padding: 2rem; }
