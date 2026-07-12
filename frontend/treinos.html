@@ -37,6 +37,20 @@
         <h1 id="treino-nome">Meu treino</h1>
         <p id="treino-desc" class="text-muted"></p>
       </div>
+      <button class="btn btn-primary" id="btn-iniciar-treino" style="display:none">
+        <span data-icon="play" data-icon-size="16"></span>Iniciar treino
+      </button>
+    </div>
+
+    <div id="sessao-bar" class="sessao-bar" style="display:none">
+      <div class="row gap-sm" style="align-items:center">
+        <span class="sessao-dot"></span>
+        <span>Treino em andamento</span>
+        <strong id="sessao-timer">00:00</strong>
+      </div>
+      <button class="btn btn-outline btn-sm" id="btn-finalizar-treino">
+        <span data-icon="check-circle" data-icon-size="14"></span>Finalizar treino
+      </button>
     </div>
 
     <div id="lista-exercicios" class="stack gap-lg">

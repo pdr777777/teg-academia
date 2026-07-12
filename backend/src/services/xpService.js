@@ -7,7 +7,13 @@ const XP_POR_MOTIVO = {
   indicacao: 200,
   conquista: 0,
   matricula: 100,
+  sessao_treino: 0, // variável — calculado por série registrada, ver POST /api/sessoes/:id/finalizar
 };
+
+// Bônus de XP por sessão de treino logada série a série. Recompensa registrar
+// o treino de verdade (carga/reps) em vez de só bater o check-in.
+const XP_POR_SERIE_REGISTRADA = 2;
+const XP_BONUS_SESSAO_MAXIMO = 50;
 
 async function adicionarXP(usuario_id, pontos, motivo) {
   await pool.query('INSERT INTO xp_log (usuario_id, pontos, motivo) VALUES ($1, $2, $3)', [usuario_id, pontos, motivo]);
@@ -88,4 +94,11 @@ async function verificarConquistas(usuario_id) {
   }
 }
 
-module.exports = { adicionarXP, atualizarSequencia, verificarConquistas };
+module.exports = {
+  adicionarXP,
+  atualizarSequencia,
+  verificarConquistas,
+  XP_POR_MOTIVO,
+  XP_POR_SERIE_REGISTRADA,
+  XP_BONUS_SESSAO_MAXIMO,
+};
