@@ -39,10 +39,20 @@ async function enviarPaizens(telefone, nome) {
   );
 }
 
+async function enviarReativacao(telefone, nome) {
+  await enviar(telefone,
+    `Ei ${nome}, tá com saudade da gente? 🥺\n` +
+    `Faz um tempo que você não treina e sentimos sua falta por aqui!\n` +
+    `Preparamos um presente pra você voltar: *R$10 de desconto* na sua próxima mensalidade. 🎁\n` +
+    `Bora retomar? É só chamar a gente aqui no WhatsApp!`
+  );
+}
+
 module.exports = {
   enviar,
   enviarBoasVindas,
   enviarLembreteAusencia,
   enviarLembreteVencimento,
   enviarPaizens,
+  enviarReativacao,
 };

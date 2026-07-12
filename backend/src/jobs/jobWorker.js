@@ -10,6 +10,8 @@ async function processarJob(job) {
     await whatsapp.enviarLembreteVencimento(payload.telefone, payload.nome, payload.dias_restantes);
   } else if (tipo === 'whatsapp_aniversario') {
     await whatsapp.enviarPaizens(payload.telefone, payload.nome);
+  } else if (tipo === 'whatsapp_reativacao') {
+    await whatsapp.enviarReativacao(payload.telefone, payload.nome);
   }
 }
 
@@ -71,6 +73,30 @@ async function agendarAutomacoes() {
     await pool.query(
       `INSERT INTO automacoes_log (usuario_id, tipo, mensagem, status) VALUES ($1, 'vencimento', $2, 'enviado')`,
       [v.id, `Vencimento em ${v.dias_restantes} dias`]
+    );
+  }
+
+  // Reativação: plano venceu há 15+ dias e não renovou — oferta única de volta
+  const { rows: paraReativar } = await pool.query(`
+    SELECT u.id, u.nome, u.telefone
+    FROM matriculas m JOIN usuarios u ON u.id = m.usuario_id
+    WHERE m.status = 'vencida' AND m.data_vencimento <= CURRENT_DATE - INTERVAL '15 days'
+  `);
+
+  for (const r of paraReativar) {
+    const jaEnviou = await pool.query(
+      `SELECT id FROM automacoes_log WHERE usuario_id = $1 AND tipo = 'reativacao'`,
+      [r.id]
+    );
+    if (jaEnviou.rows.length) continue;
+
+    await pool.query(
+      `INSERT INTO jobs (tipo, payload, agendado_para) VALUES ($1, $2, NOW())`,
+      ['whatsapp_reativacao', JSON.stringify({ telefone: r.telefone, nome: r.nome })]
+    );
+    await pool.query(
+      `INSERT INTO automacoes_log (usuario_id, tipo, mensagem, status) VALUES ($1, 'reativacao', $2, 'enviado')`,
+      [r.id, 'Oferta de reativação R$10 desconto']
     );
   }
 
