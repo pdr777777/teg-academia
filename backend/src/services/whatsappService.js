@@ -1,10 +1,39 @@
+const GRAPH_API_VERSION = 'v21.0';
+
+// Normaliza pra E.164 sem "+" (formato que a Cloud API espera). Assume Brasil
+// quando o número não vem com código de país.
+function normalizarTelefone(telefone) {
+  const digitos = String(telefone).replace(/\D/g, '');
+  return digitos.startsWith('55') ? digitos : `55${digitos}`;
+}
+
 async function enviar(telefone, mensagem) {
-  if (process.env.NODE_ENV !== 'production' || !process.env.WHATSAPP_TOKEN) {
+  if (!process.env.WHATSAPP_TOKEN || !process.env.WHATSAPP_PHONE_NUMBER_ID) {
     console.log(`[WhatsApp MOCK] → ${telefone}: ${mensagem}`);
     return;
   }
-  // TODO: integrar com Evolution API ou WhatsApp Business Cloud API
-  // https://developers.facebook.com/docs/whatsapp/cloud-api/messages/text-messages
+
+  const res = await fetch(
+    `https://graph.facebook.com/${GRAPH_API_VERSION}/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to: normalizarTelefone(telefone),
+        type: 'text',
+        text: { body: mensagem },
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    const erro = await res.text();
+    throw new Error(`Falha ao enviar WhatsApp: ${erro}`);
+  }
 }
 
 async function enviarBoasVindas(telefone, nome, plano) {
@@ -55,4 +84,5 @@ module.exports = {
   enviarLembreteVencimento,
   enviarPaizens,
   enviarReativacao,
+  normalizarTelefone,
 };

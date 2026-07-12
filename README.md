@@ -46,7 +46,10 @@ Variáveis de ambiente (`backend/.env`):
 | `DATABASE_URL` | Connection string do PostgreSQL |
 | `JWT_SECRET` | Segredo para assinar tokens (mín. 32 caracteres) |
 | `NODE_ENV` | `development`, `production` ou `test` |
-| `WHATSAPP_TOKEN` | Token da API de WhatsApp (opcional em dev — sem ele as mensagens só são logadas no console) |
+| `WHATSAPP_TOKEN` | Token da WhatsApp Business Cloud API (opcional — sem ele as mensagens só são logadas no console) |
+| `WHATSAPP_PHONE_NUMBER_ID` | ID do número de telefone configurado no Meta Business |
+| `WHATSAPP_VERIFY_TOKEN` | String qualquer que você escolhe — usada pro Meta validar o webhook (`GET /api/whatsapp/webhook`) |
+| `ANTHROPIC_API_KEY` | Chave da API da Anthropic — sem ela, a IA de resposta a leads só loga no console (não responde de verdade) |
 
 ### 3. Frontend
 
