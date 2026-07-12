@@ -9,7 +9,13 @@ document.getElementById('form-login').addEventListener('submit', async (ev) => {
       senha: document.getElementById('senha').value,
     });
     localStorage.setItem('token', token);
-    window.location.href = ['admin', 'dono'].includes(user.role) ? 'admin/index.html' : 'dashboard.html';
+    if (['admin', 'dono'].includes(user.role)) {
+      window.location.href = 'admin/index.html';
+    } else if (user.role === 'professor') {
+      window.location.href = 'admin/treinos.html';
+    } else {
+      window.location.href = 'dashboard.html';
+    }
   } catch (err) {
     toast(err.message || 'Não foi possível entrar.', 'error');
     resetBtnLoading(btn);

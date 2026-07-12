@@ -51,8 +51,8 @@ router.get('/minha', authMiddleware, async (req, res, next) => {
   }
 });
 
-// GET /api/frequencias/resumo (admin) — quem está sumindo, base pro lembrete de ausência
-router.get('/resumo', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+// GET /api/frequencias/resumo (admin/professor) — quem está sumindo, base pro lembrete de ausência
+router.get('/resumo', authMiddleware, requireRole('admin', 'dono', 'professor'), async (req, res, next) => {
   try {
     const { rows: alunos } = await pool.query(
       `SELECT u.id, u.nome, u.email, u.telefone,
@@ -81,8 +81,8 @@ router.get('/resumo', authMiddleware, requireRole('admin', 'dono'), async (req, 
   }
 });
 
-// GET /api/frequencias (admin)
-router.get('/', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+// GET /api/frequencias (admin/professor)
+router.get('/', authMiddleware, requireRole('admin', 'dono', 'professor'), async (req, res, next) => {
   try {
     const { data } = req.query;
     const params = data ? [data] : [new Date().toISOString().split('T')[0]];
