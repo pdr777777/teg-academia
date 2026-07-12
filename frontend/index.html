@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    // No app nativo (Capacitor), pula a landing de marketing — vai direto pra
+    // login ou dashboard, já que quem abre o app já é aluno ou vai virar um.
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+      window.location.replace(localStorage.getItem('token') ? 'dashboard.html' : 'login.html');
+    }
+  </script>
   <title>Academia TEG — Treine com propósito</title>
   <meta name="description" content="A academia que gamifica seu treino. Estrutura completa, professores especializados e tecnologia que acompanha cada conquista. Matricule-se em Campo Grande - MS." />
 
