@@ -45,6 +45,19 @@ router.get('/dashboard', authMiddleware, async (req, res, next) => {
   }
 });
 
+// GET /api/alunos/perfil — dados editáveis do próprio perfil
+router.get('/perfil', authMiddleware, async (req, res, next) => {
+  try {
+    const { rows: [user] } = await pool.query(
+      'SELECT id, nome, email, telefone, cpf, data_nascimento, foto_url FROM usuarios WHERE id = $1',
+      [req.user.id]
+    );
+    res.json(user);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // PATCH /api/alunos/perfil
 router.patch('/perfil', authMiddleware, async (req, res, next) => {
   try {

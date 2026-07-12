@@ -4,3 +4,11 @@
 .aluno-main > section + section,
 .aluno-main > div + section,
 .aluno-main > section + div { margin-top: 1.5rem; }
+
+.avatar-fallback {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-wine), var(--color-primary));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}

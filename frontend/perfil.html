@@ -1,15 +1,14 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ranking — Academia TEG</title>
+  <title>Meu perfil — Academia TEG</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="assets/img/favicon.png" />
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/aluno.css" />
-  <link rel="stylesheet" href="assets/css/ranking.css" />
   <link rel="stylesheet" href="assets/css/app-effects.css" />
   <script src="assets/js/theme.js"></script>
 </head>
@@ -20,9 +19,9 @@
     <nav class="topnav-links">
       <a href="dashboard.html"><span data-icon="home" data-icon-size="16"></span>Dashboard</a>
       <a href="treinos.html"><span data-icon="dumbbell" data-icon-size="16"></span>Treinos</a>
-      <a href="ranking.html" class="active"><span data-icon="award" data-icon-size="16"></span>Ranking</a>
+      <a href="ranking.html"><span data-icon="award" data-icon-size="16"></span>Ranking</a>
       <a href="indicacao.html"><span data-icon="link" data-icon-size="16"></span>Indicação</a>
-      <a href="perfil.html"><span data-icon="user" data-icon-size="16"></span>Perfil</a>
+      <a href="perfil.html" class="active"><span data-icon="user" data-icon-size="16"></span>Perfil</a>
     </nav>
     <div class="topnav-right">
       <button type="button" id="btn-theme-toggle" data-theme-toggle class="btn btn-ghost btn-sm" data-icon="sun" data-icon-size="16" title="Alternar tema"></button>
@@ -32,34 +31,40 @@
   </header>
 
   <main class="container aluno-main">
-    <div class="page-head">
-      <div>
-        <h1>Ranking</h1>
-        <p class="text-muted">Quem mais treinou por aqui.</p>
-      </div>
-      <div class="tabs" id="tabs-ranking">
-        <button class="tab active" data-tipo="semanal">Semanal</button>
-        <button class="tab" data-tipo="mensal">Mensal</button>
-        <button class="tab" data-tipo="geral">Geral</button>
-      </div>
-    </div>
+    <section>
+      <h1>Meu perfil</h1>
+      <p class="text-muted" style="margin-top:.25rem">Mantenha seus dados atualizados.</p>
 
-    <div id="minha-posicao-card" class="card minha-posicao"></div>
+      <form id="form-perfil" class="card" style="margin-top:1.5rem;max-width:520px">
+        <div class="row gap-md" style="align-items:center;margin-bottom:1.5rem">
+          <span class="avatar-fallback" id="perfil-avatar" style="width:56px;height:56px;font-size:1.1rem">—</span>
+          <div>
+            <strong id="perfil-nome-display">—</strong>
+            <div class="text-muted" style="font-size:.85rem" id="perfil-email-display">—</div>
+          </div>
+        </div>
 
-    <div class="table-wrap" style="margin-top:1.25rem" data-reveal>
-      <table>
-        <thead>
-          <tr><th>#</th><th>Aluno</th><th>Treinos</th><th>XP</th><th>Sequência</th></tr>
-        </thead>
-        <tbody id="ranking-body">
-          <tr><td colspan="5" class="loading-row"><span class="spinner"></span></td></tr>
-        </tbody>
-      </table>
-    </div>
+        <div class="field">
+          <label for="perfil-nome">Nome completo</label>
+          <input type="text" id="perfil-nome" required />
+        </div>
+        <div class="grid grid-2">
+          <div class="field">
+            <label for="perfil-telefone">WhatsApp</label>
+            <input type="tel" id="perfil-telefone" placeholder="(67) 99999-9999" />
+          </div>
+          <div class="field">
+            <label for="perfil-nascimento">Data de nascimento</label>
+            <input type="date" id="perfil-nascimento" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="perfil-cpf">CPF</label>
+          <input type="text" id="perfil-cpf" disabled />
+        </div>
 
-    <section class="card" style="margin-top:2rem" data-reveal>
-      <h2 style="margin-bottom:1rem">Conquistas</h2>
-      <div id="conquistas-grid" class="grid grid-4"></div>
+        <button type="submit" class="btn btn-primary" id="btn-perfil-salvar">Salvar alterações</button>
+      </form>
     </section>
   </main>
 
@@ -68,7 +73,6 @@
   <script src="assets/js/ui.js"></script>
   <script src="assets/js/app-effects.js"></script>
   <script src="assets/js/auth-guard.js"></script>
-  <script src="assets/js/ranking.js"></script>
+  <script src="assets/js/perfil.js"></script>
 </body>
 </html>
-
