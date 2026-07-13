@@ -49,4 +49,37 @@ describe('GET /api/alunos/dashboard e /perfil — matrícula suspensa continua v
     await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
     await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
   });
+
+  test('dashboard mostra a matrícula MAIS RECENTE quando o aluno tem mais de uma', async () => {
+    const aluno = await criarUsuario();
+    const planoAntigo = await criarPlano({ nome: 'Plano Antigo Cancelado' });
+    const planoNovo = await criarPlano({ nome: 'Plano Novo Vencido' });
+
+    // Matrícula antiga (criada primeiro, created_at menor)
+    const matriculaAntiga = await criarMatricula({
+      usuario_id: aluno.id, plano_id: planoAntigo.id, status: 'cancelada',
+      data_vencimento: new Date(Date.now() - 100 * 86400000),
+    });
+
+    // Matrícula nova (criada depois, created_at maior) — é essa que deve aparecer
+    const matriculaNova = await criarMatricula({
+      usuario_id: aluno.id, plano_id: planoNovo.id, status: 'vencida',
+      data_vencimento: new Date(Date.now() - 5 * 86400000),
+    });
+
+    const res = await request(app)
+      .get('/api/alunos/dashboard')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.matricula_status).toBe('vencida');
+    expect(res.body.plano_nome).toBe('Plano Novo Vencido');
+    expect(new Date(res.body.data_vencimento).toISOString()).toBe(
+      new Date(matriculaNova.data_vencimento).toISOString()
+    );
+
+    await pool.query('DELETE FROM matriculas WHERE id = ANY($1)', [[matriculaAntiga.id, matriculaNova.id]]);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
+    await pool.query('DELETE FROM planos WHERE id = ANY($1)', [[planoAntigo.id, planoNovo.id]]);
+  });
 });
