@@ -72,4 +72,78 @@ describe('PATCH /api/pagamentos/:id/confirmar', () => {
     await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
     await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
   });
+
+  test('pagamento automático com vencimento futuro estende a partir do vencimento original, não de agora', async () => {
+    const admin = await criarUsuario({ role: 'dono' });
+    const aluno = await criarUsuario();
+    const plano = await criarPlano({ duracao_dias: 30 });
+    const vencimentoOriginal = new Date(Date.now() + 5 * 86400000);
+    const matricula = await criarMatricula({
+      usuario_id: aluno.id, plano_id: plano.id, status: 'ativa', data_vencimento: vencimentoOriginal,
+    });
+    const { rows: [pagamento] } = await pool.query(
+      `INSERT INTO pagamentos (matricula_id, usuario_id, valor, status, gerado_automaticamente)
+       VALUES ($1, $2, $3, 'pendente', TRUE) RETURNING *`,
+      [matricula.id, aluno.id, plano.preco_mensal]
+    );
+
+    const res = await request(app)
+      .patch(`/api/pagamentos/${pagamento.id}/confirmar`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`)
+      .send({ metodo: 'pix' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('pago');
+
+    const { rows: [matriculaDepois] } = await pool.query('SELECT * FROM matriculas WHERE id = $1', [matricula.id]);
+    expect(matriculaDepois.status).toBe('ativa');
+    const esperado = new Date(vencimentoOriginal);
+    esperado.setDate(esperado.getDate() + plano.duracao_dias);
+    expect(new Date(matriculaDepois.data_vencimento).toDateString()).toBe(esperado.toDateString());
+
+    await pool.query('DELETE FROM pagamentos WHERE id = $1', [pagamento.id]);
+    await pool.query('DELETE FROM matriculas WHERE id = $1', [matricula.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
+  });
+
+  test('confirmar o mesmo pagamento automático duas vezes não estende data_vencimento novamente (idempotência)', async () => {
+    const admin = await criarUsuario({ role: 'dono' });
+    const aluno = await criarUsuario();
+    const plano = await criarPlano({ duracao_dias: 30 });
+    const vencimentoOriginal = new Date(Date.now() - 10 * 86400000);
+    const matricula = await criarMatricula({
+      usuario_id: aluno.id, plano_id: plano.id, status: 'suspensa', data_vencimento: vencimentoOriginal,
+    });
+    const { rows: [pagamento] } = await pool.query(
+      `INSERT INTO pagamentos (matricula_id, usuario_id, valor, status, gerado_automaticamente)
+       VALUES ($1, $2, $3, 'pendente', TRUE) RETURNING *`,
+      [matricula.id, aluno.id, plano.preco_mensal]
+    );
+
+    const primeira = await request(app)
+      .patch(`/api/pagamentos/${pagamento.id}/confirmar`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`)
+      .send({ metodo: 'pix' });
+    expect(primeira.status).toBe(200);
+    expect(primeira.body.status).toBe('pago');
+
+    const { rows: [matriculaAposPrimeira] } = await pool.query('SELECT * FROM matriculas WHERE id = $1', [matricula.id]);
+
+    const segunda = await request(app)
+      .patch(`/api/pagamentos/${pagamento.id}/confirmar`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`)
+      .send({ metodo: 'pix' });
+    expect(segunda.status).toBe(200);
+    expect(segunda.body.status).toBe('pago');
+
+    const { rows: [matriculaAposSegunda] } = await pool.query('SELECT * FROM matriculas WHERE id = $1', [matricula.id]);
+    expect(new Date(matriculaAposSegunda.data_vencimento).toISOString())
+      .toBe(new Date(matriculaAposPrimeira.data_vencimento).toISOString());
+
+    await pool.query('DELETE FROM pagamentos WHERE id = $1', [pagamento.id]);
+    await pool.query('DELETE FROM matriculas WHERE id = $1', [matricula.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
+  });
 });

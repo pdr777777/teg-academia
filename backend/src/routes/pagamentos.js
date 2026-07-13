@@ -27,10 +27,21 @@ router.patch('/:id/confirmar', authMiddleware, requireRole('admin', 'dono'), asy
     const { metodo = 'dinheiro' } = req.body;
     const { rows: [pag] } = await pool.query(
       `UPDATE pagamentos SET status = 'pago', metodo = $1, data_pagamento = NOW()
-       WHERE id = $2 RETURNING *`,
+       WHERE id = $2 AND status = 'pendente' RETURNING *`,
       [metodo, req.params.id]
     );
-    if (!pag) return res.status(404).json({ error: 'Pagamento não encontrado' });
+    if (!pag) {
+      // Ou o pagamento não existe, ou já foi confirmado antes (double-click,
+      // retry de cliente após timeout). Distingue os dois casos: se já existe
+      // mas não está mais pendente, é uma confirmação idempotente — devolve
+      // o registro atual com 200 em vez de tratar como erro do cliente.
+      const { rows: [existente] } = await pool.query(
+        `SELECT * FROM pagamentos WHERE id = $1`,
+        [req.params.id]
+      );
+      if (!existente) return res.status(404).json({ error: 'Pagamento não encontrado' });
+      return res.status(200).json(existente);
+    }
 
     if (pag.gerado_automaticamente) {
       // Renovação automática confirmada: estende o ciclo a partir do maior
