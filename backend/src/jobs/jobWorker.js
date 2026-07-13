@@ -148,7 +148,7 @@ async function processarVencimentos() {
     WHERE m.status = 'ativa' AND m.data_vencimento::date <= CURRENT_DATE
       AND NOT EXISTS (
         SELECT 1 FROM pagamentos
-        WHERE matricula_id = m.id AND gerado_automaticamente = TRUE AND created_at::date = CURRENT_DATE
+        WHERE matricula_id = m.id AND gerado_automaticamente = TRUE AND created_at::date >= m.data_vencimento::date
       )
   `);
 

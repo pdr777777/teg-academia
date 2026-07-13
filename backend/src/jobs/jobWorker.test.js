@@ -78,6 +78,36 @@ describe('processarVencimentos', () => {
     await limpar({ usuarios: [user.id], planos: [plano.id], matriculas: [matricula.id] });
   });
 
+  test('não duplica cobrança no dia seguinte ao vencimento exato, mesmo antes da fase 2 marcar vencida', async () => {
+    // Reproduz a virada de dia: a cobrança automática foi gerada no dia exato
+    // do vencimento (created_at = data_vencimento), a matrícula ainda está
+    // 'ativa' (fase 2 só marca 'vencida' quando data_vencimento::date <
+    // CURRENT_DATE, então no dia seguinte ao vencimento exato ela ainda não
+    // rodou pra essa matrícula até este mesmo processarVencimentos()). Com o
+    // dedup antigo (created_at::date = CURRENT_DATE) isso geraria uma segunda
+    // cobrança hoje, já que a cobrança existente foi criada ontem, não hoje.
+    const user = await criarUsuario();
+    const plano = await criarPlano({ preco_mensal: 109.9, duracao_dias: 30 });
+    const matricula = await criarMatricula({
+      usuario_id: user.id, plano_id: plano.id, status: 'ativa',
+      data_vencimento: new Date(Date.now() - 1 * 86400000),
+    });
+    await pool.query(
+      `INSERT INTO pagamentos (matricula_id, usuario_id, valor, status, gerado_automaticamente, created_at)
+       VALUES ($1, $2, $3, 'pendente', TRUE, NOW() - INTERVAL '1 day')`,
+      [matricula.id, user.id, plano.preco_mensal]
+    );
+
+    await processarVencimentos();
+
+    const { rows: pagamentos } = await pool.query(
+      'SELECT * FROM pagamentos WHERE matricula_id = $1', [matricula.id]
+    );
+    expect(pagamentos).toHaveLength(1);
+
+    await limpar({ usuarios: [user.id], planos: [plano.id], matriculas: [matricula.id] });
+  });
+
   test('não duplica cobrança se rodar duas vezes no mesmo dia', async () => {
     const user = await criarUsuario();
     const plano = await criarPlano();
