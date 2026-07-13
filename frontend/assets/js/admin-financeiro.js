@@ -130,6 +130,7 @@ function renderMetas(metas, faturamentoMes, novosMes) {
 }
 
 function renderInadimplentes(lista) {
+  lista = lista || [];
   const el = document.getElementById('inadimplentes-lista');
   document.getElementById('inadimplentes-count').textContent = lista.length
     ? `${lista.length} aluno(s)`

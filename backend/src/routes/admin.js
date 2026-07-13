@@ -64,7 +64,7 @@ router.get('/financeiro', authMiddleware, requireRole('dono'), async (req, res, 
       pool.query(`SELECT COUNT(*)::int AS total FROM matriculas WHERE status = 'ativa'`),
       pool.query(`SELECT COALESCE(SUM(valor), 0)::numeric AS total FROM pagamentos WHERE status = 'pago' AND DATE_TRUNC('month', data_pagamento) = DATE_TRUNC('month', NOW())`),
       pool.query(`SELECT COALESCE(SUM(valor), 0)::numeric AS total FROM pagamentos WHERE status = 'pago' AND DATE_TRUNC('month', data_pagamento) = DATE_TRUNC('month', NOW() - INTERVAL '1 month')`),
-      pool.query(`SELECT COUNT(*)::int AS total FROM matriculas WHERE status = 'vencida'`),
+      pool.query(`SELECT COUNT(*)::int AS total FROM matriculas WHERE status IN ('vencida', 'suspensa')`),
       pool.query(`SELECT COUNT(*)::int AS total FROM usuarios WHERE role = 'aluno' AND DATE_TRUNC('month', created_at) = DATE_TRUNC('month', NOW())`),
       pool.query(`SELECT * FROM configuracoes WHERE id = 1`),
       pool.query(`
