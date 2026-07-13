@@ -43,6 +43,8 @@ async function carregarDashboard() {
       ? `Plano ${d.plano_nome} — ${d.matricula_status === 'ativa' ? 'ativo' : d.matricula_status}`
       : 'Sem plano ativo';
 
+    renderBloqueioBanner('bloqueio-banner', d);
+
     document.getElementById('stat-vencimento').textContent = formatData(d.data_vencimento);
     animateNumber(document.getElementById('stat-freq-mes'), d.dias_treinados_mes);
     animateNumber(document.getElementById('stat-total-treinos'), d.total_treinos);

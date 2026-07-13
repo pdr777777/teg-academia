@@ -77,6 +77,21 @@ async function enviarReativacao(telefone, nome) {
   );
 }
 
+async function enviarCobrancaGerada(telefone, nome, linkPagamento) {
+  await enviar(telefone,
+    linkPagamento
+      ? `Olá ${nome}! 💳\nSua próxima cobrança já está disponível:\n${linkPagamento}\n\nPague para continuar treinando sem interrupção!`
+      : `Olá ${nome}! 💳\nSua próxima cobrança foi gerada. Procure a recepção da academia para regularizar.`
+  );
+}
+
+async function enviarLembreteAtraso(telefone, nome, diasAtraso) {
+  await enviar(telefone,
+    `Olá ${nome}! ⚠️\nSeu pagamento está atrasado há *${diasAtraso} dia(s)*.\n` +
+    `Regularize o quanto antes para não perder o acesso aos treinos e aulas.`
+  );
+}
+
 module.exports = {
   enviar,
   enviarBoasVindas,
@@ -85,4 +100,6 @@ module.exports = {
   enviarPaizens,
   enviarReativacao,
   normalizarTelefone,
+  enviarCobrancaGerada,
+  enviarLembreteAtraso,
 };

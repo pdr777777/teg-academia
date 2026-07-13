@@ -22,6 +22,7 @@ const adminRoutes = require('./routes/admin');
 const configuracoesRoutes = require('./routes/configuracoes');
 const equipeRoutes = require('./routes/equipe');
 const whatsappRoutes = require('./routes/whatsapp');
+const webhooksRoutes = require('./routes/webhooks');
 
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
   console.warn('⚠️  JWT_SECRET fraco ou ausente — defina no .env');
@@ -80,6 +81,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/configuracoes', configuracoesRoutes);
 app.use('/api/equipe', equipeRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
+app.use('/api/webhooks', webhooksRoutes);
 
 app.get('/health', (req, res) => res.json({ ok: true }));
 

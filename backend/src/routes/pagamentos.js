@@ -27,28 +27,54 @@ router.patch('/:id/confirmar', authMiddleware, requireRole('admin', 'dono'), asy
     const { metodo = 'dinheiro' } = req.body;
     const { rows: [pag] } = await pool.query(
       `UPDATE pagamentos SET status = 'pago', metodo = $1, data_pagamento = NOW()
-       WHERE id = $2 RETURNING *`,
+       WHERE id = $2 AND status = 'pendente' RETURNING *`,
       [metodo, req.params.id]
     );
-    if (!pag) return res.status(404).json({ error: 'Pagamento não encontrado' });
-
-    // Ativa matricula suspensa (criada pelo admin sem pagamento imediato)
-    const { rows: [matriculaAtivada] } = await pool.query(
-      `UPDATE matriculas SET status = 'ativa', updated_at = NOW()
-       WHERE id = $1 AND status = 'suspensa'
-       RETURNING usuario_id`,
-      [pag.matricula_id]
-    );
-    if (matriculaAtivada) {
-      await xpService.adicionarXP(matriculaAtivada.usuario_id, 100, 'matricula');
-      const { rows: [indicacao] } = await pool.query(
-        `UPDATE indicacoes SET status = 'convertido', convertido_em = NOW()
-         WHERE indicado_id = $1 AND status = 'pendente'
-         RETURNING indicador_id`,
-        [matriculaAtivada.usuario_id]
+    if (!pag) {
+      // Ou o pagamento não existe, ou já foi confirmado antes (double-click,
+      // retry de cliente após timeout). Distingue os dois casos: se já existe
+      // mas não está mais pendente, é uma confirmação idempotente — devolve
+      // o registro atual com 200 em vez de tratar como erro do cliente.
+      const { rows: [existente] } = await pool.query(
+        `SELECT * FROM pagamentos WHERE id = $1`,
+        [req.params.id]
       );
-      if (indicacao) {
-        await xpService.adicionarXP(indicacao.indicador_id, 200, 'indicacao');
+      if (!existente) return res.status(404).json({ error: 'Pagamento não encontrado' });
+      return res.status(200).json(existente);
+    }
+
+    if (pag.gerado_automaticamente) {
+      // Renovação automática confirmada: estende o ciclo a partir do maior
+      // entre agora e o vencimento atual, e reativa a matrícula.
+      const { rows: [matricula] } = await pool.query(
+        `SELECT m.*, p.duracao_dias FROM matriculas m JOIN planos p ON p.id = m.plano_id WHERE m.id = $1`,
+        [pag.matricula_id]
+      );
+      const base = new Date(Math.max(Date.now(), new Date(matricula.data_vencimento).getTime()));
+      base.setDate(base.getDate() + matricula.duracao_dias);
+      await pool.query(
+        `UPDATE matriculas SET status = 'ativa', data_vencimento = $1, updated_at = NOW() WHERE id = $2`,
+        [base, pag.matricula_id]
+      );
+    } else {
+      // Matrícula criada sem pagamento imediato (fluxo existente do admin)
+      const { rows: [matriculaAtivada] } = await pool.query(
+        `UPDATE matriculas SET status = 'ativa', updated_at = NOW()
+         WHERE id = $1 AND status = 'suspensa'
+         RETURNING usuario_id`,
+        [pag.matricula_id]
+      );
+      if (matriculaAtivada) {
+        await xpService.adicionarXP(matriculaAtivada.usuario_id, 100, 'matricula');
+        const { rows: [indicacao] } = await pool.query(
+          `UPDATE indicacoes SET status = 'convertido', convertido_em = NOW()
+           WHERE indicado_id = $1 AND status = 'pendente'
+           RETURNING indicador_id`,
+          [matriculaAtivada.usuario_id]
+        );
+        if (indicacao) {
+          await xpService.adicionarXP(indicacao.indicador_id, 200, 'indicacao');
+        }
       }
     }
 

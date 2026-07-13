@@ -41,6 +41,7 @@ async function carregarFinanceiro() {
     renderDonutPlanos(d.distribuicao_planos, d.alunos_ativos);
     renderTransacoes(d.transacoes_recentes);
     renderMetas(d.metas, d.faturamento_mes, d.novos_mes);
+    renderInadimplentes(d.inadimplentes_detalhe);
   } catch (err) {
     cardsEl.innerHTML = '<div class="empty-state" style="grid-column:1/-1">Não foi possível carregar os dados.</div>';
   }
@@ -126,6 +127,29 @@ function renderMetas(metas, faturamentoMes, novosMes) {
       el.querySelectorAll('.goal-bar-fill').forEach((f) => { f.style.width = `${f.dataset.width}%`; });
     }, 50);
   });
+}
+
+function renderInadimplentes(lista) {
+  lista = lista || [];
+  const el = document.getElementById('inadimplentes-lista');
+  document.getElementById('inadimplentes-count').textContent = lista.length
+    ? `${lista.length} aluno(s)`
+    : '';
+
+  el.innerHTML = lista.length
+    ? lista.map((i) => `
+        <div class="transaction-item">
+          <span class="transaction-icon ${i.matricula_status === 'suspensa' ? 'vencido' : 'pendente'}">
+            ${Icons.icon('alert-triangle', { size: 16 })}
+          </span>
+          <div class="transaction-info">
+            <strong>${i.nome}</strong>
+            <span>${i.matricula_status === 'suspensa' ? 'Suspensa' : 'Vencida'} há ${i.dias_atraso} dia(s) — venceu em ${formatData(i.data_vencimento)}</span>
+          </div>
+          <a href="alunos.html" class="btn btn-ghost btn-sm">Ver aluno</a>
+        </div>
+      `).join('')
+    : '<div class="empty-state">Nenhum aluno inadimplente no momento.</div>';
 }
 
 carregarFinanceiro();

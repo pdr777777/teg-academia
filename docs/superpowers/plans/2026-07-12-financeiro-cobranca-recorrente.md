@@ -1698,5 +1698,7 @@ Tasks 1→10 são estritamente sequenciais (cada uma depende da anterior: migrat
 
 Depois da Task 10, rode a suíte inteira em modo serial (evita duas tasks disputando a mesma linha da tabela `configuracoes` em paralelo):
 
-Run: `cd backend && npm test`
+Run: `cd backend && NODE_ENV=test npx jest --runInBand --forceExit`
 Expected: todos os testes de `src/**/*.test.js` passam, incluindo os das Tasks 1-10.
+
+Nota: `npm test` (o script do `package.json`) quebra em máquinas Windows porque `cmd.exe` não entende a sintaxe `NODE_ENV=test comando` — use sempre `NODE_ENV=test npx jest ...` diretamente, como em todos os outros passos deste plano.

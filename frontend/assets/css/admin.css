@@ -177,6 +177,7 @@
   background: var(--color-success-soft); color: var(--color-success);
 }
 .transaction-icon.pendente { background: var(--color-warning-soft); color: var(--color-warning); }
+.transaction-icon.vencido { background: var(--color-danger-soft); color: var(--color-danger); }
 .transaction-info { flex: 1; min-width: 0; }
 .transaction-info strong { display: block; font-size: 0.88rem; }
 .transaction-info span { font-size: 0.76rem; color: var(--color-muted); }

@@ -12,7 +12,9 @@ router.get('/dashboard', authMiddleware, async (req, res, next) => {
         `SELECT u.id, u.nome, u.email, u.foto_url, u.xp, u.sequencia_atual, u.maior_sequencia,
                 m.status as matricula_status, m.data_vencimento, p.nome as plano_nome
          FROM usuarios u
-         LEFT JOIN matriculas m ON m.usuario_id = u.id AND m.status = 'ativa'
+         LEFT JOIN LATERAL (
+           SELECT * FROM matriculas WHERE usuario_id = u.id ORDER BY created_at DESC LIMIT 1
+         ) m ON true
          LEFT JOIN planos p ON p.id = m.plano_id
          WHERE u.id = $1`,
         [req.user.id]
@@ -49,7 +51,14 @@ router.get('/dashboard', authMiddleware, async (req, res, next) => {
 router.get('/perfil', authMiddleware, async (req, res, next) => {
   try {
     const { rows: [user] } = await pool.query(
-      'SELECT id, nome, email, telefone, cpf, data_nascimento, foto_url FROM usuarios WHERE id = $1',
+      `SELECT u.id, u.nome, u.email, u.telefone, u.cpf, u.data_nascimento, u.foto_url,
+              m.status as matricula_status, m.data_vencimento, p.nome as plano_nome
+       FROM usuarios u
+       LEFT JOIN LATERAL (
+         SELECT * FROM matriculas WHERE usuario_id = u.id ORDER BY created_at DESC LIMIT 1
+       ) m ON true
+       LEFT JOIN planos p ON p.id = m.plano_id
+       WHERE u.id = $1`,
       [req.user.id]
     );
     res.json(user);

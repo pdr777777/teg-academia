@@ -200,6 +200,27 @@ function renderLineChart(containerId, dados, opts) {
   });
 }
 
+/* ===== Banner de bloqueio por matrícula suspensa ===== */
+function renderBloqueioBanner(containerId, dados) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+
+  if (dados.matricula_status !== 'suspensa') {
+    el.innerHTML = '';
+    return;
+  }
+
+  el.innerHTML =
+    '<div class="bloqueio-banner" data-reveal>' +
+      '<span class="bloqueio-banner-icon">' + Icons.icon('alert-triangle', { size: 20 }) + '</span>' +
+      '<div>' +
+        '<strong>Sua matrícula está com pagamento pendente.</strong>' +
+        '<span>Vencida desde ' + formatData(dados.data_vencimento) + '. Regularize pelo link enviado no WhatsApp ou na recepção para voltar a acessar treinos, aulas e ranking.</span>' +
+      '</div>' +
+    '</div>';
+  initReveal();
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   initReveal();
   initRipple();
