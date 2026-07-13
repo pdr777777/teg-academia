@@ -1,6 +1,12 @@
 // backend/src/jobs/jobWorker.test.js
+jest.mock('../services/gateway', () => {
+  const actual = jest.requireActual('../services/gateway');
+  return { ...actual, getGatewayAdapter: jest.fn(actual.getGatewayAdapter) };
+});
+
 const pool = require('../config/db');
 const { criarUsuario, criarPlano, criarMatricula } = require('../testUtils/fixtures');
+const { getGatewayAdapter } = require('../services/gateway');
 const { processarVencimentos } = require('./jobWorker');
 
 describe('processarVencimentos', () => {
@@ -104,5 +110,67 @@ describe('processarVencimentos', () => {
     expect(atualizada.status).toBe('vencida');
 
     await limpar({ usuarios: [user.id], planos: [plano.id], matriculas: [matricula.id] });
+  });
+
+  test('isola falha do gateway numa matrícula sem travar as demais nem as transições de status', async () => {
+    const userFalha = await criarUsuario();
+    const userOk = await criarUsuario();
+    const userVencida = await criarUsuario();
+    const plano = await criarPlano();
+
+    const matriculaFalha = await criarMatricula({
+      usuario_id: userFalha.id, plano_id: plano.id, status: 'ativa', data_vencimento: new Date(),
+    });
+    const matriculaOk = await criarMatricula({
+      usuario_id: userOk.id, plano_id: plano.id, status: 'ativa', data_vencimento: new Date(),
+    });
+    const matriculaVencida = await criarMatricula({
+      usuario_id: userVencida.id, plano_id: plano.id, status: 'ativa',
+      data_vencimento: new Date(Date.now() - 2 * 86400000),
+    });
+
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    getGatewayAdapter.mockImplementationOnce(() => ({
+      suportaWebhook: false,
+      async criarCobranca({ usuario }) {
+        if (usuario.id === userFalha.id) {
+          throw new Error('gateway indisponível (simulado)');
+        }
+        return { gateway_charge_id: 'charge-teste', link_pagamento: 'http://teste/pagar' };
+      },
+      async processarWebhook() {
+        throw new Error('não usado neste teste');
+      },
+    }));
+
+    await expect(processarVencimentos()).resolves.not.toThrow();
+
+    const { rows: pagamentosFalha } = await pool.query(
+      'SELECT * FROM pagamentos WHERE matricula_id = $1', [matriculaFalha.id]
+    );
+    expect(pagamentosFalha).toHaveLength(0);
+
+    const { rows: pagamentosOk } = await pool.query(
+      'SELECT * FROM pagamentos WHERE matricula_id = $1', [matriculaOk.id]
+    );
+    expect(pagamentosOk).toHaveLength(1);
+    expect(pagamentosOk[0].status).toBe('pendente');
+
+    const { rows: [vencidaDepois] } = await pool.query(
+      'SELECT status FROM matriculas WHERE id = $1', [matriculaVencida.id]
+    );
+    expect(vencidaDepois.status).toBe('vencida');
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining(String(matriculaFalha.id)),
+      expect.any(String)
+    );
+    consoleErrorSpy.mockRestore();
+
+    await limpar({
+      usuarios: [userFalha.id, userOk.id, userVencida.id],
+      planos: [plano.id],
+      matriculas: [matriculaFalha.id, matriculaOk.id, matriculaVencida.id],
+    });
   });
 });

@@ -122,22 +122,29 @@ async function processarVencimentos() {
   `);
 
   for (const m of vencendoHoje) {
-    const { gateway_charge_id, link_pagamento } = await adapter.criarCobranca({
-      valor: m.preco_mensal,
-      vencimento: m.data_vencimento,
-      usuario: { id: m.usuario_id, telefone: m.telefone },
-    });
+    try {
+      const { gateway_charge_id, link_pagamento } = await adapter.criarCobranca({
+        valor: m.preco_mensal,
+        vencimento: m.data_vencimento,
+        usuario: { id: m.usuario_id, telefone: m.telefone },
+      });
 
-    await pool.query(
-      `INSERT INTO pagamentos (matricula_id, usuario_id, valor, status, gateway, gateway_charge_id, link_pagamento, gerado_automaticamente)
-       VALUES ($1, $2, $3, 'pendente', $4, $5, $6, TRUE)`,
-      [m.matricula_id, m.usuario_id, m.preco_mensal, process.env.PAYMENT_GATEWAY || 'manual', gateway_charge_id, link_pagamento]
-    );
+      await pool.query(
+        `INSERT INTO pagamentos (matricula_id, usuario_id, valor, status, gateway, gateway_charge_id, link_pagamento, gerado_automaticamente)
+         VALUES ($1, $2, $3, 'pendente', $4, $5, $6, TRUE)`,
+        [m.matricula_id, m.usuario_id, m.preco_mensal, process.env.PAYMENT_GATEWAY || 'manual', gateway_charge_id, link_pagamento]
+      );
 
-    await pool.query(
-      `INSERT INTO jobs (tipo, payload, agendado_para) VALUES ($1, $2, NOW())`,
-      ['whatsapp_cobranca_gerada', JSON.stringify({ telefone: m.telefone, nome: m.nome, link_pagamento })]
-    );
+      await pool.query(
+        `INSERT INTO jobs (tipo, payload, agendado_para) VALUES ($1, $2, NOW())`,
+        ['whatsapp_cobranca_gerada', JSON.stringify({ telefone: m.telefone, nome: m.nome, link_pagamento })]
+      );
+    } catch (err) {
+      // Isola a falha por matrícula: um erro do gateway (rede, API fora do ar
+      // etc.) numa cobrança não pode impedir a geração das outras nem as fases
+      // 2/3 (marcar vencida/suspensa), que rodam incondicionalmente depois.
+      console.error(`[JobWorker] falha ao gerar cobrança para matrícula ${m.matricula_id}:`, err.message);
+    }
   }
 
   // 2. Ativas com vencimento no passado → vencida
