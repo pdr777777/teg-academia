@@ -1,11 +1,10 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const pool = require('../config/db');
 
-let contador = 0;
 function unico() {
-  contador += 1;
-  return `${Date.now()}_${contador}`;
+  return crypto.randomUUID();
 }
 
 async function criarUsuario(overrides = {}) {
