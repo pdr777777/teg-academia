@@ -129,8 +129,8 @@ router.get('/financeiro', authMiddleware, requireRole('dono'), async (req, res, 
   }
 });
 
-// GET /api/admin/alunos
-router.get('/alunos', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+// GET /api/admin/alunos — admin/dono usam pra gestão completa, professor usa só pra buscar aluno e atribuir treino
+router.get('/alunos', authMiddleware, requireRole('admin', 'dono', 'professor'), async (req, res, next) => {
   try {
     const { busca, page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;

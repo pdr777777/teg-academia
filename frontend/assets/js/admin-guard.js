@@ -11,14 +11,14 @@
   })
     .then((res) => (res.ok ? res.json() : Promise.reject()))
     .then((user) => {
-      if (!['admin', 'dono'].includes(user.role)) {
+      if (!['admin', 'dono', 'professor'].includes(user.role)) {
         window.location.href = '/dashboard.html';
         return;
       }
 
       const requiredRole = document.body.dataset.requireRole;
       if (requiredRole && user.role !== requiredRole) {
-        window.location.href = 'index.html';
+        window.location.href = user.role === 'professor' ? 'treinos.html' : 'index.html';
         return;
       }
 
@@ -27,10 +27,15 @@
           el.style.display = 'none';
         });
       }
+      if (user.role === 'professor') {
+        document.querySelectorAll('[data-role-adminup]').forEach((el) => {
+          el.style.display = 'none';
+        });
+      }
 
       const sidebarFoot = document.querySelector('.sidebar-foot');
       if (sidebarFoot && typeof iniciais === 'function') {
-        const roleLabel = user.role === 'dono' ? 'Dono da academia' : 'Administrador';
+        const roleLabel = user.role === 'dono' ? 'Dono da academia' : user.role === 'professor' ? 'Professor' : 'Administrador';
         const userEl = document.createElement('div');
         userEl.className = 'sidebar-user';
         userEl.innerHTML = `
