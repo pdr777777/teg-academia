@@ -60,13 +60,20 @@ router.get('/dashboard', authMiddleware, requireRole('admin', 'dono'), async (re
 // GET /api/admin/financeiro — dashboard financeiro do dono
 router.get('/financeiro', authMiddleware, requireRole('dono'), async (req, res, next) => {
   try {
-    const [ativos, faturamentoMes, faturamentoMesAnterior, inadimplentes, novos, config] = await Promise.all([
+    const [ativos, faturamentoMes, faturamentoMesAnterior, inadimplentes, novos, config, inadimplentesDetalhe] = await Promise.all([
       pool.query(`SELECT COUNT(*)::int AS total FROM matriculas WHERE status = 'ativa'`),
       pool.query(`SELECT COALESCE(SUM(valor), 0)::numeric AS total FROM pagamentos WHERE status = 'pago' AND DATE_TRUNC('month', data_pagamento) = DATE_TRUNC('month', NOW())`),
       pool.query(`SELECT COALESCE(SUM(valor), 0)::numeric AS total FROM pagamentos WHERE status = 'pago' AND DATE_TRUNC('month', data_pagamento) = DATE_TRUNC('month', NOW() - INTERVAL '1 month')`),
       pool.query(`SELECT COUNT(*)::int AS total FROM matriculas WHERE status = 'vencida'`),
       pool.query(`SELECT COUNT(*)::int AS total FROM usuarios WHERE role = 'aluno' AND DATE_TRUNC('month', created_at) = DATE_TRUNC('month', NOW())`),
       pool.query(`SELECT * FROM configuracoes WHERE id = 1`),
+      pool.query(`
+        SELECT u.id AS usuario_id, u.nome, u.telefone, m.status AS matricula_status, m.data_vencimento,
+               (CURRENT_DATE - m.data_vencimento::date)::int AS dias_atraso
+        FROM matriculas m JOIN usuarios u ON u.id = m.usuario_id
+        WHERE m.status IN ('vencida', 'suspensa')
+        ORDER BY m.data_vencimento ASC
+      `),
     ]);
 
     const { rows: ticketRow } = await pool.query(
@@ -123,6 +130,8 @@ router.get('/financeiro', authMiddleware, requireRole('dono'), async (req, res, 
           ? clamp((novos_mes / cfg.meta_novos_alunos_mensal) * 100)
           : 0,
       },
+      dias_tolerancia_bloqueio: cfg.dias_tolerancia_bloqueio,
+      inadimplentes_detalhe: inadimplentesDetalhe.rows,
     });
   } catch (err) {
     next(err);
