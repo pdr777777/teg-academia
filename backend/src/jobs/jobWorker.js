@@ -135,16 +135,17 @@ async function agendarAutomacoes() {
 async function processarVencimentos() {
   const adapter = getGatewayAdapter();
 
-  // 1. Matrículas ativas vencendo hoje: gera a cobrança da próxima renovação.
-  //    Não mexe em status/data_vencimento aqui — só a confirmação do
-  //    pagamento (manual ou via webhook) avança o ciclo, pra não dar
-  //    carência automática antes da tolerância configurada.
+  // 1. Matrículas ativas vencendo hoje (ou já vencidas sem cobrança gerada,
+  //    caso o worker tenha ficado fora do ar no dia exato): gera a cobrança
+  //    da próxima renovação. Não mexe em status/data_vencimento aqui — só a
+  //    confirmação do pagamento (manual ou via webhook) avança o ciclo, pra
+  //    não dar carência automática antes da tolerância configurada.
   const { rows: vencendoHoje } = await pool.query(`
-    SELECT m.id AS matricula_id, m.usuario_id, m.data_vencimento, p.preco_mensal, u.telefone, u.nome
+    SELECT m.id AS matricula_id, m.usuario_id, m.data_vencimento, p.preco_mensal, p.duracao_dias, u.telefone, u.nome
     FROM matriculas m
     JOIN planos p ON p.id = m.plano_id
     JOIN usuarios u ON u.id = m.usuario_id
-    WHERE m.status = 'ativa' AND m.data_vencimento::date = CURRENT_DATE
+    WHERE m.status = 'ativa' AND m.data_vencimento::date <= CURRENT_DATE
       AND NOT EXISTS (
         SELECT 1 FROM pagamentos
         WHERE matricula_id = m.id AND gerado_automaticamente = TRUE AND created_at::date = CURRENT_DATE
@@ -153,8 +154,11 @@ async function processarVencimentos() {
 
   for (const m of vencendoHoje) {
     try {
+      const meses = Math.round(m.duracao_dias / 30);
+      const valor = Number((m.preco_mensal * meses).toFixed(2));
+
       const { gateway_charge_id, link_pagamento } = await adapter.criarCobranca({
-        valor: m.preco_mensal,
+        valor,
         vencimento: m.data_vencimento,
         usuario: { id: m.usuario_id, telefone: m.telefone },
       });
@@ -162,7 +166,7 @@ async function processarVencimentos() {
       await pool.query(
         `INSERT INTO pagamentos (matricula_id, usuario_id, valor, status, gateway, gateway_charge_id, link_pagamento, gerado_automaticamente)
          VALUES ($1, $2, $3, 'pendente', $4, $5, $6, TRUE)`,
-        [m.matricula_id, m.usuario_id, m.preco_mensal, process.env.PAYMENT_GATEWAY || 'manual', gateway_charge_id, link_pagamento]
+        [m.matricula_id, m.usuario_id, valor, process.env.PAYMENT_GATEWAY || 'manual', gateway_charge_id, link_pagamento]
       );
 
       await pool.query(

@@ -41,6 +41,43 @@ describe('processarVencimentos', () => {
     await limpar({ usuarios: [user.id], planos: [plano.id], matriculas: [matricula.id] });
   });
 
+  test('cobra o valor do período completo, não só a mensalidade, pra plano com duração diferente de 30 dias', async () => {
+    const user = await criarUsuario();
+    const plano = await criarPlano({ preco_mensal: 109.9, duracao_dias: 90 });
+    const matricula = await criarMatricula({
+      usuario_id: user.id, plano_id: plano.id, status: 'ativa', data_vencimento: new Date(),
+    });
+
+    await processarVencimentos();
+
+    const { rows: pagamentos } = await pool.query(
+      'SELECT * FROM pagamentos WHERE matricula_id = $1', [matricula.id]
+    );
+    expect(pagamentos).toHaveLength(1);
+    expect(Number(pagamentos[0].valor)).toBe(329.7);
+
+    await limpar({ usuarios: [user.id], planos: [plano.id], matriculas: [matricula.id] });
+  });
+
+  test('gera cobrança pra matrícula ativa cujo vencimento já passou (worker ficou fora do ar no dia exato)', async () => {
+    const user = await criarUsuario();
+    const plano = await criarPlano({ preco_mensal: 109.9, duracao_dias: 30 });
+    const matricula = await criarMatricula({
+      usuario_id: user.id, plano_id: plano.id, status: 'ativa',
+      data_vencimento: new Date(Date.now() - 3 * 86400000),
+    });
+
+    await processarVencimentos();
+
+    const { rows: pagamentos } = await pool.query(
+      'SELECT * FROM pagamentos WHERE matricula_id = $1', [matricula.id]
+    );
+    expect(pagamentos).toHaveLength(1);
+    expect(pagamentos[0].gerado_automaticamente).toBe(true);
+
+    await limpar({ usuarios: [user.id], planos: [plano.id], matriculas: [matricula.id] });
+  });
+
   test('não duplica cobrança se rodar duas vezes no mesmo dia', async () => {
     const user = await criarUsuario();
     const plano = await criarPlano();
