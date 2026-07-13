@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 const whatsapp = require('../services/whatsappService');
+const { getGatewayAdapter } = require('../services/gateway');
 
 async function processarJob(job) {
   const { tipo, payload } = job;
@@ -101,6 +102,61 @@ async function agendarAutomacoes() {
   }
 }
 
+async function processarVencimentos() {
+  const adapter = getGatewayAdapter();
+
+  // 1. Matrículas ativas vencendo hoje: gera a cobrança da próxima renovação.
+  //    Não mexe em status/data_vencimento aqui — só a confirmação do
+  //    pagamento (manual ou via webhook) avança o ciclo, pra não dar
+  //    carência automática antes da tolerância configurada.
+  const { rows: vencendoHoje } = await pool.query(`
+    SELECT m.id AS matricula_id, m.usuario_id, m.data_vencimento, p.preco_mensal, u.telefone, u.nome
+    FROM matriculas m
+    JOIN planos p ON p.id = m.plano_id
+    JOIN usuarios u ON u.id = m.usuario_id
+    WHERE m.status = 'ativa' AND m.data_vencimento::date = CURRENT_DATE
+      AND NOT EXISTS (
+        SELECT 1 FROM pagamentos
+        WHERE matricula_id = m.id AND gerado_automaticamente = TRUE AND created_at::date = CURRENT_DATE
+      )
+  `);
+
+  for (const m of vencendoHoje) {
+    const { gateway_charge_id, link_pagamento } = await adapter.criarCobranca({
+      valor: m.preco_mensal,
+      vencimento: m.data_vencimento,
+      usuario: { id: m.usuario_id, telefone: m.telefone },
+    });
+
+    await pool.query(
+      `INSERT INTO pagamentos (matricula_id, usuario_id, valor, status, gateway, gateway_charge_id, link_pagamento, gerado_automaticamente)
+       VALUES ($1, $2, $3, 'pendente', $4, $5, $6, TRUE)`,
+      [m.matricula_id, m.usuario_id, m.preco_mensal, process.env.PAYMENT_GATEWAY || 'manual', gateway_charge_id, link_pagamento]
+    );
+
+    await pool.query(
+      `INSERT INTO jobs (tipo, payload, agendado_para) VALUES ($1, $2, NOW())`,
+      ['whatsapp_cobranca_gerada', JSON.stringify({ telefone: m.telefone, nome: m.nome, link_pagamento })]
+    );
+  }
+
+  // 2. Ativas com vencimento no passado → vencida
+  await pool.query(`
+    UPDATE matriculas SET status = 'vencida', updated_at = NOW()
+    WHERE status = 'ativa' AND data_vencimento::date < CURRENT_DATE
+  `);
+
+  // 3. Vencidas além da tolerância configurada → suspensa
+  const { rows: [{ dias_tolerancia_bloqueio }] } = await pool.query(
+    'SELECT dias_tolerancia_bloqueio FROM configuracoes WHERE id = 1'
+  );
+  await pool.query(
+    `UPDATE matriculas SET status = 'suspensa', updated_at = NOW()
+     WHERE status = 'vencida' AND data_vencimento::date <= CURRENT_DATE - $1::int`,
+    [dias_tolerancia_bloqueio]
+  );
+}
+
 async function executarJobsPendentes() {
   const { rows: jobs } = await pool.query(
     `UPDATE jobs SET status = 'processando', tentativas = tentativas + 1
@@ -139,4 +195,4 @@ function startJobWorker() {
   console.log('⚙️  JobWorker iniciado');
 }
 
-module.exports = { startJobWorker };
+module.exports = { startJobWorker, processarVencimentos };

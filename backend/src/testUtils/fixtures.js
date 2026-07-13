@@ -38,13 +38,21 @@ async function criarPlano(overrides = {}) {
 }
 
 async function criarMatricula(overrides) {
+  // data_inicio precisa ser sempre anterior a data_vencimento (chk_matriculas_datas,
+  // migration 016). Derivamos de data_vencimento em vez de confiar no DEFAULT NOW()
+  // da coluna, senão matrículas com vencimento hoje/passado (comuns em testes de
+  // jobWorker) violam a constraint.
+  const dataVencimento = overrides.data_vencimento || new Date(Date.now() + 30 * 86400000);
+  const dataInicio = overrides.data_inicio || new Date(new Date(dataVencimento).getTime() - 30 * 86400000);
+
   const { rows: [matricula] } = await pool.query(
-    `INSERT INTO matriculas (usuario_id, plano_id, data_vencimento, status)
-     VALUES ($1, $2, $3, $4) RETURNING *`,
+    `INSERT INTO matriculas (usuario_id, plano_id, data_inicio, data_vencimento, status)
+     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
     [
       overrides.usuario_id,
       overrides.plano_id,
-      overrides.data_vencimento || new Date(Date.now() + 30 * 86400000),
+      dataInicio,
+      dataVencimento,
       overrides.status || 'ativa',
     ]
   );
