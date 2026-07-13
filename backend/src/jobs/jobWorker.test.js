@@ -8,12 +8,9 @@ const pool = require('../config/db');
 const { criarUsuario, criarPlano, criarMatricula } = require('../testUtils/fixtures');
 const { getGatewayAdapter } = require('../services/gateway');
 const { processarVencimentos } = require('./jobWorker');
+const { agendarAutomacoes, processarJob } = require('./jobWorker');
 
 describe('processarVencimentos', () => {
-  afterAll(async () => {
-    await pool.end();
-  });
-
   async function limpar(ids) {
     await pool.query('DELETE FROM pagamentos WHERE matricula_id = ANY($1)', [ids.matriculas]);
     await pool.query('DELETE FROM matriculas WHERE id = ANY($1)', [ids.matriculas]);
@@ -172,5 +169,54 @@ describe('processarVencimentos', () => {
       planos: [plano.id],
       matriculas: [matriculaFalha.id, matriculaOk.id, matriculaVencida.id],
     });
+  });
+});
+
+describe('processarJob — novos tipos', () => {
+  test('whatsapp_cobranca_gerada não lança erro', async () => {
+    await expect(processarJob({
+      tipo: 'whatsapp_cobranca_gerada',
+      payload: { telefone: '67999999999', nome: 'Maria', link_pagamento: 'https://pay.example.com/x' },
+    })).resolves.not.toThrow();
+  });
+
+  test('whatsapp_atraso não lança erro', async () => {
+    await expect(processarJob({
+      tipo: 'whatsapp_atraso',
+      payload: { telefone: '67999999999', nome: 'Maria', dias_atraso: 3 },
+    })).resolves.not.toThrow();
+  });
+});
+
+describe('agendarAutomacoes — lembrete de atraso', () => {
+  afterAll(async () => {
+    await pool.end();
+  });
+
+  test('agenda job whatsapp_atraso pra matrícula vencida e não duplica no mesmo dia', async () => {
+    const user = await criarUsuario();
+    const plano = await criarPlano();
+    const matricula = await criarMatricula({
+      usuario_id: user.id, plano_id: plano.id, status: 'vencida',
+      data_vencimento: new Date(Date.now() - 1 * 86400000),
+    });
+
+    await pool.query(`DELETE FROM jobs WHERE tipo = 'whatsapp_atraso'`);
+    await pool.query(`DELETE FROM automacoes_log WHERE usuario_id = $1 AND tipo = 'atraso'`, [user.id]);
+
+    await agendarAutomacoes();
+    await agendarAutomacoes();
+
+    const { rows: jobs } = await pool.query(
+      `SELECT * FROM jobs WHERE tipo = 'whatsapp_atraso' AND payload->>'telefone' = $1`,
+      [user.telefone]
+    );
+    expect(jobs).toHaveLength(1);
+
+    await pool.query('DELETE FROM jobs WHERE id = ANY($1)', [jobs.map((j) => j.id)]);
+    await pool.query(`DELETE FROM automacoes_log WHERE usuario_id = $1`, [user.id]);
+    await pool.query('DELETE FROM matriculas WHERE id = $1', [matricula.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [user.id]);
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
   });
 });

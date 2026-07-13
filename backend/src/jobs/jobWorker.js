@@ -11,6 +11,10 @@ async function processarJob(job) {
     await whatsapp.enviarLembreteVencimento(payload.telefone, payload.nome, payload.dias_restantes);
   } else if (tipo === 'whatsapp_aniversario') {
     await whatsapp.enviarPaizens(payload.telefone, payload.nome);
+  } else if (tipo === 'whatsapp_cobranca_gerada') {
+    await whatsapp.enviarCobrancaGerada(payload.telefone, payload.nome, payload.link_pagamento);
+  } else if (tipo === 'whatsapp_atraso') {
+    await whatsapp.enviarLembreteAtraso(payload.telefone, payload.nome, payload.dias_atraso);
   }
 }
 
@@ -72,6 +76,32 @@ async function agendarAutomacoes() {
     await pool.query(
       `INSERT INTO automacoes_log (usuario_id, tipo, mensagem, status) VALUES ($1, 'vencimento', $2, 'enviado')`,
       [v.id, `Vencimento em ${v.dias_restantes} dias`]
+    );
+  }
+
+  // Atraso: matrícula vencida/suspensa, repete a cada 2 dias até regularizar
+  const { rows: atrasados } = await pool.query(`
+    SELECT u.id, u.nome, u.telefone,
+           (CURRENT_DATE - m.data_vencimento::date)::int AS dias_atraso
+    FROM matriculas m JOIN usuarios u ON u.id = m.usuario_id
+    WHERE m.status IN ('vencida', 'suspensa') AND m.data_vencimento::date < CURRENT_DATE
+  `);
+
+  for (const a of atrasados) {
+    const jaEnviou = await pool.query(
+      `SELECT id FROM automacoes_log WHERE usuario_id = $1 AND tipo = 'atraso'
+       AND created_at > NOW() - INTERVAL '2 days'`,
+      [a.id]
+    );
+    if (jaEnviou.rows.length) continue;
+
+    await pool.query(
+      `INSERT INTO jobs (tipo, payload, agendado_para) VALUES ($1, $2, NOW())`,
+      ['whatsapp_atraso', JSON.stringify({ telefone: a.telefone, nome: a.nome, dias_atraso: a.dias_atraso })]
+    );
+    await pool.query(
+      `INSERT INTO automacoes_log (usuario_id, tipo, mensagem, status) VALUES ($1, 'atraso', $2, 'enviado')`,
+      [a.id, `Lembrete de atraso: ${a.dias_atraso} dia(s)`]
     );
   }
 
@@ -192,6 +222,7 @@ async function executarJobsPendentes() {
 function startJobWorker() {
   setInterval(async () => {
     try {
+      await processarVencimentos();
       await agendarAutomacoes();
       await executarJobsPendentes();
     } catch (err) {
@@ -202,4 +233,4 @@ function startJobWorker() {
   console.log('⚙️  JobWorker iniciado');
 }
 
-module.exports = { startJobWorker, processarVencimentos };
+module.exports = { startJobWorker, processarVencimentos, agendarAutomacoes, processarJob };
