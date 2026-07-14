@@ -1010,7 +1010,7 @@ git commit -m "feat(ui): layout do novo dashboard (sidebar, stats, drawer de con
 <body>
 
   <div class="dash-shell">
-    <aside class="glass sidebar" id="sidebar">
+    <aside class="glass sidebar" id="dash-sidebar">
       <a href="dashboard.html" class="sb-logo">
         <img src="assets/img/logo.svg" alt="" class="sb-logo-img" onerror="this.style.display='none'" />
         <span>TEG ACADEMIA</span>
@@ -1028,7 +1028,7 @@ git commit -m "feat(ui): layout do novo dashboard (sidebar, stats, drawer de con
       </div>
     </aside>
 
-    <button type="button" class="glass sidebar-toggle" id="btn-sidebar-toggle" data-icon="menu" data-icon-size="18" aria-label="Abrir menu" aria-expanded="false"></button>
+    <button type="button" class="glass sidebar-toggle" id="btn-dash-sidebar-toggle" data-icon="menu" data-icon-size="18" aria-label="Abrir menu" aria-expanded="false"></button>
     <div class="sidebar-scrim" id="sidebar-scrim"></div>
 
     <main class="dash-main aluno-main">
@@ -1428,8 +1428,13 @@ document.getElementById('btn-checkin').addEventListener('click', async (ev) => {
 });
 
 // ===== Sidebar mobile =====
-const btnSidebarToggle = document.getElementById('btn-sidebar-toggle');
-const sidebarEl = document.getElementById('sidebar');
+// IDs prefixados com "dash-" de propósito: ui.js já tem um handler genérico
+// pré-existente pra #btn-sidebar-toggle/#sidebar (usado pelo painel admin) que
+// entra em conflito com este handler se os IDs coincidirem — os dois toggles
+// disparam no mesmo clique e um desfaz o que o outro faz (a sidebar nunca abre
+// visualmente, só o scrim). Descoberto na verificação manual desta task.
+const btnSidebarToggle = document.getElementById('btn-dash-sidebar-toggle');
+const sidebarEl = document.getElementById('dash-sidebar');
 const sidebarScrim = document.getElementById('sidebar-scrim');
 
 function fecharSidebar() {
