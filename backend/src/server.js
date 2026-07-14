@@ -5,6 +5,10 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
 const errorMiddleware = require('./middleware/errorMiddleware');
+const requestId = require('./middleware/requestId');
+const requestLogger = require('./middleware/requestLogger');
+const { register, metricsMiddleware } = require('./middleware/metrics');
+const pool = require('./config/db');
 
 const authRoutes = require('./routes/auth');
 const alunosRoutes = require('./routes/alunos');
@@ -30,6 +34,7 @@ if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
 
 const app = express();
 
+app.use(requestId);
 app.use(helmet());
 const ALLOWED_ORIGINS = [
   'https://teg-academia.pages.dev',
@@ -57,13 +62,24 @@ app.use(cors({
     : '*',
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  },
+}));
 
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
-const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
+// Rate limiting, log de requisição e métricas ficam fora do ambiente de teste:
+// o limite de 10 req/15min em /api/auth é apertado demais pro volume de uma
+// suíte de integração, e o log/métrica de cada chamada só faz ruído nos testes.
+if (process.env.NODE_ENV !== 'test') {
+  const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
+  const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
 
-app.use('/api', limiter);
-app.use('/api/auth', authLimiter);
+  app.use('/api', limiter);
+  app.use('/api/auth', authLimiter);
+  app.use(requestLogger);
+  app.use(metricsMiddleware);
+}
 
 app.use('/api/auth', authRoutes);
 app.use('/api/alunos', alunosRoutes);
@@ -83,7 +99,32 @@ app.use('/api/equipe', equipeRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/webhooks', webhooksRoutes);
 
-app.get('/health', (req, res) => res.json({ ok: true }));
+app.get('/health', async (req, res) => {
+  const health = { status: 'ok', timestamp: new Date().toISOString(), dependencies: {} };
+
+  const inicio = process.hrtime.bigint();
+  try {
+    await pool.query('SELECT 1');
+    health.dependencies.database = {
+      status: 'ok',
+      latencyMs: Math.round(Number(process.hrtime.bigint() - inicio) / 1e6 * 100) / 100,
+    };
+  } catch (err) {
+    health.status = 'degraded';
+    health.dependencies.database = { status: 'error', error: err.message };
+  }
+
+  res.status(health.status === 'ok' ? 200 : 503).json(health);
+});
+
+app.get('/metrics', async (req, res, next) => {
+  try {
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics());
+  } catch (err) {
+    next(err);
+  }
+});
 
 app.use(errorMiddleware);
 

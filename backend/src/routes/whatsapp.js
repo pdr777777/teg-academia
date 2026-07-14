@@ -46,6 +46,17 @@ async function encontrarOuCriarLead(telefone, nomeContato) {
 // POST /api/whatsapp/webhook — mensagens recebidas. Responde 200 rápido pra
 // Meta (exige ack em poucos segundos) e processa a IA depois, sem bloquear.
 router.post('/webhook', (req, res) => {
+  try {
+    const assinaturaValida = whatsapp.validarAssinaturaWebhook(
+      req.rawBody,
+      req.headers['x-hub-signature-256']
+    );
+    if (!assinaturaValida) return res.sendStatus(401);
+  } catch (err) {
+    console.error('[WhatsApp webhook] falha ao validar assinatura:', err.message);
+    return res.sendStatus(500);
+  }
+
   res.sendStatus(200);
 
   const message = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];

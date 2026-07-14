@@ -50,8 +50,8 @@ router.get('/', authMiddleware, requireRole('admin', 'dono'), async (req, res, n
     const conditions = [];
     const params = [limit, offset];
 
-    if (status) { conditions.push(`status_pipeline = $${params.push(status)}`); }
-    if (busca) { conditions.push(`(nome ILIKE $${params.push('%' + busca + '%')} OR telefone ILIKE $${params.push('%' + busca + '%')})`); }
+    if (status) { conditions.push(`l.status_pipeline = $${params.push(status)}`); }
+    if (busca) { conditions.push(`(l.nome ILIKE $${params.push('%' + busca + '%')} OR l.telefone ILIKE $${params.push('%' + busca + '%')})`); }
 
     const { rows } = await pool.query(
       `SELECT l.*, u.nome as indicador_nome

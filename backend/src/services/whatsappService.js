@@ -1,4 +1,28 @@
+const crypto = require('crypto');
+
 const GRAPH_API_VERSION = 'v21.0';
+
+// Valida o header X-Hub-Signature-256 que a Meta envia em todo POST de
+// webhook, assinando o corpo bruto com HMAC-SHA256 e o App Secret.
+// https://developers.facebook.com/docs/graph-api/webhooks/getting-started#validate-payloads
+function validarAssinaturaWebhook(rawBody, signatureHeader) {
+  if (!process.env.WHATSAPP_APP_SECRET) {
+    throw new Error('WHATSAPP_APP_SECRET não configurado — não é possível validar o webhook');
+  }
+  if (!signatureHeader || !signatureHeader.startsWith('sha256=')) return false;
+
+  const assinaturaRecebida = signatureHeader.slice('sha256='.length);
+  const assinaturaEsperada = crypto
+    .createHmac('sha256', process.env.WHATSAPP_APP_SECRET)
+    .update(rawBody)
+    .digest('hex');
+
+  const bufRecebido = Buffer.from(assinaturaRecebida, 'hex');
+  const bufEsperado = Buffer.from(assinaturaEsperada, 'hex');
+  if (bufRecebido.length !== bufEsperado.length) return false;
+
+  return crypto.timingSafeEqual(bufRecebido, bufEsperado);
+}
 
 // Normaliza pra E.164 sem "+" (formato que a Cloud API espera). Assume Brasil
 // quando o número não vem com código de país.
@@ -102,4 +126,5 @@ module.exports = {
   normalizarTelefone,
   enviarCobrancaGerada,
   enviarLembreteAtraso,
+  validarAssinaturaWebhook,
 };
