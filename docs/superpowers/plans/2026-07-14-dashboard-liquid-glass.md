@@ -279,7 +279,12 @@ Adicionar dentro do `describe('processarVencimentos', ...)` existente (depois do
 
 ```js
   test('gera cobrança mesmo com notificacoes_whatsapp desativado, mas não agenda o aviso por WhatsApp', async () => {
-    const user = await criarUsuario({ notificacoes_whatsapp: false });
+    // Telefone único: o padrão '67999999999' da fixture é compartilhado por quase
+    // todo teste do arquivo, e jobs 'whatsapp_cobranca_gerada' de execuções
+    // anteriores não são limpos — filtrar só por tipo+telefone pegaria lixo de
+    // outros testes/execuções e o assert de "não agenda job" falharia por
+    // contaminação cruzada, não pela ausência real do gate.
+    const user = await criarUsuario({ notificacoes_whatsapp: false, telefone: `679${Date.now()}`.slice(0, 11) });
     const plano = await criarPlano({ preco_mensal: 109.9, duracao_dias: 30 });
     const matricula = await criarMatricula({
       usuario_id: user.id, plano_id: plano.id, status: 'ativa', data_vencimento: new Date(),

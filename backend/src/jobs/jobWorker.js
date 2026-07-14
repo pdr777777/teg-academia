@@ -27,7 +27,7 @@ async function agendarAutomacoes() {
     FROM usuarios u
     JOIN matriculas m ON m.usuario_id = u.id AND m.status = 'ativa'
     LEFT JOIN frequencias f ON f.usuario_id = u.id
-    WHERE u.role = 'aluno' AND u.ativo = TRUE
+    WHERE u.role = 'aluno' AND u.ativo = TRUE AND u.notificacoes_whatsapp = TRUE
     GROUP BY u.id, u.nome, u.telefone
     HAVING MAX(f.data) < CURRENT_DATE - INTERVAL '7 days' OR MAX(f.data) IS NULL
   `);
@@ -61,6 +61,7 @@ async function agendarAutomacoes() {
     FROM matriculas m JOIN usuarios u ON u.id = m.usuario_id
     WHERE m.status = 'ativa'
       AND m.data_vencimento BETWEEN NOW() AND NOW() + INTERVAL '3 days'
+      AND u.notificacoes_whatsapp = TRUE
   `);
 
   for (const v of vencendo) {
@@ -86,6 +87,7 @@ async function agendarAutomacoes() {
     SELECT u.id, u.nome, u.telefone
     FROM matriculas m JOIN usuarios u ON u.id = m.usuario_id
     WHERE m.status = 'vencida' AND m.data_vencimento <= CURRENT_DATE - INTERVAL '15 days'
+      AND u.notificacoes_whatsapp = TRUE
   `);
 
   for (const r of paraReativar) {
@@ -111,6 +113,7 @@ async function agendarAutomacoes() {
            (CURRENT_DATE - m.data_vencimento::date)::int AS dias_atraso
     FROM matriculas m JOIN usuarios u ON u.id = m.usuario_id
     WHERE m.status IN ('vencida', 'suspensa') AND m.data_vencimento::date < CURRENT_DATE
+      AND u.notificacoes_whatsapp = TRUE
   `);
 
   for (const a of atrasados) {
@@ -134,7 +137,7 @@ async function agendarAutomacoes() {
   // Aniversário
   const { rows: aniversariantes } = await pool.query(`
     SELECT u.id, u.nome, u.telefone FROM usuarios u
-    WHERE u.ativo = TRUE
+    WHERE u.ativo = TRUE AND u.notificacoes_whatsapp = TRUE
       AND EXTRACT(MONTH FROM u.data_nascimento) = EXTRACT(MONTH FROM NOW())
       AND EXTRACT(DAY FROM u.data_nascimento) = EXTRACT(DAY FROM NOW())
   `);
@@ -167,7 +170,8 @@ async function processarVencimentos() {
   //    confirmação do pagamento (manual ou via webhook) avança o ciclo, pra
   //    não dar carência automática antes da tolerância configurada.
   const { rows: vencendoHoje } = await pool.query(`
-    SELECT m.id AS matricula_id, m.usuario_id, m.data_vencimento, p.preco_mensal, p.duracao_dias, u.telefone, u.nome
+    SELECT m.id AS matricula_id, m.usuario_id, m.data_vencimento, p.preco_mensal, p.duracao_dias,
+           u.telefone, u.nome, u.notificacoes_whatsapp
     FROM matriculas m
     JOIN planos p ON p.id = m.plano_id
     JOIN usuarios u ON u.id = m.usuario_id
@@ -195,10 +199,12 @@ async function processarVencimentos() {
         [m.matricula_id, m.usuario_id, valor, process.env.PAYMENT_GATEWAY || 'manual', gateway_charge_id, link_pagamento]
       );
 
-      await pool.query(
-        `INSERT INTO jobs (tipo, payload, agendado_para) VALUES ($1, $2, NOW())`,
-        ['whatsapp_cobranca_gerada', JSON.stringify({ telefone: m.telefone, nome: m.nome, link_pagamento })]
-      );
+      if (m.notificacoes_whatsapp) {
+        await pool.query(
+          `INSERT INTO jobs (tipo, payload, agendado_para) VALUES ($1, $2, NOW())`,
+          ['whatsapp_cobranca_gerada', JSON.stringify({ telefone: m.telefone, nome: m.nome, link_pagamento })]
+        );
+      }
     } catch (err) {
       // Isola a falha por matrícula: um erro do gateway (rede, API fora do ar
       // etc.) numa cobrança não pode impedir a geração das outras nem as fases
