@@ -9,75 +9,80 @@
   <link rel="icon" type="image/png" href="assets/img/favicon.png" />
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/aluno.css" />
+  <link rel="stylesheet" href="assets/css/liquid-glass.css" />
   <link rel="stylesheet" href="assets/css/indicacao.css" />
   <link rel="stylesheet" href="assets/css/app-effects.css" />
   <script src="assets/js/theme.js"></script>
 </head>
 <body>
 
-  <header class="topnav">
-    <a href="dashboard.html" class="brand"><img src="assets/img/logo.svg" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ACADEMIA</span></a>
-    <nav class="topnav-links">
-      <a href="dashboard.html"><span data-icon="home" data-icon-size="16"></span>Dashboard</a>
-      <a href="treinos.html"><span data-icon="dumbbell" data-icon-size="16"></span>Treinos</a>
-      <a href="ranking.html"><span data-icon="award" data-icon-size="16"></span>Ranking</a>
-      <a href="indicacao.html" class="active"><span data-icon="link" data-icon-size="16"></span>Indicação</a>
-      <a href="perfil.html"><span data-icon="user" data-icon-size="16"></span>Perfil</a>
-    </nav>
-    <div class="topnav-right">
-      <button type="button" id="btn-theme-toggle" data-theme-toggle class="btn btn-ghost btn-sm" data-icon="sun" data-icon-size="16" title="Alternar tema"></button>
-      <button class="btn btn-ghost btn-sm" id="btn-logout"><span data-icon="log-out" data-icon-size="16"></span>Sair</button>
-      <button class="topnav-menu-btn btn-ghost btn-sm" id="btn-mobile-menu" data-icon="menu"></button>
-    </div>
-  </header>
+  <div class="dash-shell">
+    <header class="dash-topbar">
+      <a href="dashboard.html" class="sb-logo">
+        <img src="assets/img/logo.svg" alt="" class="sb-logo-img" onerror="this.style.display='none'" />
+        <span>TEG ACADEMIA</span>
+      </a>
+      <div class="dash-topbar-actions">
+        <button type="button" id="btn-logout" aria-label="Sair"><span data-icon="log-out" data-icon-size="18"></span></button>
+      </div>
+    </header>
 
-  <main class="container aluno-main">
-    <div class="page-head">
-      <div>
-        <h1>Indique e ganhe</h1>
-        <p class="text-muted">A cada amigo que se matricular usando seu link, você ganha desconto e XP.</p>
+    <main class="dash-main aluno-main">
+      <div class="page-head">
+        <div>
+          <h1>Indique e ganhe</h1>
+          <p class="text-muted">A cada amigo que se matricular usando seu link, você ganha desconto e XP.</p>
+        </div>
       </div>
-    </div>
 
-    <div class="card link-card">
-      <label>Seu link de indicação</label>
-      <div class="link-copy-row">
-        <input type="text" id="input-link" readonly />
-        <button class="btn btn-outline" id="btn-copiar"><span data-icon="copy" data-icon-size="16"></span>Copiar</button>
-        <a class="btn btn-primary" id="btn-whatsapp" target="_blank" rel="noopener"><span data-icon="whatsapp" data-icon-size="16"></span>Compartilhar</a>
+      <div class="card link-card">
+        <label>Seu link de indicação</label>
+        <div class="link-copy-row">
+          <input type="text" id="input-link" readonly />
+          <button class="btn btn-outline" id="btn-copiar"><span data-icon="copy" data-icon-size="16"></span>Copiar</button>
+          <a class="btn btn-primary" id="btn-whatsapp" target="_blank" rel="noopener"><span data-icon="whatsapp" data-icon-size="16"></span>Compartilhar</a>
+        </div>
       </div>
-    </div>
 
-    <div class="grid grid-3 stats-indicacao">
-      <div class="card stat-card" data-reveal>
-        <span class="stat-icon"><span data-icon="users"></span></span>
-        <strong id="stat-total">0</strong>
-        <span class="text-muted">Total indicados</span>
+      <div class="grid grid-3 stats-indicacao">
+        <div class="card stat-card" data-reveal>
+          <span class="stat-icon"><span data-icon="users"></span></span>
+          <strong id="stat-total">0</strong>
+          <span class="text-muted">Total indicados</span>
+        </div>
+        <div class="card stat-card" data-reveal>
+          <span class="stat-icon" style="color:var(--color-success)"><span data-icon="user-check"></span></span>
+          <strong id="stat-convertidos">0</strong>
+          <span class="text-muted">Convertidos</span>
+        </div>
+        <div class="card stat-card" data-reveal>
+          <span class="stat-icon" style="color:var(--color-warning)"><span data-icon="clock"></span></span>
+          <strong id="stat-pendentes">0</strong>
+          <span class="text-muted">Pendentes</span>
+        </div>
       </div>
-      <div class="card stat-card" data-reveal>
-        <span class="stat-icon" style="color:var(--color-success)"><span data-icon="user-check"></span></span>
-        <strong id="stat-convertidos">0</strong>
-        <span class="text-muted">Convertidos</span>
-      </div>
-      <div class="card stat-card" data-reveal>
-        <span class="stat-icon" style="color:var(--color-warning)"><span data-icon="clock"></span></span>
-        <strong id="stat-pendentes">0</strong>
-        <span class="text-muted">Pendentes</span>
-      </div>
-    </div>
 
-    <section class="card" style="margin-top:1.5rem" data-reveal>
-      <h2 style="margin-bottom:1rem">Suas indicações</h2>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Nome</th><th>Telefone</th><th>Status</th><th>Data</th></tr></thead>
-          <tbody id="indicacoes-body">
-            <tr><td colspan="4" class="loading-row"><span class="spinner"></span></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </main>
+      <section class="card" style="margin-top:1.5rem" data-reveal>
+        <h2 style="margin-bottom:1rem">Suas indicações</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nome</th><th>Telefone</th><th>Status</th><th>Data</th></tr></thead>
+            <tbody id="indicacoes-body">
+              <tr><td colspan="4" class="loading-row"><span class="spinner"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="bottom-nav-item"><span data-icon="home" data-icon-size="20"></span><span>Início</span></a>
+    <a href="treinos.html" class="bottom-nav-item"><span data-icon="dumbbell" data-icon-size="20"></span><span>Treinos</span></a>
+    <a href="ranking.html" class="bottom-nav-item"><span data-icon="award" data-icon-size="20"></span><span>Ranking</span></a>
+    <a href="indicacao.html" class="bottom-nav-item active"><span data-icon="link" data-icon-size="20"></span><span>Indicação</span></a>
+    <a href="perfil.html" class="bottom-nav-item"><span data-icon="user" data-icon-size="20"></span><span>Perfil</span></a>
+  </nav>
 
   <script src="assets/js/icons.js"></script>
   <script src="assets/js/api.js"></script>

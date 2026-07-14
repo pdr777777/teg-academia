@@ -5,6 +5,62 @@
 .aluno-main > div + section,
 .aluno-main > section + div { margin-top: 1.5rem; }
 
+/* ===== Shell (topbar + barra inferior) — compartilhado entre as telas do aluno ===== */
+.dash-shell {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+/* Site inteiro usa Bebas Neue em h1-h4 por padrão (global.css) — nas telas
+   novas do aluno a gente quer tipografia limpa normal, sem mudar isso pro
+   resto do site (admin, marketing). */
+.dash-shell h1, .dash-shell h2, .dash-shell h3, .dash-shell h4 {
+  font-family: var(--font);
+}
+
+.dash-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: env(safe-area-inset-top, 0px) 0 0.9rem;
+  margin-bottom: 0.25rem;
+}
+.sb-logo {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-weight: 700; font-size: 0.95rem; letter-spacing: 0.01em;
+}
+.sb-logo-img { width: 24px; height: 24px; }
+.dash-topbar-actions { display: flex; gap: 0.4rem; }
+.dash-topbar-actions button {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--color-surface-2); border: none; color: var(--color-muted);
+}
+
+.dash-main { display: flex; flex-direction: column; gap: 0.9rem; padding-bottom: 5.5rem; }
+
+/* ===== Barra de navegação inferior ===== */
+.bottom-nav {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  display: flex;
+  padding: 0.5rem 0.25rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  z-index: 20;
+}
+.bottom-nav-item {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+  padding: 0.3rem 0.2rem;
+  color: var(--color-muted);
+  font-size: 0.66rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.bottom-nav-item.active { color: var(--color-primary); }
+
+@media (min-width: 720px) {
+  .dash-shell { max-width: 900px; }
+}
+
 .avatar-fallback {
   width: 38px; height: 38px; border-radius: 50%;
   background: linear-gradient(135deg, var(--color-wine), var(--color-primary));

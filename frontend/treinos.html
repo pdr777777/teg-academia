@@ -9,54 +9,59 @@
   <link rel="icon" type="image/png" href="assets/img/favicon.png" />
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/aluno.css" />
+  <link rel="stylesheet" href="assets/css/liquid-glass.css" />
   <link rel="stylesheet" href="assets/css/treinos.css" />
   <link rel="stylesheet" href="assets/css/app-effects.css" />
   <script src="assets/js/theme.js"></script>
 </head>
 <body>
 
-  <header class="topnav">
-    <a href="dashboard.html" class="brand"><img src="assets/img/logo.svg" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ACADEMIA</span></a>
-    <nav class="topnav-links">
-      <a href="dashboard.html"><span data-icon="home" data-icon-size="16"></span>Dashboard</a>
-      <a href="treinos.html" class="active"><span data-icon="dumbbell" data-icon-size="16"></span>Treinos</a>
-      <a href="ranking.html"><span data-icon="award" data-icon-size="16"></span>Ranking</a>
-      <a href="indicacao.html"><span data-icon="link" data-icon-size="16"></span>Indicação</a>
-      <a href="perfil.html"><span data-icon="user" data-icon-size="16"></span>Perfil</a>
-    </nav>
-    <div class="topnav-right">
-      <button type="button" id="btn-theme-toggle" data-theme-toggle class="btn btn-ghost btn-sm" data-icon="sun" data-icon-size="16" title="Alternar tema"></button>
-      <button class="btn btn-ghost btn-sm" id="btn-logout"><span data-icon="log-out" data-icon-size="16"></span>Sair</button>
-      <button class="topnav-menu-btn btn-ghost btn-sm" id="btn-mobile-menu" data-icon="menu"></button>
-    </div>
-  </header>
-
-  <main class="container aluno-main">
-    <div class="page-head">
-      <div>
-        <h1 id="treino-nome">Meu treino</h1>
-        <p id="treino-desc" class="text-muted"></p>
+  <div class="dash-shell">
+    <header class="dash-topbar">
+      <a href="dashboard.html" class="sb-logo">
+        <img src="assets/img/logo.svg" alt="" class="sb-logo-img" onerror="this.style.display='none'" />
+        <span>TEG ACADEMIA</span>
+      </a>
+      <div class="dash-topbar-actions">
+        <button type="button" id="btn-logout" aria-label="Sair"><span data-icon="log-out" data-icon-size="18"></span></button>
       </div>
-      <button class="btn btn-primary" id="btn-iniciar-treino" style="display:none">
-        <span data-icon="play" data-icon-size="16"></span>Iniciar treino
-      </button>
-    </div>
+    </header>
 
-    <div id="sessao-bar" class="sessao-bar" style="display:none">
-      <div class="row gap-sm" style="align-items:center">
-        <span class="sessao-dot"></span>
-        <span>Treino em andamento</span>
-        <strong id="sessao-timer">00:00</strong>
+    <main class="dash-main aluno-main">
+      <div class="page-head">
+        <div>
+          <h1 id="treino-nome">Meu treino</h1>
+          <p id="treino-desc" class="text-muted"></p>
+        </div>
+        <button class="btn btn-primary" id="btn-iniciar-treino" style="display:none">
+          <span data-icon="play" data-icon-size="16"></span>Iniciar treino
+        </button>
       </div>
-      <button class="btn btn-outline btn-sm" id="btn-finalizar-treino">
-        <span data-icon="check-circle" data-icon-size="14"></span>Finalizar treino
-      </button>
-    </div>
 
-    <div id="lista-exercicios" class="stack gap-lg">
-      <div class="loading-row"><span class="spinner"></span></div>
-    </div>
-  </main>
+      <div id="sessao-bar" class="sessao-bar" style="display:none">
+        <div class="row gap-sm" style="align-items:center">
+          <span class="sessao-dot"></span>
+          <span>Treino em andamento</span>
+          <strong id="sessao-timer">00:00</strong>
+        </div>
+        <button class="btn btn-outline btn-sm" id="btn-finalizar-treino">
+          <span data-icon="check-circle" data-icon-size="14"></span>Finalizar treino
+        </button>
+      </div>
+
+      <div id="lista-exercicios" class="stack gap-lg">
+        <div class="loading-row"><span class="spinner"></span></div>
+      </div>
+    </main>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="bottom-nav-item"><span data-icon="home" data-icon-size="20"></span><span>Início</span></a>
+    <a href="treinos.html" class="bottom-nav-item active"><span data-icon="dumbbell" data-icon-size="20"></span><span>Treinos</span></a>
+    <a href="ranking.html" class="bottom-nav-item"><span data-icon="award" data-icon-size="20"></span><span>Ranking</span></a>
+    <a href="indicacao.html" class="bottom-nav-item"><span data-icon="link" data-icon-size="20"></span><span>Indicação</span></a>
+    <a href="perfil.html" class="bottom-nav-item"><span data-icon="user" data-icon-size="20"></span><span>Perfil</span></a>
+  </nav>
 
   <script src="assets/js/icons.js"></script>
   <script src="assets/js/api.js"></script>

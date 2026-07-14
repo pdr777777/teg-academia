@@ -9,74 +9,79 @@
   <link rel="icon" type="image/png" href="assets/img/favicon.png" />
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/aluno.css" />
+  <link rel="stylesheet" href="assets/css/liquid-glass.css" />
   <link rel="stylesheet" href="assets/css/app-effects.css" />
   <script src="assets/js/theme.js"></script>
 </head>
 <body>
 
-  <header class="topnav">
-    <a href="dashboard.html" class="brand"><img src="assets/img/logo.svg" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ACADEMIA</span></a>
-    <nav class="topnav-links">
-      <a href="dashboard.html"><span data-icon="home" data-icon-size="16"></span>Dashboard</a>
-      <a href="treinos.html"><span data-icon="dumbbell" data-icon-size="16"></span>Treinos</a>
-      <a href="ranking.html"><span data-icon="award" data-icon-size="16"></span>Ranking</a>
-      <a href="indicacao.html"><span data-icon="link" data-icon-size="16"></span>Indicação</a>
-      <a href="perfil.html" class="active"><span data-icon="user" data-icon-size="16"></span>Perfil</a>
-    </nav>
-    <div class="topnav-right">
-      <button type="button" id="btn-theme-toggle" data-theme-toggle class="btn btn-ghost btn-sm" data-icon="sun" data-icon-size="16" title="Alternar tema"></button>
-      <button class="btn btn-ghost btn-sm" id="btn-logout"><span data-icon="log-out" data-icon-size="16"></span>Sair</button>
-      <button class="topnav-menu-btn btn-ghost btn-sm" id="btn-mobile-menu" data-icon="menu"></button>
-    </div>
-  </header>
+  <div class="dash-shell">
+    <header class="dash-topbar">
+      <a href="dashboard.html" class="sb-logo">
+        <img src="assets/img/logo.svg" alt="" class="sb-logo-img" onerror="this.style.display='none'" />
+        <span>TEG ACADEMIA</span>
+      </a>
+      <div class="dash-topbar-actions">
+        <button type="button" id="btn-logout" aria-label="Sair"><span data-icon="log-out" data-icon-size="18"></span></button>
+      </div>
+    </header>
 
-  <main class="container aluno-main">
-    <section>
-      <h1>Meu perfil</h1>
-      <p class="text-muted" style="margin-top:.25rem">Mantenha seus dados atualizados.</p>
+    <main class="dash-main aluno-main">
+      <section>
+        <h1>Meu perfil</h1>
+        <p class="text-muted" style="margin-top:.25rem">Mantenha seus dados atualizados.</p>
 
-      <section class="card" data-reveal style="margin-top:1.5rem;max-width:520px">
-        <div class="row-between" style="margin-bottom:1rem">
-          <h2>Minha assinatura</h2>
-          <span class="badge" id="assinatura-status-badge">—</span>
-        </div>
-        <p class="text-muted" id="assinatura-plano" style="margin-bottom:0.25rem">—</p>
-        <p class="text-muted" id="assinatura-vencimento" style="margin-bottom:1rem"></p>
-        <div class="stack gap-sm" id="assinatura-historico"></div>
+        <section class="card" data-reveal style="margin-top:1.5rem;max-width:520px">
+          <div class="row-between" style="margin-bottom:1rem">
+            <h2>Minha assinatura</h2>
+            <span class="badge" id="assinatura-status-badge">—</span>
+          </div>
+          <p class="text-muted" id="assinatura-plano" style="margin-bottom:0.25rem">—</p>
+          <p class="text-muted" id="assinatura-vencimento" style="margin-bottom:1rem"></p>
+          <div class="stack gap-sm" id="assinatura-historico"></div>
+        </section>
+
+        <form id="form-perfil" class="card" style="margin-top:1.5rem;max-width:520px">
+          <div class="row gap-md" style="align-items:center;margin-bottom:1.5rem">
+            <span class="avatar-fallback" id="perfil-avatar" style="width:56px;height:56px;font-size:1.1rem">—</span>
+            <div>
+              <strong id="perfil-nome-display">—</strong>
+              <div class="text-muted" style="font-size:.85rem" id="perfil-email-display">—</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="perfil-nome">Nome completo</label>
+            <input type="text" id="perfil-nome" required />
+          </div>
+          <div class="grid grid-2">
+            <div class="field">
+              <label for="perfil-telefone">WhatsApp</label>
+              <input type="tel" id="perfil-telefone" placeholder="(67) 99999-9999" />
+            </div>
+            <div class="field">
+              <label for="perfil-nascimento">Data de nascimento</label>
+              <input type="date" id="perfil-nascimento" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="perfil-cpf">CPF</label>
+            <input type="text" id="perfil-cpf" disabled />
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="btn-perfil-salvar">Salvar alterações</button>
+        </form>
       </section>
+    </main>
+  </div>
 
-      <form id="form-perfil" class="card" style="margin-top:1.5rem;max-width:520px">
-        <div class="row gap-md" style="align-items:center;margin-bottom:1.5rem">
-          <span class="avatar-fallback" id="perfil-avatar" style="width:56px;height:56px;font-size:1.1rem">—</span>
-          <div>
-            <strong id="perfil-nome-display">—</strong>
-            <div class="text-muted" style="font-size:.85rem" id="perfil-email-display">—</div>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="perfil-nome">Nome completo</label>
-          <input type="text" id="perfil-nome" required />
-        </div>
-        <div class="grid grid-2">
-          <div class="field">
-            <label for="perfil-telefone">WhatsApp</label>
-            <input type="tel" id="perfil-telefone" placeholder="(67) 99999-9999" />
-          </div>
-          <div class="field">
-            <label for="perfil-nascimento">Data de nascimento</label>
-            <input type="date" id="perfil-nascimento" />
-          </div>
-        </div>
-        <div class="field">
-          <label for="perfil-cpf">CPF</label>
-          <input type="text" id="perfil-cpf" disabled />
-        </div>
-
-        <button type="submit" class="btn btn-primary" id="btn-perfil-salvar">Salvar alterações</button>
-      </form>
-    </section>
-  </main>
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="bottom-nav-item"><span data-icon="home" data-icon-size="20"></span><span>Início</span></a>
+    <a href="treinos.html" class="bottom-nav-item"><span data-icon="dumbbell" data-icon-size="20"></span><span>Treinos</span></a>
+    <a href="ranking.html" class="bottom-nav-item"><span data-icon="award" data-icon-size="20"></span><span>Ranking</span></a>
+    <a href="indicacao.html" class="bottom-nav-item"><span data-icon="link" data-icon-size="20"></span><span>Indicação</span></a>
+    <a href="perfil.html" class="bottom-nav-item active"><span data-icon="user" data-icon-size="20"></span><span>Perfil</span></a>
+  </nav>
 
   <script src="assets/js/icons.js"></script>
   <script src="assets/js/api.js"></script>
