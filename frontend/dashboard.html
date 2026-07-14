@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Minha Área — Academia TEG</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="assets/img/favicon.png" />
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/aluno.css" />
   <link rel="stylesheet" href="assets/css/liquid-glass.css" />
+  <link rel="stylesheet" href="assets/css/lightfall.css" />
   <link rel="stylesheet" href="assets/css/dashboard.css" />
   <link rel="stylesheet" href="assets/css/app-effects.css" />
   <script src="assets/js/theme.js"></script>
 </head>
 <body>
+
+  <div class="lightfall-container" id="lightfall-bg"></div>
 
   <div class="dash-shell">
     <aside class="glass sidebar" id="dash-sidebar">
@@ -207,6 +210,26 @@
   <script src="assets/js/ui.js"></script>
   <script src="assets/js/app-effects.js"></script>
   <script src="assets/js/auth-guard.js"></script>
+  <script src="assets/js/lightfall-bg.js"></script>
+  <script>
+    initLightfall(document.getElementById('lightfall-bg'), {
+      colors: ['#bc0000'],
+      backgroundColor: '#000000',
+      speed: 0.4,
+      streakCount: 4,
+      streakWidth: 0.6,
+      streakLength: 1.2,
+      density: 0.5,
+      twinkle: 0.05,
+      glow: 3,
+      backgroundGlow: 0.5,
+      zoom: 2.2,
+      opacity: 1,
+      mouseInteraction: false,
+      mouseStrength: 0.5,
+      mouseRadius: 0.1,
+    });
+  </script>
   <script src="assets/js/dashboard.js"></script>
 </body>
 </html>
