@@ -3,9 +3,21 @@ let exerciciosCache = [];
 let treinoSelecionadoId = null;
 let alunoSelecionadoId = null;
 
+const GRUPOS_MUSCULARES = [
+  'Peito', 'Costas', 'Ombro', 'Bíceps', 'Tríceps', 'Antebraço', 'Trapézio',
+  'Quadríceps', 'Posterior de Coxa', 'Glúteos', 'Panturrilha', 'Abdômen', 'Lombar', 'Funcional',
+];
+
 /* ========== Carregar dados iniciais ========== */
 async function init() {
+  popularSelectsGrupoMuscular();
   await Promise.all([carregarTreinos(), carregarExercicios()]);
+}
+
+function popularSelectsGrupoMuscular() {
+  const opcoes = GRUPOS_MUSCULARES.map((g) => `<option value="${g}">${g}</option>`).join('');
+  document.getElementById('filtro-grupo-picker').insertAdjacentHTML('beforeend', opcoes);
+  document.getElementById('exercicio-grupo-input').insertAdjacentHTML('beforeend', opcoes);
 }
 
 async function carregarTreinos() {
@@ -236,16 +248,17 @@ let pickerIdxAtual = null;
 function abrirPickerExercicio(idx) {
   pickerIdxAtual = idx;
   document.getElementById('busca-exercicio-picker').value = '';
-  renderPickerGrid('');
+  document.getElementById('filtro-grupo-picker').value = '';
+  renderPickerGrid('', '');
   dialogPicker.showModal();
 }
 
-function renderPickerGrid(busca) {
+function renderPickerGrid(busca, grupo) {
   const grid = document.getElementById('exercicio-picker-grid');
   const termo = busca.trim().toLowerCase();
-  const filtrados = termo
-    ? exerciciosCache.filter((e) => e.nome.toLowerCase().includes(termo) || (e.grupo_muscular || '').toLowerCase().includes(termo))
-    : exerciciosCache;
+  let filtrados = exerciciosCache;
+  if (grupo) filtrados = filtrados.filter((e) => e.grupo_muscular === grupo);
+  if (termo) filtrados = filtrados.filter((e) => e.nome.toLowerCase().includes(termo) || (e.grupo_muscular || '').toLowerCase().includes(termo));
 
   if (!filtrados.length) {
     grid.innerHTML = '<div class="text-muted" style="font-size:.85rem;padding:1rem 0">Nenhum exercício encontrado.</div>';
@@ -262,9 +275,20 @@ function renderPickerGrid(busca) {
   `).join('');
 }
 
+function filtrosPickerAtuais() {
+  return [
+    document.getElementById('busca-exercicio-picker').value,
+    document.getElementById('filtro-grupo-picker').value,
+  ];
+}
+
 document.getElementById('busca-exercicio-picker').addEventListener('input', debounce((ev) => {
-  renderPickerGrid(ev.target.value);
+  renderPickerGrid(ev.target.value, document.getElementById('filtro-grupo-picker').value);
 }, 250));
+
+document.getElementById('filtro-grupo-picker').addEventListener('change', (ev) => {
+  renderPickerGrid(document.getElementById('busca-exercicio-picker').value, ev.target.value);
+});
 
 document.getElementById('exercicio-picker-grid').addEventListener('click', (ev) => {
   const card = ev.target.closest('[data-exercicio-id]');
@@ -301,7 +325,7 @@ document.getElementById('form-exercicio').addEventListener('submit', async (ev) 
     exerciciosCache.push(novoExercicio);
     dialogExercicio.close();
     toast(`Exercício "${novoExercicio.nome}" cadastrado!`, 'success');
-    renderPickerGrid(document.getElementById('busca-exercicio-picker').value);
+    renderPickerGrid(...filtrosPickerAtuais());
   } catch (err) {
     toast(err.message || 'Erro ao cadastrar exercício.', 'error');
   } finally {
