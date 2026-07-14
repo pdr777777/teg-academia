@@ -1,0 +1,71 @@
+workflows:
+  # Build de teste — compila pra simulador, sem precisar de conta Apple paga.
+  # Bom pra confirmar que o projeto builda certinho antes de investir em
+  # Apple Developer Program. Não gera um app instalável no iPhone (simulador
+  # só roda dentro do Xcode num Mac), mas prova que o pipeline funciona.
+  ios-simulator-smoke-test:
+    name: iOS - build de teste (simulador, sem assinatura)
+    max_build_duration: 30
+    instance_type: mac_mini_m2
+    environment:
+      node: 20
+    scripts:
+      - name: Instalar dependências do projeto (raiz)
+        script: npm install
+      - name: Sincronizar Capacitor
+        script: npx cap sync ios
+      - name: Instalar CocoaPods
+        script: cd ios/App && pod install
+      - name: Build pra simulador (sem assinatura)
+        script: |
+          xcodebuild build \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
+
+  # Build oficial assinado → TestFlight. Só funciona depois de conectar a
+  # integração com App Store Connect no Codemagic (Team settings > Integrations
+  # > Apple Developer Portal), que exige a Apple Developer Program ativa
+  # (US$ 99/ano). Enquanto isso não estiver configurado, este workflow falha
+  # na etapa de assinatura — é esperado.
+  ios-testflight:
+    name: iOS - build assinado para TestFlight
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic_appstore_integration
+    environment:
+      node: 20
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.tegacademia.app
+      vars:
+        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+    scripts:
+      - name: Instalar dependências do projeto (raiz)
+        script: npm install
+      - name: Sincronizar Capacitor
+        script: npx cap sync ios
+      - name: Buscar certificado e perfil de provisionamento
+        script: |
+          app-store-connect fetch-signing-files "$(xcode-project detect-bundle-id)" \
+            --type IOS_APP_STORE --create
+      - name: Instalar perfis de provisionamento
+        script: xcode-project use-profiles
+      - name: Instalar CocoaPods
+        script: cd ios/App && pod install
+      - name: Build e assinatura do IPA
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
