@@ -46,6 +46,10 @@ const ALLOWED_ORIGINS = [
   'http://localhost:8080',
   'http://127.0.0.1:5500',
   'http://127.0.0.1:3000',
+  // App nativo (Capacitor) — WebView serve o conteúdo local com essa origem
+  // fixa em iOS e Android (androidScheme padrão é 'https' desde Capacitor 3+).
+  'https://localhost',
+  'capacitor://localhost',
 ];
 
 function isOriginAllowed(origin) {

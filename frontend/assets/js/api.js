@@ -1,4 +1,8 @@
-const API_URL = window.location.hostname === 'localhost'
+// No app nativo (Capacitor), o WebView serve o conteúdo em https://localhost —
+// window.location.hostname bateria com 'localhost' e apontaria pro loopback
+// do próprio celular em vez do Railway. Só usa localhost:3001 no navegador real.
+const isAppNativo = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+const API_URL = (!isAppNativo && window.location.hostname === 'localhost')
   ? 'http://localhost:3001'
   : 'https://teg-academia-backend-production.up.railway.app';
 
