@@ -1,0 +1,2 @@
+ALTER TABLE usuarios
+  ADD COLUMN notificacoes_whatsapp BOOLEAN NOT NULL DEFAULT TRUE;
