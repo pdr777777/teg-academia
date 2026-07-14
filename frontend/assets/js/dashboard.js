@@ -88,7 +88,8 @@ async function carregarTreinoDoDia() {
 
     const comFoto = exercicios.find((e) => e.exercicio.imagem_url);
     if (comFoto) {
-      bg.style.backgroundImage = `linear-gradient(135deg, rgba(20,14,10,.35), rgba(9,7,6,.75)), url('${comFoto.exercicio.imagem_url}')`;
+      bg.style.backgroundImage = `url('${comFoto.exercicio.imagem_url}')`;
+      bg.classList.add('com-foto');
     }
   } catch {
     nomeEl.textContent = 'Não foi possível carregar seu treino';
