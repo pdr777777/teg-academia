@@ -7,6 +7,10 @@
   background: #0a0908;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  /* Força o WebView a recortar corretamente filhos absolutos (foto/gradiente)
+     no canto arredondado — overflow:hidden sozinho falha nisso em alguns
+     Android WebView quando o filho tem background-image full-bleed. */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
   box-shadow:
     0 0 14px rgba(255,138,0,.22),
     0 10px 30px rgba(0,0,0,.5);
