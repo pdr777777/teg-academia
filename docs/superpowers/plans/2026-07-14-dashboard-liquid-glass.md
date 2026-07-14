@@ -154,7 +154,7 @@ describe('notificacoes_whatsapp — preferência de notificação', () => {
 });
 ```
 
-> Nota: há dois `describe` já existentes nesse arquivo (`GET /api/alunos/dashboard e /perfil` e o de cima). Cada um já tem seu próprio `afterAll(() => pool.end())` — Jest permite múltiplos `pool.end()` no mesmo processo de teste (idempotente na prática desse driver), então basta seguir o padrão do arquivo e adicionar o novo `describe` ao final.
+> Nota: o `describe` existente (`GET /api/alunos/dashboard e /perfil`) tinha seu próprio `afterAll(() => pool.end())`. Chamar `pool.end()` duas vezes no mesmo processo de teste FALHA ("Called end on pool more than once") — mova esse `afterAll` pra fora de qualquer `describe`, no final do arquivo, como um único `afterAll` de nível de módulo cobrindo todos os testes do arquivo.
 
 - [ ] **Step 2: Rodar e confirmar que falha**
 

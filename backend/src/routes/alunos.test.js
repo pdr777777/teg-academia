@@ -4,10 +4,6 @@ const pool = require('../config/db');
 const { criarUsuario, criarPlano, criarMatricula, gerarToken } = require('../testUtils/fixtures');
 
 describe('GET /api/alunos/dashboard e /perfil — matrícula suspensa continua visível', () => {
-  afterAll(async () => {
-    await pool.end();
-  });
-
   test('dashboard mostra matricula_status suspensa em vez de esconder o plano', async () => {
     const aluno = await criarUsuario();
     const plano = await criarPlano({ nome: 'Plano Suspenso Teste' });
@@ -82,4 +78,42 @@ describe('GET /api/alunos/dashboard e /perfil — matrícula suspensa continua v
     await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
     await pool.query('DELETE FROM planos WHERE id = ANY($1)', [[planoAntigo.id, planoNovo.id]]);
   });
+});
+
+describe('notificacoes_whatsapp — preferência de notificação', () => {
+  test('GET /perfil retorna notificacoes_whatsapp (true por padrão)', async () => {
+    const aluno = await criarUsuario();
+
+    const res = await request(app)
+      .get('/api/alunos/perfil')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.notificacoes_whatsapp).toBe(true);
+
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
+  });
+
+  test('PATCH /perfil desativa notificacoes_whatsapp', async () => {
+    const aluno = await criarUsuario();
+
+    const res = await request(app)
+      .patch('/api/alunos/perfil')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`)
+      .send({ notificacoes_whatsapp: false });
+
+    expect(res.status).toBe(200);
+    expect(res.body.notificacoes_whatsapp).toBe(false);
+
+    const { rows: [user] } = await pool.query(
+      'SELECT notificacoes_whatsapp FROM usuarios WHERE id = $1', [aluno.id]
+    );
+    expect(user.notificacoes_whatsapp).toBe(false);
+
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
+  });
+});
+
+afterAll(async () => {
+  await pool.end();
 });
