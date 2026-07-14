@@ -1,4 +1,10 @@
-.sidebar-toggle { display: none; }
+.sidebar-toggle {
+  display: none;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
 
 .admin-stat-cards .stat-card { display: flex; flex-direction: column; gap: 0.5rem; }
 .admin-stat-cards .stat-icon { color: var(--color-primary); }
@@ -226,12 +232,59 @@
 .treino-item-info strong { display: block; font-size: .875rem; }
 .treino-item-info span { font-size: .76rem; color: var(--color-muted); }
 .exercicio-row-admin {
-  display: grid; grid-template-columns: 1fr 60px 80px 80px 80px;
+  display: grid; grid-template-columns: 1fr 60px 80px 80px 36px;
   gap: .5rem; align-items: center; font-size: .82rem;
   padding: .5rem .75rem; background: var(--color-surface-2);
   border-radius: var(--radius-sm); border: 1px solid var(--color-border);
 }
-.exercicio-row-admin select, .exercicio-row-admin input { font-size: .82rem; }
+.exercicio-row-admin input { font-size: .82rem; min-width: 0; }
+
+@media (max-width: 560px) {
+  .exercicio-row-admin {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-areas: "picker picker picker" "series reps carga" "remover remover remover";
+  }
+  .exercicio-row-admin .exercicio-picker-btn { grid-area: picker; }
+  .exercicio-row-admin input[data-field="series"] { grid-area: series; }
+  .exercicio-row-admin input[data-field="repeticoes"] { grid-area: reps; }
+  .exercicio-row-admin input[data-field="carga"] { grid-area: carga; }
+  .exercicio-row-admin [data-remove-idx] { grid-area: remover; justify-self: end; }
+}
+
+/* ===== Seletor de exercício (thumb + escolher) ===== */
+.exercicio-picker-btn {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .35rem .6rem .35rem .35rem; border-radius: var(--radius-sm);
+  border: 1px dashed var(--color-border); background: transparent;
+  cursor: pointer; text-align: left; font-size: .82rem; color: var(--color-text);
+  width: 100%;
+}
+.exercicio-picker-btn:hover { background: var(--color-surface-3, rgba(255,255,255,0.04)); }
+.exercicio-picker-btn.preenchido { border-style: solid; }
+.exercicio-thumb {
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  background: var(--color-surface-2); object-fit: cover; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: var(--color-muted);
+}
+.exercicio-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-sm); }
+.exercicio-picker-nome { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.exercicio-picker-placeholder { color: var(--color-muted); }
+
+.exercicio-picker-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: .75rem; max-height: 360px; overflow-y: auto; padding: .25rem;
+}
+.exercicio-card {
+  display: flex; flex-direction: column; gap: .4rem;
+  padding: .6rem; border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border); background: var(--color-surface-2);
+  cursor: pointer; transition: border-color .12s, background .12s;
+}
+.exercicio-card:hover { background: var(--color-surface-3, rgba(255,255,255,0.04)); }
+.exercicio-card.selecionado { border-color: var(--color-primary); background: var(--color-primary-soft); }
+.exercicio-card .exercicio-thumb { width: 100%; height: 78px; border-radius: var(--radius-sm); }
+.exercicio-card strong { font-size: .8rem; line-height: 1.2; }
+.exercicio-card span { font-size: .72rem; color: var(--color-muted); }
 .aluno-row-sel {
   display: flex; align-items: center; justify-content: space-between; gap: .75rem;
   padding: .55rem .75rem; border-radius: var(--radius-sm); cursor: pointer;

@@ -112,4 +112,42 @@ router.get('/exercicios', authMiddleware, async (req, res, next) => {
   }
 });
 
+// POST /api/treinos/exercicios (professor/admin) — cadastra exercício na biblioteca
+router.post('/exercicios', authMiddleware, requireRole('professor', 'admin', 'dono'), async (req, res, next) => {
+  try {
+    const { nome, grupo_muscular, video_url, imagem_url, descricao } = req.body;
+    if (!nome) return res.status(400).json({ error: 'nome é obrigatório' });
+
+    const { rows: [exercicio] } = await pool.query(
+      `INSERT INTO exercicios (nome, grupo_muscular, video_url, imagem_url, descricao)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [nome, grupo_muscular || null, video_url || null, imagem_url || null, descricao || null]
+    );
+    res.status(201).json(exercicio);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PUT /api/treinos/exercicios/:id (professor/admin)
+router.put('/exercicios/:id', authMiddleware, requireRole('professor', 'admin', 'dono'), async (req, res, next) => {
+  try {
+    const { nome, grupo_muscular, video_url, imagem_url, descricao } = req.body;
+    const { rows: [exercicio] } = await pool.query(
+      `UPDATE exercicios SET
+         nome = COALESCE($1, nome),
+         grupo_muscular = $2,
+         video_url = $3,
+         imagem_url = $4,
+         descricao = $5
+       WHERE id = $6 RETURNING *`,
+      [nome, grupo_muscular || null, video_url || null, imagem_url || null, descricao || null, req.params.id]
+    );
+    if (!exercicio) return res.status(404).json({ error: 'Exercício não encontrado' });
+    res.json(exercicio);
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

@@ -282,8 +282,8 @@ label {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1.5rem;
-  height: 64px;
+  padding: env(safe-area-inset-top, 0px) 1.5rem 0;
+  height: calc(64px + env(safe-area-inset-top, 0px));
   background: rgba(10,10,10,0.85);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--color-border);
@@ -307,7 +307,7 @@ label {
 .topnav-links a:hover { color: var(--color-text); background: var(--color-surface-2); }
 .topnav-links a.active { color: var(--color-text); background: var(--color-surface-2); }
 .topnav-right { display: flex; align-items: center; gap: 0.6rem; }
-.topnav-menu-btn { display: none; }
+.topnav-menu-btn { display: none; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
 
 /* ===== Sidebar (admin) ===== */
 .app-shell { display: flex; min-height: 100vh; }
@@ -481,7 +481,7 @@ tbody tr:hover { background: var(--color-surface-2); }
   .topnav-links {
     display: none;
     position: absolute;
-    top: 64px; left: 0; right: 0;
+    top: calc(64px + env(safe-area-inset-top, 0px)); left: 0; right: 0;
     flex-direction: column;
     background: var(--color-bg);
     border-bottom: 1px solid var(--color-border);
