@@ -143,3 +143,57 @@ describe('GET /api/treinos/exercicios', () => {
     await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
   });
 });
+
+describe('POST /api/treinos/exercicios e PUT /api/treinos/exercicios/:id', () => {
+  test('rejeita aluno comum e valida nome obrigatório', async () => {
+    const aluno = await criarUsuario({ role: 'aluno' });
+    const professor = await criarUsuario({ role: 'professor' });
+
+    const semPermissao = await request(app)
+      .post('/api/treinos/exercicios')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`)
+      .send({ nome: 'Supino Teste' });
+    expect(semPermissao.status).toBe(403);
+
+    const semNome = await request(app)
+      .post('/api/treinos/exercicios')
+      .set('Authorization', `Bearer ${gerarToken(professor)}`)
+      .send({ grupo_muscular: 'peito' });
+    expect(semNome.status).toBe(400);
+
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[aluno.id, professor.id]]);
+  });
+
+  test('professor cadastra exercício com imagem/vídeo e depois edita', async () => {
+    const professor = await criarUsuario({ role: 'professor' });
+
+    const criacao = await request(app)
+      .post('/api/treinos/exercicios')
+      .set('Authorization', `Bearer ${gerarToken(professor)}`)
+      .send({
+        nome: 'Supino Reto Teste',
+        grupo_muscular: 'peito',
+        video_url: 'https://exemplo.com/video.mp4',
+        imagem_url: 'https://exemplo.com/imagem.jpg',
+      });
+    expect(criacao.status).toBe(201);
+    expect(criacao.body.imagem_url).toBe('https://exemplo.com/imagem.jpg');
+
+    const edicao = await request(app)
+      .put(`/api/treinos/exercicios/${criacao.body.id}`)
+      .set('Authorization', `Bearer ${gerarToken(professor)}`)
+      .send({ nome: 'Supino Reto Atualizado', imagem_url: 'https://exemplo.com/nova.jpg' });
+    expect(edicao.status).toBe(200);
+    expect(edicao.body.nome).toBe('Supino Reto Atualizado');
+    expect(edicao.body.imagem_url).toBe('https://exemplo.com/nova.jpg');
+
+    const inexistente = await request(app)
+      .put('/api/treinos/exercicios/999999999')
+      .set('Authorization', `Bearer ${gerarToken(professor)}`)
+      .send({ nome: 'X' });
+    expect(inexistente.status).toBe(404);
+
+    await pool.query('DELETE FROM exercicios WHERE id = $1', [criacao.body.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [professor.id]);
+  });
+});

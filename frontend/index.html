@@ -2,12 +2,23 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <script>
     // No app nativo (Capacitor), pula a landing de marketing — vai direto pra
-    // login ou dashboard, já que quem abre o app já é aluno ou vai virar um.
+    // login ou pra área certa de quem já tem sessão. Sem checar o role aqui,
+    // admin/dono/professor reabrindo o app caiam sempre no dashboard do aluno
+    // e ficavam presos lá, já que a navegação do aluno não linka de volta pro admin.
+    function destinoPosLogin(token) {
+      if (!token) return 'login.html';
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        if (payload.role === 'admin' || payload.role === 'dono') return 'admin/index.html';
+        if (payload.role === 'professor') return 'admin/treinos.html';
+      } catch {}
+      return 'dashboard.html';
+    }
     if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
-      window.location.replace(localStorage.getItem('token') ? 'dashboard.html' : 'login.html');
+      window.location.replace(destinoPosLogin(localStorage.getItem('token')));
     }
   </script>
   <title>Academia TEG — Treine com propósito</title>

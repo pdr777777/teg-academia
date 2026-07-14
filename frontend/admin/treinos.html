@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Treinos — Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -114,6 +114,48 @@
       <div class="dialog-actions">
         <button type="button" class="btn btn-ghost" id="btn-treino-cancel">Cancelar</button>
         <button type="submit" class="btn btn-primary" id="btn-treino-confirm">Criar treino</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Dialog escolher exercício (grade visual com imagem) -->
+  <dialog id="dialog-escolher-exercicio" class="admin-dialog" style="max-width:640px">
+    <h2>Escolher exercício</h2>
+    <div class="row gap-sm" style="margin-bottom:1rem">
+      <div class="search-field" style="flex:1;position:relative">
+        <span data-icon="search" data-icon-size="16" style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--color-muted)"></span>
+        <input type="text" id="busca-exercicio-picker" class="input" placeholder="Buscar exercício..." style="padding-left:2.5rem" />
+      </div>
+      <button type="button" class="btn btn-ghost btn-sm" id="btn-novo-exercicio-inline">
+        <span data-icon="plus" data-icon-size="13"></span>Novo exercício
+      </button>
+    </div>
+    <div id="exercicio-picker-grid" class="exercicio-picker-grid"></div>
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-ghost" id="btn-escolher-exercicio-cancel">Fechar</button>
+    </div>
+  </dialog>
+
+  <!-- Dialog cadastrar/editar exercício -->
+  <dialog id="dialog-exercicio" class="admin-dialog" style="max-width:440px">
+    <form id="form-exercicio" method="dialog">
+      <h2 id="exercicio-dialog-titulo">Novo exercício</h2>
+
+      <label class="field-label">Nome <span class="text-danger">*</span></label>
+      <input type="text" id="exercicio-nome-input" class="input" placeholder="ex: Supino Reto" required />
+
+      <label class="field-label" style="margin-top:.9rem">Grupo muscular</label>
+      <input type="text" id="exercicio-grupo-input" class="input" placeholder="ex: peito, costas, pernas..." />
+
+      <label class="field-label" style="margin-top:.9rem">URL da imagem</label>
+      <input type="url" id="exercicio-imagem-input" class="input" placeholder="https://..." />
+
+      <label class="field-label" style="margin-top:.9rem">URL do vídeo</label>
+      <input type="url" id="exercicio-video-input" class="input" placeholder="https://..." />
+
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" id="btn-exercicio-cancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-exercicio-confirm">Salvar exercício</button>
       </div>
     </form>
   </dialog>

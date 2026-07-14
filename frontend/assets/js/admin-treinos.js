@@ -176,19 +176,26 @@ document.getElementById('btn-add-exercicio').addEventListener('click', () => {
   renderExerciciosForm();
 });
 
+function exercicioThumb(ex) {
+  return ex && ex.imagem_url
+    ? `<span class="exercicio-thumb"><img src="${ex.imagem_url}" alt="" /></span>`
+    : `<span class="exercicio-thumb">${Icons.icon('dumbbell', { size: 16 })}</span>`;
+}
+
 function renderExerciciosForm() {
   const container = document.getElementById('exercicios-form-list');
   if (!exerciciosForm.length) {
     container.innerHTML = '<div class="text-muted" style="font-size:.82rem;padding:.4rem 0">Nenhum exercício adicionado ainda.</div>';
     return;
   }
-  const opts = exerciciosCache.map((e) => `<option value="${e.id}">${e.nome}${e.grupo_muscular ? ' (' + e.grupo_muscular + ')' : ''}</option>`).join('');
-  container.innerHTML = exerciciosForm.map((ex, i) => `
+  container.innerHTML = exerciciosForm.map((ex, i) => {
+    const exercicio = exerciciosCache.find((e) => e.id === Number(ex.exercicio_id));
+    return `
     <div class="exercicio-row-admin">
-      <select data-ex-idx="${i}" data-field="exercicio_id" class="input">
-        <option value="">— Exercício —</option>
-        ${opts}
-      </select>
+      <button type="button" class="exercicio-picker-btn${exercicio ? ' preenchido' : ''}" data-escolher-idx="${i}">
+        ${exercicio ? exercicioThumb(exercicio) : `<span class="exercicio-thumb">${Icons.icon('dumbbell', { size: 16 })}</span>`}
+        <span class="exercicio-picker-nome${exercicio ? '' : ' exercicio-picker-placeholder'}">${exercicio ? exercicio.nome : 'Escolher exercício...'}</span>
+      </button>
       <input type="number" class="input" placeholder="Séries" value="${ex.series}" min="1" data-ex-idx="${i}" data-field="series" />
       <input type="number" class="input" placeholder="Reps" value="${ex.repeticoes}" min="1" data-ex-idx="${i}" data-field="repeticoes" />
       <input type="number" class="input" placeholder="Carga kg" value="${ex.carga || ''}" min="0" step="0.5" data-ex-idx="${i}" data-field="carga" />
@@ -196,13 +203,8 @@ function renderExerciciosForm() {
         ${Icons.icon('trash-2', { size: 13 })}
       </button>
     </div>
-  `).join('');
-
-  // Preencher selects com valor atual
-  exerciciosForm.forEach((ex, i) => {
-    const sel = container.querySelector(`select[data-ex-idx="${i}"]`);
-    if (sel && ex.exercicio_id) sel.value = ex.exercicio_id;
-  });
+  `;
+  }).join('');
 }
 
 document.getElementById('exercicios-form-list').addEventListener('change', (ev) => {
@@ -214,11 +216,97 @@ document.getElementById('exercicios-form-list').addEventListener('change', (ev) 
 });
 
 document.getElementById('exercicios-form-list').addEventListener('click', (ev) => {
-  const btn = ev.target.closest('[data-remove-idx]');
-  if (!btn) return;
-  const idx = Number(btn.dataset.removeIdx);
-  exerciciosForm.splice(idx, 1);
+  const removeBtn = ev.target.closest('[data-remove-idx]');
+  if (removeBtn) {
+    const idx = Number(removeBtn.dataset.removeIdx);
+    exerciciosForm.splice(idx, 1);
+    renderExerciciosForm();
+    return;
+  }
+  const escolherBtn = ev.target.closest('[data-escolher-idx]');
+  if (escolherBtn) {
+    abrirPickerExercicio(Number(escolherBtn.dataset.escolherIdx));
+  }
+});
+
+/* ========== Picker visual de exercício (grade com imagem) ========== */
+const dialogPicker = document.getElementById('dialog-escolher-exercicio');
+let pickerIdxAtual = null;
+
+function abrirPickerExercicio(idx) {
+  pickerIdxAtual = idx;
+  document.getElementById('busca-exercicio-picker').value = '';
+  renderPickerGrid('');
+  dialogPicker.showModal();
+}
+
+function renderPickerGrid(busca) {
+  const grid = document.getElementById('exercicio-picker-grid');
+  const termo = busca.trim().toLowerCase();
+  const filtrados = termo
+    ? exerciciosCache.filter((e) => e.nome.toLowerCase().includes(termo) || (e.grupo_muscular || '').toLowerCase().includes(termo))
+    : exerciciosCache;
+
+  if (!filtrados.length) {
+    grid.innerHTML = '<div class="text-muted" style="font-size:.85rem;padding:1rem 0">Nenhum exercício encontrado.</div>';
+    return;
+  }
+
+  const selecionadoId = pickerIdxAtual !== null ? Number(exerciciosForm[pickerIdxAtual]?.exercicio_id) : null;
+  grid.innerHTML = filtrados.map((e) => `
+    <div class="exercicio-card${e.id === selecionadoId ? ' selecionado' : ''}" data-exercicio-id="${e.id}">
+      ${exercicioThumb(e)}
+      <strong>${e.nome}</strong>
+      ${e.grupo_muscular ? `<span>${e.grupo_muscular}</span>` : ''}
+    </div>
+  `).join('');
+}
+
+document.getElementById('busca-exercicio-picker').addEventListener('input', debounce((ev) => {
+  renderPickerGrid(ev.target.value);
+}, 250));
+
+document.getElementById('exercicio-picker-grid').addEventListener('click', (ev) => {
+  const card = ev.target.closest('[data-exercicio-id]');
+  if (!card || pickerIdxAtual === null) return;
+  exerciciosForm[pickerIdxAtual].exercicio_id = card.dataset.exercicioId;
+  dialogPicker.close();
   renderExerciciosForm();
+});
+
+document.getElementById('btn-escolher-exercicio-cancel').addEventListener('click', () => dialogPicker.close());
+
+/* ========== Cadastrar novo exercício (imagem/vídeo) ========== */
+const dialogExercicio = document.getElementById('dialog-exercicio');
+
+document.getElementById('btn-novo-exercicio-inline').addEventListener('click', () => {
+  document.getElementById('form-exercicio').reset();
+  dialogExercicio.showModal();
+});
+
+document.getElementById('btn-exercicio-cancel').addEventListener('click', () => dialogExercicio.close());
+
+document.getElementById('form-exercicio').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const btn = document.getElementById('btn-exercicio-confirm');
+  setBtnLoading(btn, 'Salvando...');
+
+  try {
+    const novoExercicio = await api.post('/api/treinos/exercicios', {
+      nome: document.getElementById('exercicio-nome-input').value.trim(),
+      grupo_muscular: document.getElementById('exercicio-grupo-input').value.trim() || null,
+      imagem_url: document.getElementById('exercicio-imagem-input').value.trim() || null,
+      video_url: document.getElementById('exercicio-video-input').value.trim() || null,
+    });
+    exerciciosCache.push(novoExercicio);
+    dialogExercicio.close();
+    toast(`Exercício "${novoExercicio.nome}" cadastrado!`, 'success');
+    renderPickerGrid(document.getElementById('busca-exercicio-picker').value);
+  } catch (err) {
+    toast(err.message || 'Erro ao cadastrar exercício.', 'error');
+  } finally {
+    resetBtnLoading(btn);
+  }
 });
 
 document.getElementById('form-treino').addEventListener('submit', async (ev) => {
