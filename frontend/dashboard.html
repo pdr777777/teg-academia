@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -9,101 +9,188 @@
   <link rel="icon" type="image/png" href="assets/img/favicon.png" />
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/aluno.css" />
+  <link rel="stylesheet" href="assets/css/liquid-glass.css" />
   <link rel="stylesheet" href="assets/css/dashboard.css" />
   <link rel="stylesheet" href="assets/css/app-effects.css" />
   <script src="assets/js/theme.js"></script>
 </head>
 <body>
 
-  <header class="topnav">
-    <a href="dashboard.html" class="brand"><img src="assets/img/logo.svg" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ACADEMIA</span></a>
-    <nav class="topnav-links">
-      <a href="dashboard.html" class="active"><span data-icon="home" data-icon-size="16"></span>Dashboard</a>
-      <a href="treinos.html"><span data-icon="dumbbell" data-icon-size="16"></span>Treinos</a>
-      <a href="ranking.html"><span data-icon="award" data-icon-size="16"></span>Ranking</a>
-      <a href="indicacao.html"><span data-icon="link" data-icon-size="16"></span>Indicação</a>
-      <a href="perfil.html"><span data-icon="user" data-icon-size="16"></span>Perfil</a>
-    </nav>
-    <div class="topnav-right">
-      <button type="button" id="btn-theme-toggle" data-theme-toggle class="btn btn-ghost btn-sm" data-icon="sun" data-icon-size="16" title="Alternar tema"></button>
-      <button class="btn btn-ghost btn-sm" id="btn-logout"><span data-icon="log-out" data-icon-size="16"></span>Sair</button>
-      <button class="topnav-menu-btn btn-ghost btn-sm" id="btn-mobile-menu" data-icon="menu"></button>
-    </div>
-  </header>
+  <div class="dash-shell">
+    <aside class="glass sidebar" id="sidebar">
+      <a href="dashboard.html" class="sb-logo">
+        <img src="assets/img/logo.svg" alt="" class="sb-logo-img" onerror="this.style.display='none'" />
+        <span>TEG ACADEMIA</span>
+      </a>
+      <nav class="sb-nav">
+        <a href="dashboard.html" class="glass active-nav sb-item active-nav"><span data-icon="grid" data-icon-size="16"></span>Dashboard</a>
+        <a href="treinos.html" class="sb-item"><span data-icon="dumbbell" data-icon-size="16"></span>Treinos</a>
+        <a href="ranking.html" class="sb-item"><span data-icon="award" data-icon-size="16"></span>Ranking</a>
+        <a href="indicacao.html" class="sb-item"><span data-icon="link" data-icon-size="16"></span>Indicação</a>
+        <a href="perfil.html" class="sb-item"><span data-icon="user" data-icon-size="16"></span>Perfil</a>
+      </nav>
+      <div class="sb-foot">
+        <button type="button" class="sb-item" id="btn-open-config"><span data-icon="settings" data-icon-size="16"></span>Configurações</button>
+        <button type="button" class="sb-item" id="btn-logout"><span data-icon="log-out" data-icon-size="16"></span>Sair</button>
+      </div>
+    </aside>
 
-  <main class="container aluno-main">
-    <div id="bloqueio-banner"></div>
+    <button type="button" class="glass sidebar-toggle" id="btn-sidebar-toggle" data-icon="menu" data-icon-size="18" aria-label="Abrir menu" aria-expanded="false"></button>
+    <div class="sidebar-scrim" id="sidebar-scrim"></div>
 
-    <section id="cards-resumo">
-      <div class="dash-hero card">
+    <main class="dash-main aluno-main">
+      <div id="bloqueio-banner"></div>
+
+      <div class="glass greet">
         <div>
           <p class="text-muted" id="saudacao">Carregando...</p>
           <h1 id="dash-nome">—</h1>
-          <span class="badge badge-primary" id="dash-plano-badge"></span>
         </div>
-        <div class="dash-xp-block">
-          <div class="dash-xp-row">
-            <span data-icon="zap" data-icon-size="18" class="text-primary"></span>
-            <strong id="dash-xp">0 XP</strong>
-            <span class="badge badge-muted" id="dash-nivel">Nível 1</span>
-          </div>
-          <div class="dash-xp-bar-wrap">
-            <div class="dash-xp-bar"><div class="dash-xp-fill" id="dash-xp-fill" style="width:0%"></div></div>
-            <span class="dash-xp-next" id="dash-xp-next">0 XP até o próximo nível</span>
-          </div>
-          <span class="dash-seq-label">
-            <span data-icon="flame" data-icon-size="13" class="text-primary"></span>
-            <span id="dash-sequencia">0</span> dias de sequência
-          </span>
+        <span class="chip" id="dash-plano-badge"></span>
+      </div>
+
+      <div class="stats-row">
+        <div class="glass stat-glass">
+          <div class="ring" id="ring-sequencia"><div class="ring-inner"><strong id="dash-sequencia">0</strong></div></div>
+          <span class="stat-lbl">Sequência (dias)</span>
+        </div>
+        <div class="glass stat-glass">
+          <svg class="heartline" id="freq-sparkline" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="" /></svg>
+          <span class="stat-lbl">Frequência da semana</span>
+        </div>
+        <div class="glass stat-glass">
+          <strong class="stat-big" id="stat-total-treinos">0</strong>
+          <span class="stat-lbl">Treinos no total</span>
+        </div>
+        <div class="glass stat-glass">
+          <div class="ring" id="ring-xp"><div class="ring-inner"><strong id="dash-nivel">Nv.1</strong></div></div>
+          <span class="stat-lbl" id="dash-xp-next">0 XP até o próximo nível</span>
         </div>
       </div>
 
-      <div class="grid grid-4 stat-cards">
-        <div class="card stat-card" data-reveal>
-          <span class="stat-icon"><span data-icon="calendar"></span></span>
-          <strong id="stat-vencimento">—</strong>
-          <span class="text-muted">Vencimento do plano</span>
+      <section class="glass activity">
+        <div class="activity-head">
+          <h2>Frequência da semana</h2>
         </div>
-        <div class="card stat-card" data-reveal>
-          <span class="stat-icon"><span data-icon="trending-up"></span></span>
-          <strong id="stat-freq-mes">0</strong>
-          <span class="text-muted">Dias treinados no mês</span>
-        </div>
-        <div class="card stat-card" data-reveal>
-          <span class="stat-icon"><span data-icon="dumbbell"></span></span>
-          <strong id="stat-total-treinos">0</strong>
-          <span class="text-muted">Treinos no total</span>
-        </div>
-        <div class="card stat-card" data-reveal>
-          <span class="stat-icon"><span data-icon="flame"></span></span>
-          <strong id="stat-maior-sequencia">0</strong>
-          <span class="text-muted">Maior sequência</span>
+        <div class="bars" id="bars-semana"></div>
+      </section>
+
+      <div class="lower-row">
+        <section class="glass conquistas">
+          <div class="section-label">Conquistas recentes</div>
+          <div id="lista-conquistas" class="stack gap-md"></div>
+        </section>
+
+        <section class="glass hoje">
+          <span data-icon="flame" data-icon-size="26" class="text-primary"></span>
+          <div class="section-label">Hoje</div>
+          <p class="text-muted" id="hoje-status">Carregando...</p>
+          <button id="btn-checkin" class="btn-checkin-glass">
+            <span data-icon="check-circle" data-icon-size="16"></span>Registrar treino
+          </button>
+        </section>
+
+        <section class="glass next-aula" id="next-aula">
+          <div>
+            <div class="section-label">Próxima aula</div>
+            <div class="next-aula-nome" id="next-aula-nome">—</div>
+          </div>
+          <span class="chip" id="next-aula-prof"></span>
+        </section>
+      </div>
+    </main>
+
+    <aside class="right-col">
+      <div class="glass profile">
+        <span class="avatar-fallback" id="profile-avatar">—</span>
+        <strong id="profile-nome">—</strong>
+        <span class="text-muted" id="profile-email">—</span>
+        <div class="chips">
+          <span class="chip" id="profile-plano"></span>
+          <span class="chip" id="profile-vencimento"></span>
         </div>
       </div>
-    </section>
 
-    <div class="grid grid-2 dash-lower">
-      <section id="frequencia-mes" class="card" data-reveal>
-        <div class="row-between" style="margin-bottom:1rem">
-          <h2>Frequência do mês</h2>
-          <span data-icon="calendar" data-icon-size="18" class="text-muted"></span>
+      <div class="glass calendar-card">
+        <div class="row-between">
+          <div class="section-label" id="calendar-mes">—</div>
+          <span data-icon="calendar" data-icon-size="16" class="text-muted"></span>
         </div>
         <div class="calendario-grid" id="calendario-grid"></div>
-      </section>
+      </div>
 
-      <section id="conquistas-recentes" class="card" data-reveal>
-        <div class="row-between" style="margin-bottom:1rem">
-          <h2>Conquistas recentes</h2>
-          <span data-icon="award" data-icon-size="18" class="text-muted"></span>
+      <div class="glass schedule-card">
+        <div class="section-label">Aulas da semana</div>
+        <div id="lista-agenda" class="stack gap-sm"></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="config-overlay" id="config-overlay">
+    <div class="glass config-drawer" id="config-drawer">
+      <div class="drawer-head">
+        <h2>Configurações</h2>
+        <button type="button" id="btn-close-config" data-icon="x" data-icon-size="18" aria-label="Fechar"></button>
+      </div>
+      <div class="drawer-body">
+        <nav class="drawer-nav">
+          <button type="button" class="drawer-nav-item active" data-section="conta"><span data-icon="user" data-icon-size="15"></span>Conta</button>
+          <button type="button" class="drawer-nav-item" data-section="seguranca"><span data-icon="shield" data-icon-size="15"></span>Segurança</button>
+          <button type="button" class="drawer-nav-item" data-section="notificacoes"><span data-icon="bell" data-icon-size="15"></span>Notificações</button>
+          <button type="button" class="drawer-nav-item" data-section="aparencia"><span data-icon="sun" data-icon-size="15"></span>Aparência</button>
+          <button type="button" class="drawer-nav-item" data-section="ajuda"><span data-icon="phone" data-icon-size="15"></span>Ajuda</button>
+        </nav>
+        <div class="drawer-content">
+          <div class="drawer-section active" data-section-panel="conta">
+            <div class="setting-row">
+              <div><div class="setting-t">Nome</div><div class="setting-d" id="config-conta-nome">—</div></div>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-t">E-mail</div><div class="setting-d" id="config-conta-email">—</div></div>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-t">Telefone</div><div class="setting-d" id="config-conta-telefone">—</div></div>
+            </div>
+            <a href="perfil.html" class="btn btn-ghost btn-sm">Editar dados no Perfil<span data-icon="chevron-right" data-icon-size="14"></span></a>
+          </div>
+
+          <form class="drawer-section" data-section-panel="seguranca" id="form-senha">
+            <div class="field">
+              <label for="config-senha-atual">Senha atual</label>
+              <input type="password" id="config-senha-atual" required autocomplete="current-password" />
+            </div>
+            <div class="field">
+              <label for="config-senha-nova">Nova senha</label>
+              <input type="password" id="config-senha-nova" required autocomplete="new-password" minlength="8" />
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" id="btn-senha-salvar">Trocar senha</button>
+          </form>
+
+          <div class="drawer-section" data-section-panel="notificacoes">
+            <div class="setting-row">
+              <div><div class="setting-t">Lembretes por WhatsApp</div><div class="setting-d">Avisos de vencimento, ausência e cobrança</div></div>
+              <button type="button" class="toggle-glass" id="toggle-whatsapp" role="switch" aria-checked="false"></button>
+            </div>
+          </div>
+
+          <div class="drawer-section" data-section-panel="aparencia">
+            <div class="setting-row" style="flex-direction:column;align-items:flex-start">
+              <div class="setting-t">Tema</div>
+              <div class="theme-options">
+                <button type="button" class="theme-opt" data-theme-option="light">Claro</button>
+                <button type="button" class="theme-opt" data-theme-option="dark">Escuro</button>
+                <button type="button" class="theme-opt" data-theme-option="auto">Automático</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="drawer-section" data-section-panel="ajuda">
+            <a href="https://wa.me/5567999999999" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Falar com o suporte<span data-icon="chevron-right" data-icon-size="14"></span></a>
+          </div>
         </div>
-        <div id="lista-conquistas" class="stack gap-md"></div>
-      </section>
+      </div>
     </div>
-
-    <button id="btn-checkin" class="btn btn-primary btn-checkin">
-      <span data-icon="check-circle"></span>Registrar treino de hoje
-    </button>
-  </main>
+  </div>
 
   <script src="assets/js/icons.js"></script>
   <script src="assets/js/api.js"></script>
@@ -113,4 +200,3 @@
   <script src="assets/js/dashboard.js"></script>
 </body>
 </html>
-
