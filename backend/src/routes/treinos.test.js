@@ -179,6 +179,8 @@ describe('POST /api/treinos/exercicios e PUT /api/treinos/exercicios/:id', () =>
     expect(criacao.status).toBe(201);
     expect(criacao.body.imagem_url).toBe('https://exemplo.com/imagem.jpg');
 
+    // Edição parcial (só nome + imagem_url) não pode apagar grupo_muscular/video_url
+    // que já estavam salvos — regressão: COALESCE fazia isso só pro nome antes.
     const edicao = await request(app)
       .put(`/api/treinos/exercicios/${criacao.body.id}`)
       .set('Authorization', `Bearer ${gerarToken(professor)}`)
@@ -186,6 +188,8 @@ describe('POST /api/treinos/exercicios e PUT /api/treinos/exercicios/:id', () =>
     expect(edicao.status).toBe(200);
     expect(edicao.body.nome).toBe('Supino Reto Atualizado');
     expect(edicao.body.imagem_url).toBe('https://exemplo.com/nova.jpg');
+    expect(edicao.body.grupo_muscular).toBe('peito');
+    expect(edicao.body.video_url).toBe('https://exemplo.com/video.mp4');
 
     const inexistente = await request(app)
       .put('/api/treinos/exercicios/999999999')

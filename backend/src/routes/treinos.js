@@ -133,15 +133,18 @@ router.post('/exercicios', authMiddleware, requireRole('professor', 'admin', 'do
 router.put('/exercicios/:id', authMiddleware, requireRole('professor', 'admin', 'dono'), async (req, res, next) => {
   try {
     const { nome, grupo_muscular, video_url, imagem_url, descricao } = req.body;
+    // COALESCE em todos os campos: omitir um campo no body preserva o valor
+    // atual em vez de apagar (undefined vira NULL no driver, e COALESCE
+    // ignora NULL) — evita que uma atualização parcial limpe os outros campos.
     const { rows: [exercicio] } = await pool.query(
       `UPDATE exercicios SET
          nome = COALESCE($1, nome),
-         grupo_muscular = $2,
-         video_url = $3,
-         imagem_url = $4,
-         descricao = $5
+         grupo_muscular = COALESCE($2, grupo_muscular),
+         video_url = COALESCE($3, video_url),
+         imagem_url = COALESCE($4, imagem_url),
+         descricao = COALESCE($5, descricao)
        WHERE id = $6 RETURNING *`,
-      [nome, grupo_muscular || null, video_url || null, imagem_url || null, descricao || null, req.params.id]
+      [nome, grupo_muscular, video_url, imagem_url, descricao, req.params.id]
     );
     if (!exercicio) return res.status(404).json({ error: 'Exercício não encontrado' });
     res.json(exercicio);

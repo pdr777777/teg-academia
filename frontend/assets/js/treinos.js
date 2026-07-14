@@ -102,7 +102,7 @@ function renderExercicios() {
       <div class="exercicio-body">
         <div class="exercicio-head">
           <h3>${te.exercicio.nome}</h3>
-          <span class="badge badge-muted">${te.exercicio.grupo_muscular || ''}</span>
+          ${te.exercicio.grupo_muscular ? `<span class="badge badge-muted">${te.exercicio.grupo_muscular}</span>` : ''}
         </div>
         <div class="exercicio-stats">
           <div class="exercicio-stat"><strong>${te.series}</strong><span>Séries</span></div>
