@@ -14,7 +14,7 @@ router.get('/meu', authMiddleware, async (req, res, next) => {
                   'id', te.id, 'ordem', te.ordem, 'series', te.series,
                   'repeticoes', te.repeticoes, 'carga', te.carga,
                   'descanso_segundos', te.descanso_segundos, 'observacoes', te.observacoes,
-                  'exercicio', json_build_object('id', e.id, 'nome', e.nome, 'video_url', e.video_url, 'grupo_muscular', e.grupo_muscular)
+                  'exercicio', json_build_object('id', e.id, 'nome', e.nome, 'video_url', e.video_url, 'imagem_url', e.imagem_url, 'grupo_muscular', e.grupo_muscular)
                 ) ORDER BY te.ordem
               ) AS exercicios
        FROM treino_alunos ta
@@ -42,7 +42,7 @@ router.get('/', authMiddleware, requireRole('professor', 'admin', 'dono'), async
                   'id', te.id, 'ordem', te.ordem, 'series', te.series,
                   'repeticoes', te.repeticoes, 'carga', te.carga,
                   'descanso_segundos', te.descanso_segundos,
-                  'exercicio', json_build_object('id', e.id, 'nome', e.nome, 'grupo_muscular', e.grupo_muscular)
+                  'exercicio', json_build_object('id', e.id, 'nome', e.nome, 'imagem_url', e.imagem_url, 'grupo_muscular', e.grupo_muscular)
                 ) ORDER BY te.ordem
               ) FILTER (WHERE te.id IS NOT NULL) AS exercicios
        FROM treinos t

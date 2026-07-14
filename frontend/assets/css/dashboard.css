@@ -64,7 +64,10 @@
 .dash-main { display: flex; flex-direction: column; gap: 1rem; }
 
 .greet { padding: 1.1rem 1.4rem; display: flex; justify-content: space-between; align-items: center; }
-.greet h1 { font-size: 1.3rem; margin-top: 0.15rem; }
+.greet h1 {
+  font-family: var(--font-display); font-weight: 400; font-size: 1.9rem;
+  letter-spacing: 0.01em; text-transform: uppercase; margin-top: 0.2rem; line-height: 1;
+}
 .chip {
   font-size: 0.7rem;
   padding: 0.35rem 0.8rem;
@@ -75,6 +78,39 @@
   white-space: nowrap;
 }
 :root[data-theme="light"] .chip { background: rgba(20,18,15,0.04); border-color: rgba(20,18,15,0.08); }
+
+/* ===== Hero do treino de hoje (foto + glass) ===== */
+.treino-hero {
+  display: block; position: relative; min-height: 152px;
+  text-decoration: none; transition: transform 0.2s;
+}
+.treino-hero:hover { transform: translateY(-2px); }
+.treino-hero-bg {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  background-color: #1a1512;
+  background-image: linear-gradient(135deg, #241a14, #120e0c);
+}
+.treino-hero-bg::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(0deg, rgba(9,7,6,.92) 12%, rgba(9,7,6,.55) 55%, rgba(9,7,6,.22) 100%);
+}
+.treino-hero-content {
+  position: relative; z-index: 1;
+  padding: 1.3rem 1.4rem; min-height: 152px;
+  display: flex; flex-direction: column; gap: 0.35rem; justify-content: flex-end;
+}
+.treino-hero-eyebrow { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-primary); }
+.treino-hero-content h2 {
+  margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 1.5rem;
+  letter-spacing: 0.01em; text-transform: uppercase; color: #fff;
+}
+.treino-hero-meta { font-size: 0.8rem; color: rgba(255,255,255,.75); }
+.treino-hero-cta {
+  width: fit-content; margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.35rem;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-coral));
+  color: #fff; font-weight: 700; border: none;
+}
 
 /* ===== Stats row ===== */
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem; }
@@ -87,21 +123,22 @@
   text-align: center;
 }
 .ring {
-  width: 54px; height: 54px;
+  width: 58px; height: 58px;
   border-radius: 50%;
   background: conic-gradient(var(--color-primary) calc(var(--pct, 0) * 1%), rgba(255,255,255,0.08) 0);
   display: flex; align-items: center; justify-content: center;
+  filter: drop-shadow(0 0 10px rgba(255,138,0,.4));
 }
 .ring-inner {
-  width: 40px; height: 40px;
+  width: 42px; height: 42px;
   border-radius: 50%;
   background: var(--color-bg);
   display: flex; align-items: center; justify-content: center;
 }
-.ring-inner strong { font-size: 0.68rem; font-weight: 700; }
+.ring-inner strong { font-family: var(--font-display); font-weight: 400; font-size: 1.05rem; color: var(--color-primary); text-shadow: 0 0 12px rgba(255,138,0,.5); }
 .heartline { width: 100%; height: 38px; }
-.heartline polyline { fill: none; stroke: var(--color-coral); stroke-width: 2; }
-.stat-big { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; }
+.heartline polyline { fill: none; stroke: var(--color-coral); stroke-width: 2; filter: drop-shadow(0 0 6px rgba(239,77,77,.5)); }
+.stat-big { font-family: var(--font-display); font-weight: 400; font-size: 2rem; letter-spacing: 0.01em; }
 .stat-lbl { font-size: 0.66rem; color: var(--color-muted); }
 
 /* ===== Activity ===== */

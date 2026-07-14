@@ -68,6 +68,34 @@ async function carregarDashboard() {
   }
 }
 
+async function carregarTreinoDoDia() {
+  const nomeEl = document.getElementById('dash-treino-nome');
+  const metaEl = document.getElementById('dash-treino-meta');
+  const bg = document.getElementById('dash-treino-bg');
+
+  try {
+    const treinos = await api.get('/api/treinos/meu');
+    const treino = treinos[0];
+    if (!treino) {
+      nomeEl.textContent = 'Nenhum treino atribuído';
+      metaEl.textContent = 'Fale com seu professor na recepção';
+      return;
+    }
+
+    const exercicios = (treino.exercicios || []).filter((e) => e && e.exercicio);
+    nomeEl.textContent = treino.nome;
+    metaEl.textContent = `${exercicios.length} exercício${exercicios.length === 1 ? '' : 's'}${treino.descricao ? ' · ' + treino.descricao : ''}`;
+
+    const comFoto = exercicios.find((e) => e.exercicio.imagem_url);
+    if (comFoto) {
+      bg.style.backgroundImage = `linear-gradient(135deg, rgba(20,14,10,.35), rgba(9,7,6,.75)), url('${comFoto.exercicio.imagem_url}')`;
+    }
+  } catch {
+    nomeEl.textContent = 'Não foi possível carregar seu treino';
+    metaEl.textContent = '';
+  }
+}
+
 async function carregarCalendario() {
   const grid = document.getElementById('calendario-grid');
   const agora = new Date();
@@ -306,3 +334,4 @@ carregarDashboard();
 carregarCalendario();
 carregarFrequenciaSemana();
 carregarAgenda();
+carregarTreinoDoDia();
