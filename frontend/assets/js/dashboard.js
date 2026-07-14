@@ -238,23 +238,6 @@ document.getElementById('btn-checkin').addEventListener('click', async (ev) => {
   }
 });
 
-// ===== Sidebar mobile =====
-const btnSidebarToggle = document.getElementById('btn-dash-sidebar-toggle');
-const sidebarEl = document.getElementById('dash-sidebar');
-const sidebarScrim = document.getElementById('sidebar-scrim');
-
-function fecharSidebar() {
-  sidebarEl.classList.remove('open');
-  sidebarScrim.classList.remove('open');
-  btnSidebarToggle.setAttribute('aria-expanded', 'false');
-}
-btnSidebarToggle.addEventListener('click', () => {
-  const abrir = !sidebarEl.classList.contains('open');
-  sidebarEl.classList.toggle('open', abrir);
-  sidebarScrim.classList.toggle('open', abrir);
-  btnSidebarToggle.setAttribute('aria-expanded', String(abrir));
-});
-sidebarScrim.addEventListener('click', fecharSidebar);
 
 // ===== Painel de configurações =====
 const configOverlay = document.getElementById('config-overlay');

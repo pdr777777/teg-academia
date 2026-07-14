@@ -1,31 +1,16 @@
-/* ===== Liquid glass — material reutilizável (squircle + brilho especular) ===== */
+/* ===== Card padrão — flat, sem glow, sem transparência ===== */
 .glass {
   position: relative;
-  border-radius: 24px;
-  overflow: hidden;
-  border: 1.5px solid rgba(255,138,0,.55);
-  background: #0a0908;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  /* Força o WebView a recortar corretamente filhos absolutos (foto/gradiente)
-     no canto arredondado — overflow:hidden sozinho falha nisso em alguns
-     Android WebView quando o filho tem background-image full-bleed. */
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
-  box-shadow:
-    0 0 14px rgba(255,138,0,.22),
-    0 10px 30px rgba(0,0,0,.5);
+  border-radius: 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
 }
 .glass.active-nav {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-coral));
-  border-color: rgba(255,138,0,.7);
-  box-shadow: inset 0 1px 1px rgba(255,255,255,0.25), 0 0 14px rgba(255,138,0,0.4);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
-/* ===== Tema claro — cards sólidos brancos, mesma borda com glow ===== */
 :root[data-theme="light"] .glass {
   background: #ffffff;
-  border-color: rgba(255,138,0,.4);
-  box-shadow:
-    0 0 12px rgba(255,138,0,.16),
-    0 10px 30px rgba(20,18,15,0.08);
+  border-color: rgba(20,18,15,0.08);
 }

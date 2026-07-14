@@ -10,36 +10,23 @@
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/aluno.css" />
   <link rel="stylesheet" href="assets/css/liquid-glass.css" />
-  <link rel="stylesheet" href="assets/css/lightfall.css" />
   <link rel="stylesheet" href="assets/css/dashboard.css" />
   <link rel="stylesheet" href="assets/css/app-effects.css" />
   <script src="assets/js/theme.js"></script>
 </head>
 <body>
 
-  <div class="lightfall-container" id="lightfall-bg"></div>
-
   <div class="dash-shell">
-    <aside class="glass sidebar" id="dash-sidebar">
+    <header class="dash-topbar">
       <a href="dashboard.html" class="sb-logo">
         <img src="assets/img/logo.svg" alt="" class="sb-logo-img" onerror="this.style.display='none'" />
         <span>TEG ACADEMIA</span>
       </a>
-      <nav class="sb-nav">
-        <a href="dashboard.html" class="glass active-nav sb-item active-nav"><span data-icon="grid" data-icon-size="16"></span>Dashboard</a>
-        <a href="treinos.html" class="sb-item"><span data-icon="dumbbell" data-icon-size="16"></span>Treinos</a>
-        <a href="ranking.html" class="sb-item"><span data-icon="award" data-icon-size="16"></span>Ranking</a>
-        <a href="indicacao.html" class="sb-item"><span data-icon="link" data-icon-size="16"></span>Indicação</a>
-        <a href="perfil.html" class="sb-item"><span data-icon="user" data-icon-size="16"></span>Perfil</a>
-      </nav>
-      <div class="sb-foot">
-        <button type="button" class="sb-item" id="btn-open-config"><span data-icon="settings" data-icon-size="16"></span>Configurações</button>
-        <button type="button" class="sb-item" id="btn-logout"><span data-icon="log-out" data-icon-size="16"></span>Sair</button>
+      <div class="dash-topbar-actions">
+        <button type="button" id="btn-open-config" aria-label="Configurações"><span data-icon="settings" data-icon-size="18"></span></button>
+        <button type="button" id="btn-logout" aria-label="Sair"><span data-icon="log-out" data-icon-size="18"></span></button>
       </div>
-    </aside>
-
-    <button type="button" class="glass sidebar-toggle" id="btn-dash-sidebar-toggle" data-icon="menu" data-icon-size="18" aria-label="Abrir menu" aria-expanded="false"></button>
-    <div class="sidebar-scrim" id="sidebar-scrim"></div>
+    </header>
 
     <main class="dash-main aluno-main">
       <div id="bloqueio-banner"></div>
@@ -139,6 +126,14 @@
     </aside>
   </div>
 
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="bottom-nav-item active"><span data-icon="home" data-icon-size="20"></span><span>Início</span></a>
+    <a href="treinos.html" class="bottom-nav-item"><span data-icon="dumbbell" data-icon-size="20"></span><span>Treinos</span></a>
+    <a href="ranking.html" class="bottom-nav-item"><span data-icon="award" data-icon-size="20"></span><span>Ranking</span></a>
+    <a href="indicacao.html" class="bottom-nav-item"><span data-icon="link" data-icon-size="20"></span><span>Indicação</span></a>
+    <a href="perfil.html" class="bottom-nav-item"><span data-icon="user" data-icon-size="20"></span><span>Perfil</span></a>
+  </nav>
+
   <div class="config-overlay" id="config-overlay">
     <div class="glass config-drawer" id="config-drawer">
       <div class="drawer-head">
@@ -210,26 +205,6 @@
   <script src="assets/js/ui.js"></script>
   <script src="assets/js/app-effects.js"></script>
   <script src="assets/js/auth-guard.js"></script>
-  <script src="assets/js/lightfall-bg.js"></script>
-  <script>
-    initLightfall(document.getElementById('lightfall-bg'), {
-      colors: ['#bc0000'],
-      backgroundColor: '#000000',
-      speed: 0.4,
-      streakCount: 4,
-      streakWidth: 0.6,
-      streakLength: 1.2,
-      density: 0.5,
-      twinkle: 0.05,
-      glow: 3,
-      backgroundGlow: 0.5,
-      zoom: 2.2,
-      opacity: 1,
-      mouseInteraction: false,
-      mouseStrength: 0.5,
-      mouseRadius: 0.1,
-    });
-  </script>
   <script src="assets/js/dashboard.js"></script>
 </body>
 </html>
