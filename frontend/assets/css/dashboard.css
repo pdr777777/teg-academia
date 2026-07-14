@@ -127,7 +127,6 @@
   border-radius: 50%;
   background: conic-gradient(var(--color-primary) calc(var(--pct, 0) * 1%), rgba(255,255,255,0.08) 0);
   display: flex; align-items: center; justify-content: center;
-  filter: drop-shadow(0 0 10px rgba(255,138,0,.4));
 }
 .ring-inner {
   width: 42px; height: 42px;
@@ -137,7 +136,7 @@
 }
 .ring-inner strong { font-family: var(--font-display); font-weight: 400; font-size: 1.05rem; color: var(--color-primary); text-shadow: 0 0 12px rgba(255,138,0,.5); }
 .heartline { width: 100%; height: 38px; }
-.heartline polyline { fill: none; stroke: var(--color-coral); stroke-width: 2; filter: drop-shadow(0 0 6px rgba(239,77,77,.5)); }
+.heartline polyline { fill: none; stroke: var(--color-coral); stroke-width: 2; }
 .stat-big { font-family: var(--font-display); font-weight: 400; font-size: 2rem; letter-spacing: 0.01em; }
 .stat-lbl { font-size: 0.66rem; color: var(--color-muted); }
 
