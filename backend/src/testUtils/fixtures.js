@@ -10,8 +10,8 @@ function unico() {
 async function criarUsuario(overrides = {}) {
   const senha_hash = await bcrypt.hash('senha1234', 4);
   const { rows: [user] } = await pool.query(
-    `INSERT INTO usuarios (nome, email, senha_hash, telefone, role, link_indicacao)
-     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    `INSERT INTO usuarios (nome, email, senha_hash, telefone, role, link_indicacao, notificacoes_whatsapp)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
     [
       overrides.nome || 'Aluno Teste',
       overrides.email || `${unico()}@teste.com`,
@@ -19,6 +19,7 @@ async function criarUsuario(overrides = {}) {
       overrides.telefone || '67999999999',
       overrides.role || 'aluno',
       overrides.link_indicacao || unico().slice(0, 8),
+      overrides.notificacoes_whatsapp ?? true,
     ]
   );
   return user;
