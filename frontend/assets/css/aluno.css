@@ -16,24 +16,28 @@
    a primeira tentativa usou um fundo ANIMADO em WebGL só pra isso, e isso
    trouxe uma cadeia de bugs no WebView (opacidade, cantos vazando). Degradê
    estático resolve o mesmo problema (blur sem fundo rico fica lavado) sem
-   nenhum custo de performance/compat. */
+   nenhum custo de performance/compat.
+   Cores da identidade visual oficial da TEG (vermelho escuro #7A1B1E →
+   vermelho principal #B62929 → laranja destaque #FF7A1A, no mesmo sentido
+   do "gradiente recomendado" do guia de marca) — a mistura anterior
+   (laranja + vinho + coral, hues bem diferentes) ficava acastanhada/suja
+   onde os blobs se sobrepunham. Gradiente numa família só de cor (vermelho
+   → laranja) não tem esse problema. */
 .dash-shell::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(ellipse 620px 620px at 12% 8%, rgba(255,138,0,0.18), transparent 60%),
-    radial-gradient(ellipse 520px 520px at 92% 22%, rgba(122,31,63,0.20), transparent 60%),
-    radial-gradient(ellipse 560px 640px at 50% 105%, rgba(239,77,77,0.14), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 18% 0%, rgba(255,122,26,0.16), transparent 65%),
+    linear-gradient(135deg, rgba(122,27,30,0.18) 0%, rgba(182,41,41,0.13) 50%, rgba(255,122,26,0.11) 100%),
     var(--color-bg);
   pointer-events: none;
 }
 :root[data-theme="light"] .dash-shell::before {
   background:
-    radial-gradient(ellipse 620px 620px at 12% 8%, rgba(255,138,0,0.10), transparent 60%),
-    radial-gradient(ellipse 520px 520px at 92% 22%, rgba(122,31,63,0.10), transparent 60%),
-    radial-gradient(ellipse 560px 640px at 50% 105%, rgba(239,77,77,0.08), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 18% 0%, rgba(255,122,26,0.09), transparent 65%),
+    linear-gradient(135deg, rgba(122,27,30,0.09) 0%, rgba(182,41,41,0.07) 50%, rgba(255,122,26,0.06) 100%),
     var(--color-bg);
 }
 /* Site inteiro usa Bebas Neue em h1-h4 por padrão (global.css) — nas telas
