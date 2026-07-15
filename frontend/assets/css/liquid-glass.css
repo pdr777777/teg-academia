@@ -1,16 +1,47 @@
-/* ===== Card padrão — flat, sem glow, sem transparência ===== */
+/* ===== Liquid glass — material reutilizável (squircle + brilho especular) =====
+   Segunda tentativa (2026-07-14): a primeira foi abandonada depois de bugs no
+   WebView Android (blur sem fundo rico ficava lavado; fundo animado em WebGL
+   pra compensar trouxe outros problemas de opacidade/cantos). Desta vez:
+   - o "fundo rico" vem de um degradê estático em aluno.css (.dash-shell::before),
+     sem WebGL/animação — barato e sem risco de performance no WebView.
+   - borda sólida semi-transparente, não gradiente (gradiente vazava no canto).
+   - -webkit-mask-image força o recorte do canto arredondado no WebView Android,
+     que às vezes ignora overflow:hidden sozinho quando o filho tem
+     backdrop-filter/background-image full-bleed. */
 .glass {
   position: relative;
-  border-radius: 20px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015) 55%);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.09);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.14),
+    inset 0 -8px 18px rgba(0,0,0,0.25),
+    0 10px 26px rgba(0,0,0,0.4);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
-.glass.active-nav {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+.glass::after {
+  content: '';
+  position: absolute;
+  left: -15%; bottom: -30%;
+  width: 65%; height: 65%;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.14), rgba(255,255,255,0) 65%);
+  filter: blur(6px);
+  mix-blend-mode: screen;
+  pointer-events: none;
 }
 
+/* ===== Tema claro — vidro fica mais claro/branco, mantém o brilho ===== */
 :root[data-theme="light"] .glass {
-  background: #ffffff;
-  border-color: rgba(20,18,15,0.08);
+  background: linear-gradient(160deg, rgba(255,255,255,0.62), rgba(255,255,255,0.3) 55%);
+  border: 1px solid rgba(255,255,255,0.55);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.7),
+    inset 0 -8px 18px rgba(20,18,15,0.04),
+    0 10px 26px rgba(20,18,15,0.08);
+}
+:root[data-theme="light"] .glass::after {
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.55), rgba(255,255,255,0) 65%);
 }
