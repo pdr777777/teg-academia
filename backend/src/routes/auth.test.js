@@ -110,6 +110,78 @@ describe('POST /api/auth/login', () => {
     const res = await request(app).post('/api/auth/login').send({ email: emailUnico() });
     expect(res.status).toBe(400);
   });
+
+  test('bloqueia a conta após 5 tentativas erradas seguidas', async () => {
+    const usuario = await criarUsuario();
+
+    let ultimaResposta;
+    for (let i = 0; i < 5; i++) {
+      ultimaResposta = await request(app).post('/api/auth/login').send({
+        email: usuario.email,
+        senha: 'senhaErrada123',
+      });
+    }
+
+    expect(ultimaResposta.status).toBe(429);
+    expect(ultimaResposta.body.bloqueado).toBe(true);
+    expect(ultimaResposta.body.bloqueado_ate).toBeDefined();
+
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [usuario.id]);
+  });
+
+  test('rejeita até a senha correta enquanto a conta está bloqueada', async () => {
+    const usuario = await criarUsuario();
+
+    for (let i = 0; i < 5; i++) {
+      await request(app).post('/api/auth/login').send({ email: usuario.email, senha: 'senhaErrada123' });
+    }
+
+    const comSenhaCorreta = await request(app).post('/api/auth/login').send({
+      email: usuario.email,
+      senha: 'senha1234',
+    });
+
+    expect(comSenhaCorreta.status).toBe(429);
+    expect(comSenhaCorreta.body.token).toBeUndefined();
+
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [usuario.id]);
+  });
+
+  test('login bem-sucedido zera o contador de tentativas erradas', async () => {
+    const usuario = await criarUsuario();
+
+    await request(app).post('/api/auth/login').send({ email: usuario.email, senha: 'senhaErrada123' });
+    await request(app).post('/api/auth/login').send({ email: usuario.email, senha: 'senhaErrada123' });
+
+    const sucesso = await request(app).post('/api/auth/login').send({ email: usuario.email, senha: 'senha1234' });
+    expect(sucesso.status).toBe(200);
+
+    const { rows } = await pool.query('SELECT tentativas_login_falhas FROM usuarios WHERE id = $1', [usuario.id]);
+    expect(rows[0].tentativas_login_falhas).toBe(0);
+
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [usuario.id]);
+  });
+
+  test('desbloqueia quando o bloqueio expira', async () => {
+    const usuario = await criarUsuario();
+
+    for (let i = 0; i < 5; i++) {
+      await request(app).post('/api/auth/login').send({ email: usuario.email, senha: 'senhaErrada123' });
+    }
+    // simula o cooldown já vencido, sem esperar 10 minutos de verdade.
+    // Margem generosa (20min) porque o relógio da máquina de dev local pode
+    // divergir de alguns minutos em relação ao servidor do Postgres (Supabase);
+    // em produção os dois relógios são sincronizados via NTP normalmente.
+    await pool.query(
+      "UPDATE usuarios SET bloqueado_ate = NOW() - INTERVAL '20 minutes' WHERE id = $1",
+      [usuario.id]
+    );
+
+    const res = await request(app).post('/api/auth/login').send({ email: usuario.email, senha: 'senha1234' });
+    expect(res.status).toBe(200);
+
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [usuario.id]);
+  });
 });
 
 describe('GET /api/auth/me', () => {
@@ -239,6 +311,28 @@ describe('POST /api/auth/esqueci-senha e /redefinir-senha', () => {
       .post('/api/auth/redefinir-senha')
       .send({ token, novaSenha: 'senhaResetada123' });
     expect(res.status).toBe(400);
+
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [usuario.id]);
+  });
+
+  test('redefinir a senha desbloqueia a conta', async () => {
+    const usuario = await criarUsuario();
+    for (let i = 0; i < 5; i++) {
+      await request(app).post('/api/auth/login').send({ email: usuario.email, senha: 'senhaErrada123' });
+    }
+    const { rows: [antes] } = await pool.query('SELECT bloqueado_ate FROM usuarios WHERE id = $1', [usuario.id]);
+    expect(antes.bloqueado_ate).not.toBeNull();
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    await pool.query(
+      'UPDATE usuarios SET reset_token_hash = $1, reset_token_expira = $2 WHERE id = $3',
+      [tokenHash, new Date(Date.now() + 60 * 60 * 1000), usuario.id]
+    );
+    await request(app).post('/api/auth/redefinir-senha').send({ token, novaSenha: 'senhaResetada123' });
+
+    const res = await request(app).post('/api/auth/login').send({ email: usuario.email, senha: 'senhaResetada123' });
+    expect(res.status).toBe(200);
 
     await pool.query('DELETE FROM usuarios WHERE id = $1', [usuario.id]);
   });

@@ -14,7 +14,12 @@ async function apiFetch(path, options = {}) {
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
   const data = await res.json();
 
-  if (!res.ok) throw new Error(data.error || 'Erro na requisição');
+  if (!res.ok) {
+    const err = new Error(data.error || 'Erro na requisição');
+    err.status = res.status;
+    err.data = data;
+    throw err;
+  }
   return data;
 }
 
