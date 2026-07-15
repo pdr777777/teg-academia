@@ -144,7 +144,7 @@ function renderInadimplentes(lista) {
           </span>
           <div class="transaction-info">
             <strong>${i.nome}</strong>
-            <span>${i.matricula_status === 'suspensa' ? 'Suspensa' : 'Vencida'} há ${i.dias_atraso} dia(s) — venceu em ${formatData(i.data_vencimento)}</span>
+            <span>${i.matricula_status === 'suspensa' ? 'Suspensa' : 'Vencida'} há ${i.dias_atraso} dia(s), venceu em ${formatData(i.data_vencimento)}</span>
           </div>
           <a href="alunos.html" class="btn btn-ghost btn-sm">Ver aluno</a>
         </div>

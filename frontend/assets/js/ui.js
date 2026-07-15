@@ -17,7 +17,7 @@ function formatMoeda(valor) {
 }
 
 function formatData(data) {
-  if (!data) return '—';
+  if (!data) return '-';
   return new Date(data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 }
 

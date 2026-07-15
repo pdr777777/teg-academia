@@ -62,7 +62,7 @@ function renderSerieTracker(te) {
   const pills = Array.from({ length: totalSeries }, (_, i) => {
     const num = i + 1;
     const feita = feitas.find((f) => f.numero_serie === num);
-    if (feita) return `<span class="serie-pill feita" title="${feita.repeticoes_realizadas || '—'} reps${feita.carga_realizada ? ' · ' + feita.carga_realizada + 'kg' : ''}">${Icons.icon('check', { size: 12 })}</span>`;
+    if (feita) return `<span class="serie-pill feita" title="${feita.repeticoes_realizadas || '-'} reps${feita.carga_realizada ? ' · ' + feita.carga_realizada + 'kg' : ''}">${Icons.icon('check', { size: 12 })}</span>`;
     if (num === proximaSerie) return `<button type="button" class="serie-pill proxima" data-abrir-serie="${te.id}">${num}</button>`;
     return `<span class="serie-pill pendente">${num}</span>`;
   }).join('');
@@ -107,8 +107,8 @@ function renderExercicios() {
         <div class="exercicio-stats">
           <div class="exercicio-stat"><strong>${te.series}</strong><span>Séries</span></div>
           <div class="exercicio-stat"><strong>${te.repeticoes}</strong><span>Repetições</span></div>
-          <div class="exercicio-stat"><strong>${te.carga ? te.carga + ' kg' : '—'}</strong><span>Carga</span></div>
-          <div class="exercicio-stat"><strong>${te.descanso_segundos ? te.descanso_segundos + 's' : '—'}</strong><span>Descanso</span></div>
+          <div class="exercicio-stat"><strong>${te.carga ? te.carga + ' kg' : '-'}</strong><span>Carga</span></div>
+          <div class="exercicio-stat"><strong>${te.descanso_segundos ? te.descanso_segundos + 's' : '-'}</strong><span>Descanso</span></div>
         </div>
         ${te.observacoes ? `<div class="exercicio-obs">${te.observacoes}</div>` : ''}
         ${renderSerieTracker(te)}

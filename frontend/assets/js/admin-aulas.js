@@ -26,7 +26,7 @@ async function carregarAulas() {
             <td><strong>${a.nome}</strong></td>
             <td>${a.dia_semana_nome}</td>
             <td>${hhmm(a.hora_inicio)} – ${hhmm(a.hora_fim)}</td>
-            <td>${a.professor_nome || '—'}</td>
+            <td>${a.professor_nome || '-'}</td>
             <td>${a.capacidade_maxima}</td>
             <td>
               <label class="switch" title="Ativar/desativar aula">
@@ -75,7 +75,7 @@ document.getElementById('aulas-body').addEventListener('click', async (ev) => {
   if (!aula) return;
 
   await carregarProfessores();
-  document.getElementById('aula-dialog-titulo').textContent = `Editar — ${aula.nome}`;
+  document.getElementById('aula-dialog-titulo').textContent = `Editar: ${aula.nome}`;
   document.getElementById('aula-id').value = aula.id;
   document.getElementById('aula-nome').value = aula.nome;
   document.getElementById('aula-dia').value = aula.dia_semana;

@@ -9,8 +9,8 @@ let alunosFrequencia = [];
 function severidade(dias) {
   if (dias <= 2) return { texto: 'Em dia', classe: 'badge-success' };
   if (dias <= 7) return { texto: `${dias} dias`, classe: 'badge-muted' };
-  if (dias <= 14) return { texto: `${dias} dias — atenção`, classe: 'badge-warning' };
-  return { texto: `${dias} dias — sumiu`, classe: 'badge-danger' };
+  if (dias <= 14) return { texto: `${dias} dias, atenção`, classe: 'badge-warning' };
+  return { texto: `${dias} dias, sumiu`, classe: 'badge-danger' };
 }
 
 function renderFrequencia(lista) {

@@ -41,7 +41,7 @@ async function carregarDashboard() {
 
     const planoBadge = document.getElementById('dash-plano-badge');
     planoBadge.textContent = d.plano_nome
-      ? `Plano ${d.plano_nome} — ${d.matricula_status === 'ativa' ? 'ativo' : d.matricula_status}`
+      ? `Plano ${d.plano_nome} (${d.matricula_status === 'ativa' ? 'ativo' : d.matricula_status})`
       : 'Sem plano ativo';
 
     renderBloqueioBanner('bloqueio-banner', d);
@@ -62,7 +62,7 @@ async function carregarDashboard() {
             <div><strong>${c.nome}</strong><span>${formatData(c.desbloqueada_em)}</span></div>
           </div>
         `).join('')
-      : '<div class="empty-state">Nenhuma conquista ainda — treine para desbloquear!</div>';
+      : '<div class="empty-state">Nenhuma conquista ainda, treine para desbloquear!</div>';
   } catch (err) {
     toast(err.message || 'Erro ao carregar seus dados.', 'error');
   }
@@ -154,7 +154,7 @@ async function carregarFrequenciaSemana() {
     const resultados = await Promise.all(meses.map((mes) => api.get(`/api/frequencias/minha?mes=${mes}`)));
     treinados = new Set(resultados.flat().map((f) => new Date(f.data).toISOString().slice(0, 10)));
   } catch (err) {
-    // segue com o set vazio — as barras aparecem todas "não treinou"
+    // segue com o set vazio, as barras aparecem todas "não treinou"
   }
 
   const chaveHoje = hoje.toISOString().slice(0, 10);
@@ -203,7 +203,7 @@ async function carregarAgenda() {
     if (proxima) {
       const ehHoje = minutosAteAula(proxima, diaAtual, horaAtualMin) < 1440;
       document.getElementById('next-aula-nome').textContent =
-        `${proxima.nome} — ${ehHoje ? 'hoje' : DIAS_ABREV[proxima.dia_semana]} ${proxima.hora_inicio.slice(0, 5)}`;
+        `${proxima.nome} (${ehHoje ? 'hoje' : DIAS_ABREV[proxima.dia_semana]} ${proxima.hora_inicio.slice(0, 5)})`;
       document.getElementById('next-aula-prof').textContent = proxima.professor_nome ? `Prof. ${proxima.professor_nome}` : '';
     } else {
       document.getElementById('next-aula-nome').textContent = 'Nenhuma aula cadastrada';
@@ -213,7 +213,7 @@ async function carregarAgenda() {
     lista.innerHTML = ordenadas.length
       ? ordenadas.slice(0, 5).map((a) => `
           <div class="agenda-item">
-            <span class="agenda-dot"></span>${DIAS_ABREV[a.dia_semana]} ${a.hora_inicio.slice(0, 5)} — ${a.nome}
+            <span class="agenda-dot"></span>${DIAS_ABREV[a.dia_semana]} ${a.hora_inicio.slice(0, 5)}: ${a.nome}
           </div>
         `).join('')
       : '<div class="empty-state">Nenhuma aula cadastrada.</div>';
