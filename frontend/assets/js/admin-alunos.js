@@ -23,7 +23,7 @@ async function carregarAlunos(busca = '') {
                 <div><strong>${a.nome}</strong><div class="text-muted" style="font-size:.78rem">${a.email}</div></div>
               </div>
             </td>
-            <td>${a.plano_nome || '—'}</td>
+            <td>${a.plano_nome || '-'}</td>
             <td>${formatData(a.data_vencimento)}</td>
             <td>${a.xp}</td>
             <td>${a.sequencia_atual} dias</td>
@@ -112,8 +112,8 @@ async function abrirDialogMatricula(btn) {
   const matriculaId = btn.dataset.matMatriculaId || '';
 
   document.getElementById('dialog-titulo').textContent = matriculaId
-    ? `Renovar matrícula — ${nome}`
-    : `Matricular — ${nome}`;
+    ? `Renovar matrícula: ${nome}`
+    : `Matricular: ${nome}`;
 
   inputUsuarioId.value = usuarioId;
   inputMatriculaId.value = matriculaId;
@@ -121,7 +121,7 @@ async function abrirDialogMatricula(btn) {
 
   try {
     const planos = await carregarPlanos();
-    selPlano.innerHTML = planos.map((p) => `<option value="${p.id}">${p.nome} — ${formatMoeda(p.preco_mensal)}/mês</option>`).join('');
+    selPlano.innerHTML = planos.map((p) => `<option value="${p.id}">${p.nome} (${formatMoeda(p.preco_mensal)}/mês)</option>`).join('');
   } catch {
     toast('Erro ao carregar planos.', 'error');
     return;

@@ -8,6 +8,9 @@ const whatsappService = require('../services/whatsappService');
 
 const router = express.Router();
 
+const MAX_TENTATIVAS_LOGIN = 5;
+const BLOQUEIO_LOGIN_MINUTOS = 10;
+
 function gerarLinkIndicacao() {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
@@ -76,8 +79,40 @@ router.post('/login', async (req, res, next) => {
       [email]
     );
     const user = rows[0];
-    if (!user || !(await bcrypt.compare(senha, user.senha_hash))) {
+
+    if (user && user.bloqueado_ate && new Date(user.bloqueado_ate) > new Date()) {
+      const minutosRestantes = Math.max(1, Math.ceil((new Date(user.bloqueado_ate) - new Date()) / 60000));
+      return res.status(429).json({
+        error: `Muitas tentativas erradas. Tente novamente em ${minutosRestantes} minuto(s) ou redefina sua senha.`,
+        bloqueado: true,
+        bloqueado_ate: user.bloqueado_ate,
+      });
+    }
+
+    const senhaValida = user && (await bcrypt.compare(senha, user.senha_hash));
+
+    if (!senhaValida) {
+      if (user) {
+        const tentativas = user.tentativas_login_falhas + 1;
+        if (tentativas >= MAX_TENTATIVAS_LOGIN) {
+          const bloqueadoAte = new Date(Date.now() + BLOQUEIO_LOGIN_MINUTOS * 60000);
+          await pool.query(
+            'UPDATE usuarios SET tentativas_login_falhas = 0, bloqueado_ate = $1 WHERE id = $2',
+            [bloqueadoAte, user.id]
+          );
+          return res.status(429).json({
+            error: `Muitas tentativas erradas. Sua conta foi bloqueada por ${BLOQUEIO_LOGIN_MINUTOS} minutos. Redefina sua senha ou tente novamente depois.`,
+            bloqueado: true,
+            bloqueado_ate: bloqueadoAte,
+          });
+        }
+        await pool.query('UPDATE usuarios SET tentativas_login_falhas = $1 WHERE id = $2', [tentativas, user.id]);
+      }
       return res.status(401).json({ error: 'Credenciais inválidas' });
+    }
+
+    if (user.tentativas_login_falhas > 0 || user.bloqueado_ate) {
+      await pool.query('UPDATE usuarios SET tentativas_login_falhas = 0, bloqueado_ate = NULL WHERE id = $1', [user.id]);
     }
 
     res.json({ token: gerarToken(user), user: { id: user.id, nome: user.nome, email: user.email, role: user.role } });
@@ -204,7 +239,8 @@ router.post('/redefinir-senha', async (req, res, next) => {
     const senha_hash = await bcrypt.hash(novaSenha, 12);
     await pool.query(
       `UPDATE usuarios
-       SET senha_hash = $1, senha_alterada_em = NOW(), reset_token_hash = NULL, reset_token_expira = NULL
+       SET senha_hash = $1, senha_alterada_em = NOW(), reset_token_hash = NULL, reset_token_expira = NULL,
+           tentativas_login_falhas = 0, bloqueado_ate = NULL
        WHERE id = $2`,
       [senha_hash, user.id]
     );

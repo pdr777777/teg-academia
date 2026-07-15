@@ -8,6 +8,10 @@ document.getElementById('form-registro').addEventListener('submit', async (ev) =
   const senha         = form.senha.value;
   const confirmarSenha = form.confirmar_senha.value;
 
+  if (senha.length < 8 || !/[a-zA-Z]/.test(senha) || !/[0-9]/.test(senha)) {
+    toast('A senha precisa ter no mínimo 8 caracteres, com letra e número.', 'error');
+    return;
+  }
   if (senha !== confirmarSenha) {
     toast('As senhas não coincidem.', 'error');
     return;

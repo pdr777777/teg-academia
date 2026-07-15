@@ -44,7 +44,7 @@ async function carregarIndicacoes() {
           return `
             <tr>
               <td>${i.lead_nome || 'Aguardando cadastro'}</td>
-              <td>${i.lead_telefone || '—'}</td>
+              <td>${i.lead_telefone || '-'}</td>
               <td><span class="badge ${s.classe}">${s.label}</span></td>
               <td>${formatData(i.created_at)}</td>
             </tr>

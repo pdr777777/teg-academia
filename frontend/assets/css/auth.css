@@ -41,6 +41,25 @@
   transition: color 0.15s;
 }
 .auth-forgot:hover { color: var(--color-primary); }
+.auth-forgot.destaque {
+  color: var(--color-danger);
+  font-weight: 700;
+  animation: auth-forgot-pulse 1.4s ease-in-out infinite;
+}
+@keyframes auth-forgot-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.auth-bloqueio-msg {
+  display: none;
+  font-size: 0.85rem;
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
+  border: 1px solid rgba(239,68,68,.25);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 0.85rem;
+  margin-bottom: 1rem;
+}
 
 .auth-divider {
   display: flex;
