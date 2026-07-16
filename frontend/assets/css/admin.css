@@ -321,3 +321,37 @@
 .admin-dialog h2 { margin-bottom: 1.25rem; font-size: 1.1rem; }
 .admin-dialog .field-label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--color-muted); margin-bottom: 0.4rem; }
 .dialog-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+
+/* ===== Liquid glass — paleta oficial da marca, escopada só no admin =====
+   Redefine as variáveis de marca localmente em .app-shell (não em :root),
+   então tudo que já lê var(--color-primary)/var(--color-wine)/var(--color-coral)
+   — gráficos, donut, badges, botões, .sidebar-nav a.active via
+   --gradient-flame — recolore automaticamente sem tocar em nenhum .js, e
+   sem afetar páginas fora do admin (login, landing, dashboard do aluno). */
+.app-shell {
+  position: relative;
+  --color-primary: #FF7A1A;
+  --color-primary-hover: #e56a10;
+  --color-wine: #7A1B1E;
+  --color-coral: #B62929;
+}
+/* Fundo estático (sem WebGL/animação) — mesma técnica usada no dashboard
+   do aluno (.dash-shell::before), dá textura pro blur dos cards sem custo
+   de performance/risco de compat. */
+.app-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 700px 500px at 85% 0%, rgba(255,122,26,0.14), transparent 65%),
+    linear-gradient(135deg, rgba(122,27,30,0.16) 0%, rgba(182,41,41,0.12) 50%, rgba(255,122,26,0.10) 100%),
+    var(--color-bg);
+  pointer-events: none;
+}
+:root[data-theme="light"] .app-shell::before {
+  background:
+    radial-gradient(ellipse 700px 500px at 85% 0%, rgba(255,122,26,0.08), transparent 65%),
+    linear-gradient(135deg, rgba(122,27,30,0.08) 0%, rgba(182,41,41,0.06) 50%, rgba(255,122,26,0.05) 100%),
+    var(--color-bg);
+}
