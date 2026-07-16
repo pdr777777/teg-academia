@@ -14,5 +14,11 @@
   display: block;
 }
 
-/* Garante que o conteúdo real fique acima do fundo animado */
-.dash-shell, .topnav, .sidebar { position: relative; z-index: 1; }
+/* Só faz sentido no tema escuro — em tema claro o fundo fica branco e o efeito some. */
+:root[data-theme="light"] .lightfall-container { display: none; }
+
+/* Garante que o conteúdo real fique acima do fundo animado, em qualquer tela do app.
+   .bottom-nav já é position:fixed (definido em aluno.css) — aqui só sobe o z-index,
+   sem redeclarar position (senão quebra o "grudar" na base da tela). */
+.dash-shell, .app-shell, .topnav, .sidebar { position: relative; z-index: 1; }
+.bottom-nav { z-index: 1; }
