@@ -405,3 +405,18 @@
 :root[data-theme="light"] .app-shell .card::after {
   background: radial-gradient(ellipse at center, rgba(255,255,255,0.55), rgba(255,255,255,0) 65%);
 }
+
+/* ===== Tabelas em vidro ===== */
+.app-shell .table-wrap {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012) 55%);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.09);
+}
+:root[data-theme="light"] .app-shell .table-wrap {
+  background: linear-gradient(160deg, rgba(255,255,255,0.6), rgba(255,255,255,0.28) 55%);
+  border: 1px solid rgba(255,255,255,0.5);
+}
