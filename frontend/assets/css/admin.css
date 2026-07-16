@@ -352,6 +352,13 @@
   --color-primary-hover: #e56a10;
   --color-wine: #7A1B1E;
   --color-coral: #B62929;
+  /* As variantes "-soft" (usadas por .badge-primary etc.) são valores rgba
+     fixos em global.css, não derivados de --color-primary — sem essa
+     redefinição, badges/destaques ficariam com o laranja antigo por baixo
+     do texto na cor nova. */
+  --color-primary-soft: rgba(255, 122, 26, 0.14);
+  --color-wine-soft: rgba(122, 27, 30, 0.12);
+  --color-coral-soft: rgba(182, 41, 41, 0.14);
 }
 /* Fundo estático (sem WebGL/animação) — mesma técnica usada no dashboard
    do aluno (.dash-shell::before), dá textura pro blur dos cards sem custo
@@ -443,23 +450,23 @@
    .kanban-card fica menos transparente que os outros elementos de vidro —
    ele empilha em cima da coluna (que já é vidro) e precisa de bom
    contraste de texto durante o arraste. */
-.kanban-col {
+.app-shell .kanban-col {
   background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012) 55%);
   backdrop-filter: blur(18px) saturate(150%);
   -webkit-backdrop-filter: blur(18px) saturate(150%);
   border: 1px solid rgba(255,255,255,0.09);
 }
-.kanban-card {
+.app-shell .kanban-card {
   background: linear-gradient(160deg, rgba(255,255,255,0.09), rgba(255,255,255,0.025) 55%);
   backdrop-filter: blur(14px) saturate(150%);
   -webkit-backdrop-filter: blur(14px) saturate(150%);
   border: 1px solid rgba(255,255,255,0.11);
 }
-:root[data-theme="light"] .kanban-col {
+:root[data-theme="light"] .app-shell .kanban-col {
   background: linear-gradient(160deg, rgba(255,255,255,0.6), rgba(255,255,255,0.28) 55%);
   border: 1px solid rgba(255,255,255,0.5);
 }
-:root[data-theme="light"] .kanban-card {
+:root[data-theme="light"] .app-shell .kanban-card {
   background: linear-gradient(160deg, rgba(255,255,255,0.78), rgba(255,255,255,0.45) 55%);
   border: 1px solid rgba(255,255,255,0.6);
 }
