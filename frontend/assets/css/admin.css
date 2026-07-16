@@ -299,13 +299,31 @@
 
 /* ===== Admin Dialog ===== */
 .admin-dialog {
+  position: relative;
+  overflow: hidden;
   width: 100%; max-width: 400px;
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(255,255,255,0.09);
   border-radius: var(--radius-lg);
-  background: linear-gradient(180deg, #131313, var(--color-surface));
+  background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015) 55%);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
   color: var(--color-text);
   padding: 2rem;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.03), 0 24px 64px rgba(0,0,0,0.5);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.14),
+    inset 0 -8px 18px rgba(0,0,0,0.25),
+    0 24px 64px rgba(0,0,0,0.5);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+.admin-dialog::after {
+  content: '';
+  position: absolute;
+  left: -15%; bottom: -30%;
+  width: 65%; height: 65%;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.14), rgba(255,255,255,0) 65%);
+  filter: blur(6px);
+  mix-blend-mode: screen;
+  pointer-events: none;
 }
 .admin-dialog[open] { animation: dialog-in 0.25s cubic-bezier(.16,1,.3,1); }
 @keyframes dialog-in {
