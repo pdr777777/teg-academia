@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#0a0a0a"/>
+  <g transform="translate(30,84.25) scale(0.875)">
+    <polygon points="0,0 13,9 0,18" fill="#e85050"/>
+    <polygon points="0,18 13,9 13,27" fill="#cc0000"/>
+    <polygon points="0,18 13,27 0,36" fill="#6b1a30"/>
+    <polygon points="13,9 26,18 13,27" fill="#ff6d00"/>
+    <text x="34" y="25" font-family="'Arial Black','Arial',sans-serif" font-size="22" font-weight="900" fill="#ffffff" letter-spacing="-0.5">TEG</text>
+    <text x="35.5" y="34.5" font-family="Arial,sans-serif" font-size="9" font-weight="500" fill="rgba(255,255,255,0.55)" letter-spacing="2.5">ACADEMIA</text>
+  </g>
+</svg>

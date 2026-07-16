@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ usa a API nativa de splash (android:windowSplashScreenBackground), que tem
+         prioridade sobre o android:background usado nas versões antigas. Sem isso aqui, o SO
+         ignora nosso drawable/splash preto e mostra o fundo claro padrão do Material. -->
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="android:windowSplashScreenBackground">#0a0a0a</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+    </style>
+</resources>
