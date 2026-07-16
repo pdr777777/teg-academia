@@ -299,13 +299,31 @@
 
 /* ===== Admin Dialog ===== */
 .admin-dialog {
+  position: relative;
+  overflow: hidden;
   width: 100%; max-width: 400px;
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(255,255,255,0.09);
   border-radius: var(--radius-lg);
-  background: linear-gradient(180deg, #131313, var(--color-surface));
+  background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015) 55%);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
   color: var(--color-text);
   padding: 2rem;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.03), 0 24px 64px rgba(0,0,0,0.5);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.14),
+    inset 0 -8px 18px rgba(0,0,0,0.25),
+    0 24px 64px rgba(0,0,0,0.5);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+.admin-dialog::after {
+  content: '';
+  position: absolute;
+  left: -15%; bottom: -30%;
+  width: 65%; height: 65%;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.14), rgba(255,255,255,0) 65%);
+  filter: blur(6px);
+  mix-blend-mode: screen;
+  pointer-events: none;
 }
 .admin-dialog[open] { animation: dialog-in 0.25s cubic-bezier(.16,1,.3,1); }
 @keyframes dialog-in {
@@ -321,3 +339,134 @@
 .admin-dialog h2 { margin-bottom: 1.25rem; font-size: 1.1rem; }
 .admin-dialog .field-label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--color-muted); margin-bottom: 0.4rem; }
 .dialog-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+
+/* ===== Liquid glass — paleta oficial da marca, escopada só no admin =====
+   Redefine as variáveis de marca localmente em .app-shell (não em :root),
+   então tudo que já lê var(--color-primary)/var(--color-wine)/var(--color-coral)
+   — gráficos, donut, badges, botões, .sidebar-nav a.active via
+   --gradient-flame — recolore automaticamente sem tocar em nenhum .js, e
+   sem afetar páginas fora do admin (login, landing, dashboard do aluno). */
+.app-shell {
+  position: relative;
+  --color-primary: #FF7A1A;
+  --color-primary-hover: #e56a10;
+  --color-wine: #7A1B1E;
+  --color-coral: #B62929;
+  /* As variantes "-soft" (usadas por .badge-primary etc.) são valores rgba
+     fixos em global.css, não derivados de --color-primary — sem essa
+     redefinição, badges/destaques ficariam com o laranja antigo por baixo
+     do texto na cor nova. */
+  --color-primary-soft: rgba(255, 122, 26, 0.14);
+  --color-wine-soft: rgba(122, 27, 30, 0.12);
+  --color-coral-soft: rgba(182, 41, 41, 0.14);
+}
+/* Fundo estático (sem WebGL/animação) — mesma técnica usada no dashboard
+   do aluno (.dash-shell::before), dá textura pro blur dos cards sem custo
+   de performance/risco de compat. */
+.app-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 700px 500px at 85% 0%, rgba(255,122,26,0.14), transparent 65%),
+    linear-gradient(135deg, rgba(122,27,30,0.16) 0%, rgba(182,41,41,0.12) 50%, rgba(255,122,26,0.10) 100%),
+    var(--color-bg);
+  pointer-events: none;
+}
+:root[data-theme="light"] .app-shell::before {
+  background:
+    radial-gradient(ellipse 700px 500px at 85% 0%, rgba(255,122,26,0.08), transparent 65%),
+    linear-gradient(135deg, rgba(122,27,30,0.08) 0%, rgba(182,41,41,0.06) 50%, rgba(255,122,26,0.05) 100%),
+    var(--color-bg);
+}
+
+/* ===== Sidebar em vidro ===== */
+.app-shell .sidebar {
+  background: linear-gradient(160deg, rgba(255,255,255,0.055), rgba(255,255,255,0.012) 55%);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+:root[data-theme="light"] .app-shell .sidebar {
+  background: linear-gradient(160deg, rgba(255,255,255,0.6), rgba(255,255,255,0.28) 55%);
+  border-right: 1px solid rgba(255,255,255,0.5);
+}
+
+/* ===== Cards em vidro (stat cards, gráficos, listas, configurações) =====
+   Cobre .card.modal-box (pagamentos.html) automaticamente — não precisa
+   de regra separada pro modal, ele já tem a classe .card. */
+.app-shell .card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015) 55%);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.09);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.14),
+    inset 0 -8px 18px rgba(0,0,0,0.25),
+    0 10px 26px rgba(0,0,0,0.4);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+.app-shell .card::after {
+  content: '';
+  position: absolute;
+  left: -15%; bottom: -30%;
+  width: 65%; height: 65%;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.14), rgba(255,255,255,0) 65%);
+  filter: blur(6px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+:root[data-theme="light"] .app-shell .card {
+  background: linear-gradient(160deg, rgba(255,255,255,0.62), rgba(255,255,255,0.3) 55%);
+  border: 1px solid rgba(255,255,255,0.55);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.7),
+    inset 0 -8px 18px rgba(20,18,15,0.04),
+    0 10px 26px rgba(20,18,15,0.08);
+}
+:root[data-theme="light"] .app-shell .card::after {
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.55), rgba(255,255,255,0) 65%);
+}
+
+/* ===== Tabelas em vidro ===== */
+.app-shell .table-wrap {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012) 55%);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.09);
+}
+:root[data-theme="light"] .app-shell .table-wrap {
+  background: linear-gradient(160deg, rgba(255,255,255,0.6), rgba(255,255,255,0.28) 55%);
+  border: 1px solid rgba(255,255,255,0.5);
+}
+
+/* ===== Kanban do CRM em vidro =====
+   .kanban-card fica menos transparente que os outros elementos de vidro —
+   ele empilha em cima da coluna (que já é vidro) e precisa de bom
+   contraste de texto durante o arraste. */
+.app-shell .kanban-col {
+  background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012) 55%);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.09);
+}
+.app-shell .kanban-card {
+  background: linear-gradient(160deg, rgba(255,255,255,0.09), rgba(255,255,255,0.025) 55%);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.11);
+}
+:root[data-theme="light"] .app-shell .kanban-col {
+  background: linear-gradient(160deg, rgba(255,255,255,0.6), rgba(255,255,255,0.28) 55%);
+  border: 1px solid rgba(255,255,255,0.5);
+}
+:root[data-theme="light"] .app-shell .kanban-card {
+  background: linear-gradient(160deg, rgba(255,255,255,0.78), rgba(255,255,255,0.45) 55%);
+  border: 1px solid rgba(255,255,255,0.6);
+}
