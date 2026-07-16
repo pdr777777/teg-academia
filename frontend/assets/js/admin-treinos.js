@@ -190,7 +190,7 @@ document.getElementById('btn-add-exercicio').addEventListener('click', () => {
 
 function exercicioThumb(ex) {
   return ex && ex.imagem_url
-    ? `<span class="exercicio-thumb"><img src="${ex.imagem_url}" alt="" /></span>`
+    ? `<span class="exercicio-thumb"><img src="${ex.imagem_url}" alt="" loading="lazy" decoding="async" /></span>`
     : `<span class="exercicio-thumb">${Icons.icon('dumbbell', { size: 16 })}</span>`;
 }
 

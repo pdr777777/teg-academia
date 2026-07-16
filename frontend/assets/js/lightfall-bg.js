@@ -94,7 +94,7 @@ vec2 sceneC(vec2 frag, vec2 r) {
   float z = 0.0;
   float d = 1e3;
   vec4 O = vec4(0.0);
-  for (int k = 0; k < 39; k++) {
+  for (int k = 0; k < 28; k++) {
     if (d <= 1e-4) break;
     O = z * normalize(vec4(P, uZoom, 0.0)) - vec4(0.0, 4.0, 1.0, 0.0) / 4.5;
     d = 1.0 - sqrt(length(O * O));
@@ -179,7 +179,10 @@ void main() {
       return; // respeita preferência de movimento reduzido — mantém só o fundo estático
     }
 
-    const dpr = Math.min(opts.dpr || window.devicePixelRatio || 1, 2);
+    // Teto de 1.5x (não 2x) — o shader é caro por pixel (raymarching), e a maioria dos
+    // celulares tem DPR 2.5-3, então isso corta bastante trabalho de GPU sem perda visível
+    // num fundo desfocado/animado.
+    const dpr = Math.min(opts.dpr || window.devicePixelRatio || 1, 1.5);
     const canvas = document.createElement('canvas');
     const gl = canvas.getContext('webgl', { alpha: true, antialias: true })
       || canvas.getContext('experimental-webgl', { alpha: true, antialias: true });

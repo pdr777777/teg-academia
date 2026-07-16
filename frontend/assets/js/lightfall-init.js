@@ -4,6 +4,12 @@
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.initLightfall) return;
 
+  // Em aparelho fraco (pouca RAM ou poucos núcleos), prioriza rodar liso a manter o
+  // efeito — fica só o fundo preto liso, que já era a aparência aprovada antes dele.
+  const memoriaBaixa = navigator.deviceMemory && navigator.deviceMemory <= 2;
+  const poucosNucleos = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2;
+  if (memoriaBaixa || poucosNucleos) return;
+
   const container = document.createElement('div');
   container.className = 'lightfall-container';
   container.id = 'lightfall-bg';
