@@ -89,11 +89,34 @@
 }
 .serie-form .input { max-width: 110px; }
 .serie-descanso {
-  margin-top: 0.75rem;
-  font-size: 0.82rem;
-  color: var(--color-muted);
+  margin-top: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: var(--color-primary-soft);
+  border: 1px solid rgba(255,138,0,.3);
 }
-.serie-descanso strong { color: var(--color-primary); font-variant-numeric: tabular-nums; }
+.serie-descanso-head {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 0.85rem; font-weight: 600; color: var(--color-primary);
+}
+.serie-descanso-head span { display: flex; align-items: center; gap: 0.4rem; }
+.serie-descanso-time {
+  font-size: 1.4rem; font-weight: 800; color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+.serie-descanso-bar {
+  margin-top: 0.6rem;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255,138,0,.18);
+  overflow: hidden;
+}
+.serie-descanso-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 999px;
+  transition: width 1s linear;
+}
 .serie-tracker-completo {
   display: flex; align-items: center; gap: 0.4rem;
   margin-top: 0.75rem;

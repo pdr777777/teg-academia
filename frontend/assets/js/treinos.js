@@ -81,7 +81,11 @@ function renderSerieTracker(te) {
           <button type="button" class="btn btn-primary btn-sm" data-confirmar-serie="${te.id}" data-numero="${proximaSerie}">Concluir</button>
         </div>
         <div class="serie-descanso" id="serie-descanso-${te.id}" style="display:none">
-          Descansando... <strong class="serie-descanso-time"></strong>
+          <div class="serie-descanso-head">
+            <span>${Icons.icon('clock', { size: 15 })}Descansando</span>
+            <strong class="serie-descanso-time"></strong>
+          </div>
+          <div class="serie-descanso-bar"><div class="serie-descanso-fill"></div></div>
         </div>
       ` : `<div class="serie-tracker-completo">${Icons.icon('check-circle', { size: 14 })}Exercício completo!</div>`}
     </div>
@@ -234,20 +238,38 @@ async function confirmarSerie(btn) {
   }
 }
 
+function vibrarFimDescanso() {
+  try {
+    const haptics = window.Capacitor?.isNativePlatform?.() && window.Capacitor.Plugins?.Haptics;
+    if (haptics) {
+      haptics.vibrate({ duration: 300 });
+    } else if (navigator.vibrate) {
+      navigator.vibrate([120, 80, 120]);
+    }
+  } catch {
+    /* sem suporte a vibração — segue sem alerta tátil */
+  }
+}
+
 function mostrarDescanso(teId, segundos) {
   const el = document.getElementById(`serie-descanso-${teId}`);
   if (!el) return;
   el.style.display = 'block';
   const timeEl = el.querySelector('.serie-descanso-time');
+  const fillEl = el.querySelector('.serie-descanso-fill');
+  const total = segundos;
   let restante = segundos;
   timeEl.textContent = formatTempo(restante);
+  fillEl.style.width = '100%';
   const iv = setInterval(() => {
     restante--;
     if (!document.body.contains(el)) return clearInterval(iv);
     timeEl.textContent = formatTempo(Math.max(restante, 0));
+    fillEl.style.width = `${Math.max(restante, 0) / total * 100}%`;
     if (restante <= 0) {
       clearInterval(iv);
       el.style.display = 'none';
+      vibrarFimDescanso();
     }
   }, 1000);
 }
