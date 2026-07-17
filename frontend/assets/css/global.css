@@ -296,21 +296,78 @@ label {
 .topnav .brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 800; letter-spacing: -0.02em; font-size: 1.05rem; }
 .topnav .brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--color-primary); }
 .brand-logo { height: 34px; width: auto; display: block; }
+.brand-icon { height: 34px; width: auto; display: block; }
+.brand-text { height: 30px; width: auto; display: block; }
 .brand-fallback { display: none; align-items: center; gap: 0.6rem; }
-.topnav-links { display: flex; align-items: center; gap: 0.25rem; }
-.topnav-links a {
+
+/* ===== Menu em pills (porte do PillNav do React Bits, JS puro + GSAP) ===== */
+.topnav-links.pill-list {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.55rem 0.9rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: var(--color-muted);
-  transition: background-color 0.15s, color 0.15s;
+  gap: 3px;
+  padding: 3px;
+  background: #0a0a0a;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
 }
-.topnav-links a:hover { color: var(--color-text); background: var(--color-surface-2); }
-.topnav-links a.active { color: var(--color-text); background: var(--color-surface-2); }
+.topnav-links .pill {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 1.05rem;
+  border-radius: 999px;
+  background: #fff;
+  color: #111;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+}
+.topnav-links .hover-circle {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  border-radius: 50%;
+  background: #0a0a0a;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  pointer-events: none;
+  will-change: transform;
+}
+.topnav-links .label-stack { position: relative; display: inline-block; line-height: 1; z-index: 2; }
+.topnav-links .pill-label {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  will-change: transform;
+  z-index: 2;
+  /* neutraliza o "shiny text" global (effects.css) — aqui o texto é sólido */
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: currentColor;
+  color: #111;
+}
+.topnav-links .pill-label-hover {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: currentColor;
+  display: inline-block;
+  color: #fff;
+  z-index: 3;
+  will-change: transform, opacity;
+}
 .topnav-right { display: flex; align-items: center; gap: 0.6rem; }
 .topnav-menu-btn { display: none; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
 
@@ -483,17 +540,21 @@ tbody tr:hover { background: var(--color-surface-2); }
   .sidebar.open { transform: translateX(0); }
   .main-content { padding: 1.25rem; }
   .topnav-menu-btn { display: flex; }
-  .topnav-links {
+  .topnav-links.pill-list {
     display: none;
     position: absolute;
     top: calc(64px + env(safe-area-inset-top, 0px)); left: 0; right: 0;
     flex-direction: column;
+    align-items: stretch;
     background: var(--color-bg);
+    border: none;
     border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
     padding: 0.5rem;
+    gap: 0.35rem;
   }
-  .topnav-links.open { display: flex; }
-  .topnav-links a { width: 100%; }
+  .topnav-links.pill-list.open { display: flex; }
+  .topnav-links .pill { width: 100%; height: 44px; }
   .section { padding: 3rem 0; }
   .section-head { margin-bottom: 2rem; }
 }

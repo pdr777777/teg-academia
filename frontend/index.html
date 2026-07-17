@@ -84,18 +84,19 @@
   <!-- NAV -->
   <header class="topnav" id="site-nav">
     <a href="index.html" class="brand">
-      <img src="assets/img/logo.svg" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-      <span class="brand-fallback"><span class="dot"></span>TEG ACADEMIA</span>
+      <img src="assets/img/logo-icon.svg" alt="" class="brand-icon" id="brand-icon" onerror="this.style.display='none'" />
+      <img src="assets/img/logo-text.svg" alt="TEG Academia" class="brand-text" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+      <span class="brand-fallback" style="display:none"><span class="dot"></span>TEG ACADEMIA</span>
     </a>
-    <nav class="topnav-links">
-      <a href="#estrutura">Estrutura</a>
-      <a href="#gamificacao">Gamificação</a>
-      <a href="#planos">Planos</a>
-      <a href="#depoimentos">Depoimentos</a>
-      <a href="#localizacao">Localização</a>
+    <nav class="topnav-links pill-list" id="site-nav-links">
+      <a href="#estrutura" class="pill"><span class="hover-circle" aria-hidden="true"></span><span class="label-stack"><span class="pill-label">Estrutura</span><span class="pill-label-hover" aria-hidden="true">Estrutura</span></span></a>
+      <a href="#gamificacao" class="pill"><span class="hover-circle" aria-hidden="true"></span><span class="label-stack"><span class="pill-label">Gamificação</span><span class="pill-label-hover" aria-hidden="true">Gamificação</span></span></a>
+      <a href="#planos" class="pill"><span class="hover-circle" aria-hidden="true"></span><span class="label-stack"><span class="pill-label">Planos</span><span class="pill-label-hover" aria-hidden="true">Planos</span></span></a>
+      <a href="#depoimentos" class="pill"><span class="hover-circle" aria-hidden="true"></span><span class="label-stack"><span class="pill-label">Depoimentos</span><span class="pill-label-hover" aria-hidden="true">Depoimentos</span></span></a>
+      <a href="#localizacao" class="pill"><span class="hover-circle" aria-hidden="true"></span><span class="label-stack"><span class="pill-label">Localização</span><span class="pill-label-hover" aria-hidden="true">Localização</span></span></a>
+      <a href="login.html" class="pill"><span class="hover-circle" aria-hidden="true"></span><span class="label-stack"><span class="pill-label">Entrar</span><span class="pill-label-hover" aria-hidden="true">Entrar</span></span></a>
     </nav>
     <div class="topnav-right">
-      <a href="login.html" class="btn btn-ghost btn-sm">Entrar</a>
       <a href="matricula.html" class="btn btn-primary btn-sm">Matricule-se</a>
       <button class="topnav-menu-btn btn-ghost btn-sm" id="btn-mobile-menu" aria-label="Abrir menu"></button>
     </div>
@@ -542,6 +543,8 @@
   <script src="assets/js/linewaves.js"></script>
   <script src="assets/js/landing.js"></script>
   <script src="assets/js/effects.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="assets/js/pill-nav.js"></script>
 </body>
 </html>
 
