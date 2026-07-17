@@ -8,8 +8,8 @@
   padding: 2rem 1.5rem;
   gap: 2rem;
   background:
-    radial-gradient(50% 40% at 50% 0%, rgba(255,60,0,0.10), transparent),
-    radial-gradient(40% 35% at 85% 100%, rgba(122,31,63,0.10), transparent),
+    radial-gradient(50% 40% at 50% 0%, rgba(255,255,255,0.06), transparent),
+    radial-gradient(40% 35% at 85% 100%, rgba(255,255,255,0.04), transparent),
     var(--color-bg);
 }
 /* Grão sutil — tira a cara de "gradiente CSS liso" sem custar peso de asset */
@@ -26,7 +26,7 @@
 :root[data-theme="light"] .auth-wrap::before { display: none; }
 .auth-brand { position: relative; z-index: 1; font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 0.6rem; transition: opacity 0.15s; }
 .auth-brand:hover { opacity: 0.85; }
-.auth-brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--color-primary); }
+.auth-brand .dot { width: 9px; height: 9px; border-radius: 50%; background: #fff; }
 .auth-card {
   position: relative;
   z-index: 1;
@@ -166,9 +166,9 @@
   margin: 0 auto 1.25rem;
 }
 .sucesso-icon.primary {
-  background: var(--color-primary-soft);
-  border-color: rgba(255,138,0,.22);
-  color: var(--color-primary);
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.16);
+  color: #fff;
 }
 
 @media (max-width: 420px) {
@@ -181,5 +181,5 @@
   font-size: 0.88rem;
   color: var(--color-muted);
 }
-.auth-links a { color: var(--color-primary); text-decoration: none; }
+.auth-links a { color: #fff; text-decoration: none; }
 .auth-links a:hover { text-decoration: underline; }
