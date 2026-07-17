@@ -44,7 +44,24 @@
   position: absolute;
   top: 0; left: 12%; right: 12%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,138,0,.55), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent);
+}
+
+/* Auth em preto e branco — mesma paleta da pill gooey, sem laranja da marca
+   (o resto do app continua laranja; isso é escopado só ao .auth-card). */
+.auth-card .btn-primary {
+  background: #fff;
+  color: #111;
+  box-shadow: inset 0 1px 0 rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.3);
+}
+.auth-card .btn-primary:hover:not(:disabled) {
+  filter: none;
+  background: #e9e9e9;
+  box-shadow: inset 0 1px 0 rgba(0,0,0,.04), 0 6px 24px rgba(255,255,255,.16);
+}
+.auth-card input:focus {
+  border-color: rgba(255,255,255,.4);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.1);
 }
 .auth-card h1 {
   font-size: clamp(2rem, 5vw, 2.6rem);
@@ -61,7 +78,7 @@
   margin-top: -0.25rem;
   transition: color 0.15s;
 }
-.auth-forgot:hover { color: var(--color-primary); }
+.auth-forgot:hover { color: #fff; }
 .auth-forgot.destaque {
   color: var(--color-danger);
   font-weight: 700;
@@ -96,7 +113,7 @@
   display: flex;
   transition: color 0.15s;
 }
-.field-icon input:focus ~ .field-icon-glyph { color: var(--color-primary); }
+.field-icon input:focus ~ .field-icon-glyph { color: #fff; }
 .field-toggle {
   position: absolute;
   right: 0.4rem;
