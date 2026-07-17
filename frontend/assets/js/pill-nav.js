@@ -1,6 +1,6 @@
 // pill-nav.js — porte em JS puro (GSAP) do componente PillNav do React Bits
-// (github.com/DavidHDev/react-bits): a onda que cobre o pill no hover e o giro
-// do ícone da marca. Sem React/react-router — aqui é sempre <a href>.
+// (github.com/DavidHDev/react-bits): a onda que cobre o pill no hover.
+// Sem React/react-router — aqui é sempre <a href>.
 (function () {
   var REDUCE_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var EASE = 'power3.out';
@@ -68,24 +68,7 @@
     });
   }
 
-  function initLogoSpin(icon) {
-    if (!icon) return;
-    if (!window.gsap || REDUCE_MOTION) {
-      // Sem GSAP/motion reduzido: giro simples via CSS, sem reset instantâneo.
-      icon.style.transition = 'transform 0.4s ease';
-      icon.addEventListener('mouseenter', function () { icon.style.transform = 'rotate(360deg)'; });
-      icon.addEventListener('mouseleave', function () { icon.style.transform = 'rotate(0deg)'; });
-      return;
-    }
-    icon.addEventListener('mouseenter', function () {
-      gsap.killTweensOf(icon);
-      gsap.set(icon, { rotate: 0 });
-      gsap.to(icon, { rotate: 360, duration: 0.4, ease: EASE });
-    });
-  }
-
   document.addEventListener('DOMContentLoaded', function () {
     initPillHover(document.getElementById('site-nav-links'));
-    initLogoSpin(document.getElementById('brand-icon'));
   });
 })();
