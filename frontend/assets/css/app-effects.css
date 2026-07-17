@@ -68,6 +68,41 @@
   pointer-events: none;
 }
 
+/* Modo gooey (opt-in via initTabsIndicator(el, {gooey:true})) — porte do
+   GooeyNav do React Bits: blur+contrast funde a pill com as partículas que
+   estouram na troca de aba, sem borrar o texto (que fica fora do wrapper).
+   O truque só é estável com BRANCO PURO sobre fundo preto — qualquer canal
+   de cor que não esteja já no extremo (0 ou 255) estoura pro lado errado sob
+   contrast() alto e a cor sai distorcida (testado: laranja virou amarelo). */
+.tab-indicator-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(6px) contrast(28) blur(0);
+  mix-blend-mode: lighten;
+}
+.tab-indicator-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -40px;
+  z-index: -1;
+  background: #000;
+}
+.tab-indicator-wrap .tab-indicator { background: #fff; border-radius: 999px; }
+.tabs-gooey .tab.active { color: #111; text-shadow: none; }
+.tab-particle {
+  position: absolute;
+  top: 50%;
+  border-radius: 50%;
+  background: #fff;
+  animation: tab-particle-fly var(--time, 550ms) cubic-bezier(.2,.8,.2,1) forwards;
+}
+@keyframes tab-particle-fly {
+  0%   { transform: translate(-50%, -50%) scale(1); }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0); }
+}
+
 /* ───────────────────────── Sidebar admin — indicador ativo ───────────────────────── */
 .sidebar-nav a {
   position: relative;

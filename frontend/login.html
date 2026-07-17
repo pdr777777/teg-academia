@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Entrar - Academia TEG</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="assets/img/favicon.png" />
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/auth.css" />
@@ -16,35 +16,112 @@
   <div class="auth-wrap">
     <a href="index.html" class="brand auth-brand"><img src="assets/img/logo.svg" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ACADEMIA</span></a>
 
-    <form id="form-login" class="card auth-card">
-      <h1>Bem-vindo de volta</h1>
-      <p class="text-muted" style="margin-bottom:1.75rem">Entre para acessar sua área do aluno.</p>
-
-      <div class="field">
-        <label for="email">E-mail</label>
-        <input type="email" id="email" required autocomplete="email" />
-      </div>
-      <div class="field">
-        <label for="senha">Senha</label>
-        <input type="password" id="senha" required autocomplete="current-password" />
+    <div class="card auth-card">
+      <div class="tabs auth-tabs" id="auth-tabs">
+        <button type="button" class="tab active" data-panel="entrar">Entrar</button>
+        <button type="button" class="tab" data-panel="criar-conta">Criar conta</button>
       </div>
 
-      <p id="login-bloqueio-msg" class="auth-bloqueio-msg"></p>
-      <a href="esqueci-senha.html" id="link-esqueci-senha" class="auth-forgot">Esqueci minha senha</a>
+      <div class="auth-panel active" data-panel="entrar">
+        <h1>Bem-vindo de volta</h1>
+        <p class="text-muted" style="margin-bottom:1.75rem">Entre para acessar sua área do aluno.</p>
 
-      <button type="submit" class="btn btn-primary btn-block" id="btn-login">Entrar</button>
+        <form id="form-login">
+          <div class="field">
+            <label for="login-email">E-mail</label>
+            <div class="field-icon">
+              <input type="email" id="login-email" name="email" required autocomplete="email" />
+              <span class="field-icon-glyph" data-icon="mail" data-icon-size="17"></span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="login-senha">Senha</label>
+            <div class="field-icon has-toggle">
+              <input type="password" id="login-senha" name="senha" required autocomplete="current-password" />
+              <span class="field-icon-glyph" data-icon="lock" data-icon-size="17"></span>
+              <button type="button" class="field-toggle" data-toggle-password="login-senha" aria-label="Mostrar senha">
+                <span data-icon="eye" data-icon-size="17"></span>
+              </button>
+            </div>
+          </div>
 
-      <div class="auth-divider"><span>ou</span></div>
+          <p id="login-bloqueio-msg" class="auth-bloqueio-msg"></p>
+          <a href="esqueci-senha.html" id="link-esqueci-senha" class="auth-forgot">Esqueci minha senha</a>
 
-      <a href="registro.html" class="btn btn-outline btn-block">Criar conta</a>
-    </form>
+          <button type="submit" class="btn btn-primary btn-block" id="btn-login">Entrar</button>
+        </form>
+      </div>
+
+      <div class="auth-panel" data-panel="criar-conta">
+        <form id="form-registro" autocomplete="off">
+          <h1>Criar conta</h1>
+          <p class="text-muted" style="margin-bottom:1.75rem">Preencha seus dados para acessar a área do aluno.</p>
+
+          <div class="field">
+            <label for="registro-nome">Nome completo</label>
+            <div class="field-icon">
+              <input type="text" id="registro-nome" name="nome" required autocomplete="name" placeholder="Seu nome completo" />
+              <span class="field-icon-glyph" data-icon="user" data-icon-size="17"></span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="registro-email">E-mail</label>
+            <div class="field-icon">
+              <input type="email" id="registro-email" name="email" required autocomplete="email" placeholder="seu@email.com" />
+              <span class="field-icon-glyph" data-icon="mail" data-icon-size="17"></span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="registro-telefone">WhatsApp</label>
+            <div class="field-icon">
+              <input type="tel" id="registro-telefone" name="telefone" required autocomplete="tel" placeholder="(67) 99999-9999" />
+              <span class="field-icon-glyph" data-icon="phone" data-icon-size="17"></span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="registro-senha">Senha</label>
+            <div class="field-icon has-toggle">
+              <input type="password" id="registro-senha" name="senha" required minlength="8" autocomplete="new-password" placeholder="Mínimo 8 caracteres com letra e número" />
+              <span class="field-icon-glyph" data-icon="lock" data-icon-size="17"></span>
+              <button type="button" class="field-toggle" data-toggle-password="registro-senha" aria-label="Mostrar senha">
+                <span data-icon="eye" data-icon-size="17"></span>
+              </button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="registro-confirmar_senha">Confirmar senha</label>
+            <div class="field-icon has-toggle">
+              <input type="password" id="registro-confirmar_senha" name="confirmar_senha" required autocomplete="new-password" placeholder="Repita a senha" />
+              <span class="field-icon-glyph" data-icon="lock" data-icon-size="17"></span>
+              <button type="button" class="field-toggle" data-toggle-password="registro-confirmar_senha" aria-label="Mostrar senha">
+                <span data-icon="eye" data-icon-size="17"></span>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Criar conta</button>
+        </form>
+
+        <!-- Tela de sucesso (oculta inicialmente) -->
+        <div id="registro-sucesso" style="display:none;text-align:center">
+          <div class="sucesso-icon">✓</div>
+          <h2>Conta criada!</h2>
+          <p class="text-muted" style="margin:0.75rem 0 1.75rem">Agora fale com nossa equipe no WhatsApp para escolher seu plano e finalizar sua matrícula.</p>
+          <a id="btn-whatsapp" href="#" class="btn btn-primary btn-block" target="_blank" rel="noopener">
+            Falar no WhatsApp
+          </a>
+          <a href="dashboard.html" class="btn btn-ghost btn-block" style="margin-top:0.5rem">Ir para minha área</a>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <div id="toast-root"></div>
   <script src="assets/js/icons.js"></script>
   <script src="assets/js/api.js"></script>
   <script src="assets/js/ui.js"></script>
   <script src="assets/js/app-effects.js"></script>
+  <script src="assets/js/registro.js"></script>
   <script src="assets/js/login.js"></script>
 </body>
 </html>
-

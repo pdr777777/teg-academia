@@ -1,4 +1,5 @@
 .auth-wrap {
+  position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -11,15 +12,30 @@
     radial-gradient(40% 35% at 85% 100%, rgba(122,31,63,0.10), transparent),
     var(--color-bg);
 }
-.auth-brand { font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 0.6rem; transition: opacity 0.15s; }
+/* Grão sutil — tira a cara de "gradiente CSS liso" sem custar peso de asset */
+.auth-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+:root[data-theme="light"] .auth-wrap::before { display: none; }
+.auth-brand { position: relative; z-index: 1; font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 0.6rem; transition: opacity 0.15s; }
 .auth-brand:hover { opacity: 0.85; }
 .auth-brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--color-primary); }
 .auth-card {
   position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 410px;
   padding: 2.25rem 2rem;
-  background: linear-gradient(180deg, #131313, #0f0f0f);
+  background: linear-gradient(180deg, rgba(19,19,19,.86), rgba(15,15,15,.86));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   overflow: hidden;
   box-shadow: 0 0 0 1px rgba(255,255,255,.03), 0 24px 64px rgba(0,0,0,.5);
 }
@@ -30,7 +46,12 @@
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255,138,0,.55), transparent);
 }
-.auth-card h1 { font-size: 1.55rem; letter-spacing: 0.03em; }
+.auth-card h1 {
+  font-size: clamp(2rem, 5vw, 2.6rem);
+  line-height: 0.98;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.35rem;
+}
 .auth-forgot {
   display: block;
   text-align: right;
@@ -61,6 +82,44 @@
   margin-bottom: 1rem;
 }
 
+/* Campos com ícone à esquerda (e toggle de mostrar senha à direita) */
+.field-icon { position: relative; }
+.field-icon input { padding-left: 2.75rem; }
+.field-icon.has-toggle input { padding-right: 2.75rem; }
+.field-icon-glyph {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-muted);
+  pointer-events: none;
+  display: flex;
+  transition: color 0.15s;
+}
+.field-icon input:focus ~ .field-icon-glyph { color: var(--color-primary); }
+.field-toggle {
+  position: absolute;
+  right: 0.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-muted);
+  transition: color 0.15s, background-color 0.15s;
+}
+.field-toggle:hover { color: var(--color-text); background: var(--color-surface-2); }
+
+/* Abas Entrar/Criar conta — mesmo sistema .tabs/.tab do ranking, versão pill */
+.auth-tabs { border-radius: 999px; margin-bottom: 1.75rem; }
+.auth-tabs .tab { flex: 1; text-align: center; border-radius: 999px; padding: 0.7rem 1rem; font-size: 0.95rem; }
+.auth-tabs .tab-indicator,
+.auth-tabs .tab-indicator-wrap .tab-indicator { border-radius: 999px; }
+.auth-panel { display: none; }
+.auth-panel.active { display: block; }
+
 .auth-divider {
   display: flex;
   align-items: center;
@@ -88,6 +147,11 @@
   font-weight: 800;
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 1.25rem;
+}
+.sucesso-icon.primary {
+  background: var(--color-primary-soft);
+  border-color: rgba(255,138,0,.22);
+  color: var(--color-primary);
 }
 
 @media (max-width: 420px) {

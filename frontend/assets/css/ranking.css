@@ -1,7 +1,3 @@
-.tabs { display: flex; gap: 0.3rem; background: var(--color-surface-2); padding: 0.3rem; border-radius: var(--radius-sm); position: relative; }
-.tab { padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; color: var(--color-muted); position: relative; z-index: 1; transition: color 0.25s ease; }
-.tab.active { color: #fff; }
-
 .minha-posicao { display: flex; align-items: center; gap: 1rem; border-color: var(--color-primary); background: var(--color-primary-soft); }
 .minha-posicao .posicao-num { font-size: 1.6rem; font-weight: 800; color: var(--color-primary); width: 2.4rem; text-align: center; }
 

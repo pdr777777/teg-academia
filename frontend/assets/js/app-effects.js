@@ -80,12 +80,24 @@ function animateNumber(el, end, opts) {
 }
 
 /* ===== Indicador deslizante de abas ===== */
-function initTabsIndicator(container) {
+function initTabsIndicator(container, opts) {
   if (!container) return;
+  opts = opts || {};
+  var gooey = !!opts.gooey;
+
+  // Modo gooey: a pill vive num wrapper filtrado (blur+contrast = efeito "goo",
+  // porte do GooeyNav do React Bits), pra não borrar o texto das abas junto.
+  var mount = container;
+  if (gooey) {
+    container.classList.add('tabs-gooey');
+    mount = document.createElement('span');
+    mount.className = 'tab-indicator-wrap';
+    container.appendChild(mount);
+  }
 
   var indicator = document.createElement('span');
   indicator.className = 'tab-indicator';
-  container.appendChild(indicator);
+  mount.appendChild(indicator);
 
   function move(tab) {
     if (!tab) { indicator.style.width = '0'; return; }
@@ -93,11 +105,37 @@ function initTabsIndicator(container) {
     indicator.style.transform = 'translateX(' + tab.offsetLeft + 'px)';
   }
 
+  function burst(fromTab, toTab) {
+    if (!gooey || REDUCE_MOTION) return;
+    var fromCenter = fromTab.offsetLeft + fromTab.offsetWidth / 2;
+    var toCenter = toTab.offsetLeft + toTab.offsetWidth / 2;
+    var dxTarget = toCenter - fromCenter;
+    for (var i = 0; i < 6; i++) {
+      var p = document.createElement('span');
+      p.className = 'tab-particle';
+      var size = 6 + Math.random() * 8;
+      var dx = dxTarget * (0.4 + Math.random() * 0.6) + (Math.random() - 0.5) * 24;
+      var dy = (Math.random() - 0.5) * 14;
+      var time = 400 + Math.random() * 220;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.left = fromCenter + 'px';
+      p.style.setProperty('--dx', dx + 'px');
+      p.style.setProperty('--dy', dy + 'px');
+      p.style.setProperty('--time', time + 'ms');
+      mount.appendChild(p);
+      (function (el, t) { setTimeout(function () { el.remove(); }, t + 60); })(p, time);
+    }
+  }
+
   requestAnimationFrame(function () { move(container.querySelector('.tab.active')); });
 
   container.addEventListener('click', function (ev) {
     var tab = ev.target.closest('.tab');
-    if (tab) requestAnimationFrame(function () { move(tab); });
+    if (!tab) return;
+    var prev = container.querySelector('.tab.active');
+    requestAnimationFrame(function () { move(tab); });
+    if (prev && prev !== tab) burst(prev, tab);
   });
 
   window.addEventListener('resize', debounce(function () {
@@ -221,7 +259,24 @@ function renderBloqueioBanner(containerId, dados) {
   initReveal();
 }
 
+/* ===== Toggle mostrar/ocultar senha (telas de auth) ===== */
+function initPasswordToggles() {
+  document.querySelectorAll('[data-toggle-password]').forEach(function (btn) {
+    if (btn.dataset.toggleWired) return;
+    btn.dataset.toggleWired = '1';
+    btn.addEventListener('click', function () {
+      var input = document.getElementById(btn.dataset.togglePassword);
+      if (!input) return;
+      var showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      btn.innerHTML = Icons.icon(showing ? 'eye' : 'eye-off', { size: 17 });
+      btn.setAttribute('aria-label', showing ? 'Mostrar senha' : 'Ocultar senha');
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   initReveal();
   initRipple();
+  initPasswordToggles();
 });

@@ -77,7 +77,7 @@ document.getElementById('tabs-ranking').addEventListener('click', (ev) => {
   carregarRanking(btn.dataset.tipo);
 });
 
-initTabsIndicator(document.getElementById('tabs-ranking'));
+initTabsIndicator(document.getElementById('tabs-ranking'), { gooey: true });
 
 (async function init() {
   try {

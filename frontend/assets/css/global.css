@@ -259,6 +259,11 @@ label {
 .badge-muted { background: var(--color-surface-2); color: var(--color-muted); border: 1px solid var(--color-border); }
 .badge-primary { background: var(--color-primary-soft); color: var(--color-primary); border: 1px solid rgba(255,138,0,.22); }
 
+/* ===== Tabs (pill deslizante, ver .tab-indicator em app-effects.css) ===== */
+.tabs { display: flex; gap: 0.3rem; background: var(--color-surface-2); padding: 0.3rem; border-radius: var(--radius-sm); position: relative; }
+.tab { padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; color: var(--color-muted); position: relative; z-index: 1; transition: color 0.25s ease; }
+.tab.active { color: #fff; }
+
 /* Ícone de stat-card em "tile" — adapta a cor via currentColor */
 .stat-icon {
   width: 46px;
