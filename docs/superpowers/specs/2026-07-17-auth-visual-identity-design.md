@@ -20,25 +20,27 @@ Aplicar os 4 princípios acima às 4 páginas de auth que compartilham `.auth-wr
 `redefinir-senha.html`), sem introduzir dependências novas (continua HTML/CSS/JS puro,
 sem build step) e sem alterar lógica de formulário/JS existente.
 
-Não há foto real da academia disponível ainda — o design usa tipografia + Lightfall +
-grain como pilares agora, com um slot de background-image preparado para receber uma
-foto real depois (troca de uma variável CSS, sem refatoração).
+Não há foto real da academia disponível ainda — o design usa tipografia + grain como
+pilares agora, com um slot de background-image preparado para receber uma foto real
+depois (troca de uma variável CSS, sem refatoração).
+
+**Nota sobre o Lightfall:** o Pedro removeu esse fundo animado de todas as telas em
+2026-07-16 (commit `1dee425`, sem justificativa registrada). Por isso esta iteração
+NÃO reintroduz o Lightfall nas telas de auth — fica só grain + tipografia, decisão do
+usuário até haver alinhamento com o Pedro sobre o motivo da remoção.
 
 ## Mudanças
 
-1. **Fundo Lightfall** (já existe, usado no dashboard) — adicionar aos 4 HTMLs de auth
-   via os 3 arquivos já existentes (`lightfall.css`, `lightfall-bg.js`,
-   `lightfall-init.js`). Zero código novo.
-2. **Grain overlay** — camada CSS nova (`::before` com SVG noise em `data:` URI,
+1. **Grain overlay** — camada CSS nova (`::before` com SVG noise em `data:` URI,
    `mix-blend-mode: overlay`, opacidade baixa) aplicada em `.auth-wrap`. ~1 regra CSS,
    sem asset externo.
-3. **Título como elemento gráfico** — `.auth-card h1` passa a usar `--font-display`
+2. **Título como elemento gráfico** — `.auth-card h1` passa a usar `--font-display`
    (Bebas Neue) em escala bem maior (`clamp` similar ao `.section-head h2` do
    `global.css`), em vez do tamanho atual de card comum.
-4. **Card com leve vidro** — `.auth-card` ganha fundo semi-transparente +
-   `backdrop-filter: blur()` para deixar o Lightfall/grain vazarem atrás, mantendo
-   contraste suficiente pro formulário.
-5. **Inputs com ícone** — usar `icons.js` (`mail`, `lock`, `eye`/`unlock` já existentes)
+3. **Card com leve vidro** — `.auth-card` ganha fundo semi-transparente +
+   `backdrop-filter: blur()` para deixar o grain vazar atrás, mantendo contraste
+   suficiente pro formulário.
+4. **Inputs com ícone** — usar `icons.js` (`mail`, `lock`, `eye`/`unlock` já existentes)
    como ícone à esquerda dos campos de e-mail/senha + toggle de mostrar senha.
 
 ## Fora de escopo
