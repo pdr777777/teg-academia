@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "reactbits": {
+      "command": "node",
+      "args": [".mcp-servers/reactbits/node_modules/reactbits-dev-mcp-server/dist/index.js"]
+    }
+  }
+}
