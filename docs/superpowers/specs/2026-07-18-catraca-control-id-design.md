@@ -75,13 +75,40 @@ critério já existe no schema, não precisa de dado novo.
   dashboard — gráfico e feed ao vivo). `usuario_id` (nullable, se não
   reconhecido), `catraca`, `tipo` (`'autorizado'`|`'negado'`|`'nao_identificado'`),
   `criado_em`.
-- `frequencias`: nova coluna `origem VARCHAR(10) NOT NULL DEFAULT 'app'`
-  (`'app'` | `'catraca'`) — só telemetria, não muda a regra de 1
-  check-in/dia (`UNIQUE(usuario_id, data)` já existente é respeitada; evento
-  de catraca duplicado no mesmo dia é ignorado, sem erro, sem XP duplicado).
+- `frequencias`: sem mudança estrutural — regra de 1 check-in/dia
+  (`UNIQUE(usuario_id, data)` já existente) é respeitada; evento de catraca
+  duplicado no mesmo dia é ignorado, sem erro, sem XP duplicado. A origem
+  (app × catraca) fica registrada em `catraca_eventos`, não precisa duplicar
+  em `frequencias`.
 - `configuracoes`: nova coluna `catraca_ativa BOOLEAN NOT NULL DEFAULT true` —
   liga/desliga a integração sem redeploy (mesmo padrão de
   `dias_tolerancia_bloqueio`).
+
+## 1.1 Achado durante o design: webhook especulativo do Pedro
+
+Existe um endpoint `POST /api/sessoes/catraca-checkin` ([sessoes.js:154](../../../backend/src/routes/sessoes.js#L154)),
+protegido por `CATRACA_WEBHOOK_SECRET` (já em `.env.example`), que o Pedro
+escreveu especulativamente ("catraca no futuro", comentário na migration
+`021_treino_sessoes.sql`) — **nunca testado contra o equipamento real**.
+Ele espera JSON `{ usuario_id | cpf }` num path fixo `/api/sessoes/catraca-checkin`.
+
+Isso não bate com o que a iDFace realmente envia em "Modo Personalizado"
+(`application/x-www-form-urlencoded`, path fixo `/new_user_identified.fcgi`,
+campos `device_id/user_id/event/time/portal_id/user_name/confidence` — sem
+CPF). Decisão do Matias em 2026-07-18: **não trocar o Modo de Operação**
+(fica em iDCloud, sem mexer), então esse endpoint não é usado pela integração
+real por enquanto — o check-in vem do polling de `access_logs` (seção 2).
+
+**Reaproveitamento, não duplicação:** o polling não insere em `frequencias`
+sozinho por acaso — ele chama a mesma função `iniciarSessao` que
+`sessoes.js` já usa (extraída pra `backend/src/services/sessaoService.js`
+nesta entrega), pra ganhar de graça o auto-início de sessão de treino
+quando o aluno tem `treino_alunos` ativo. Como isso falha (400) quando o
+aluno não tem treino atribuído — caso comum e esperado, não é erro — o
+polling também garante um registro em `frequencias` diretamente (com XP),
+sem depender de o aluno abrir o app pra "finalizar" a sessão depois. Isso é
+importante: sem o insert direto, um aluno sem treino atribuído nunca geraria
+frequência via catraca nenhuma, o que anularia o ponto principal do recurso.
 
 ## 2. Cliente da API Control iD (`backend/src/services/catraca/`)
 
@@ -99,10 +126,20 @@ critério já existe no schema, não precisa de dado novo.
   - `liberarAcesso(usuarioId)` / `bloquearAcesso(usuarioId)` — inclui/remove
     do grupo `TEG-ativos` nas duas catracas.
   - `processarNovosAcessos()` — para cada catraca, `load_objects` em
-    `access_logs` com `id > cursor`, filtra só `registration` com prefixo
-    `TEG-`, grava em `catraca_eventos` sempre, e em `frequencias` (com
-    `origem='catraca'`) quando autorizado — reaproveitando XP/sequência de
-    `frequencias.js:9`. Avança o cursor ao final.
+    `access_logs` com `id > cursor`, filtra só usuários cujo `registration`
+    tem prefixo `TEG-` (resolve pro `usuario_id` via `catraca_usuarios`),
+    grava em `catraca_eventos` sempre (autorizado/negado/não identificado —
+    telemetria do dashboard). Quando autorizado (`event = 7`): tenta
+    `sessaoService.iniciarSessao(usuarioId, null, 'catraca')` (extraído de
+    `sessoes.js` nesta entrega) pra ganhar de graça o auto-início de treino;
+    se falhar por falta de treino atribuído (400 esperado, não é erro),
+    ignora e segue. Em paralelo, sempre garante o registro de presença via
+    `frequenciaService.registrarCheckin(usuarioId, 'catraca')` (mesma lógica
+    de XP/sequência de `frequencias.js:9`, extraída pra reuso) —
+    independente de o aluno ter treino ou finalizar a sessão depois, senão
+    quem não tem treino atribuído nunca geraria frequência pela catraca.
+    Duplicata no mesmo dia (já tem check-in) é engolida sem erro. Avança o
+    cursor ao final.
   - `verificarSaude()` — heartbeat (login simples) nas duas catracas, resultado
     usado pelo dashboard e pela reconciliação diária.
   - `reconciliar()` — job diário: confere se cada linha `catraca_usuarios`
@@ -129,13 +166,16 @@ critério já existe no schema, não precisa de dado novo.
 
 ## 4. Endpoints novos
 
-- `GET /api/admin/catraca` (admin/dono) — status das duas catracas (online/
+- `GET /api/catraca/status` (admin/dono) — status das duas catracas (online/
   offline via `verificarSaude`), contagem de sincronizados/pendentes/erro,
   dados pro dashboard (cards + série horária dos últimos 3 dias a partir de
-  `catraca_eventos`, feed dos últimos acessos).
-- `POST /api/admin/catraca/:usuarioId/sincronizar` (admin/dono) — força
-  re-sync manual (reenviar foto, recriar se necessário).
-- `PATCH /api/admin/configuracoes` — estende o endpoint já existente
+  `catraca_eventos`, feed dos últimos acessos). Novo arquivo
+  `backend/src/routes/catraca.js`, mesmo padrão de módulo por domínio que
+  `frequencias.js`/`matriculas.js`, montado em `/api/catraca` (não dentro de
+  `admin.js`).
+- `POST /api/catraca/:usuarioId/sincronizar` (admin/dono) — força re-sync
+  manual (reenviar foto, recriar se necessário).
+- `PATCH /api/configuracoes` — estende o endpoint já existente
   (`configuracoes.js:18`) com o campo `catraca_ativa`.
 
 ## 5. Dashboard (frontend)
@@ -173,7 +213,12 @@ admin, não no azul/escuro da Control iD:
   genérico, erros de rede/autenticação.
 - `catracaService.test.js` — `sincronizarAluno` (com/sem foto, idempotência),
   `liberarAcesso`/`bloquearAcesso`, `processarNovosAcessos` (dedupe, avanço
-  de cursor, unique-violation engolida), `reconciliar`.
+  de cursor, unique-violation engolida, aluno sem treino ainda gera
+  frequência), `reconciliar`.
+- `sessaoService.test.js` / `frequenciaService.test.js` — cobrem a extração
+  de `iniciarSessao` (de `sessoes.js`) e do check-in (de `frequencias.js`);
+  os testes existentes de `sessoes.test.js`/`frequencias.test.js` continuam
+  passando sem alteração de comportamento (puro refactor de extração).
 - Ganchos em `jobWorker.test.js`, `matriculas.test.js`, `pagamentos.test.js`,
   `webhooks.test.js` — cobrindo as chamadas novas (mockando `catracaService`).
 - Sem acesso a equipamento real em CI — API sempre mockada. Validação real
