@@ -300,7 +300,15 @@ label {
 .brand-text { height: 30px; width: auto; display: block; }
 .brand-fallback { display: none; align-items: center; gap: 0.6rem; }
 
-/* ===== Menu em pills (porte do PillNav do React Bits, JS puro + GSAP) ===== */
+/* ===== Menu em pills (inspirado no PillNav do React Bits) =====
+   Wipe em CSS puro, animando `height` (layout), não `transform`/`scale`.
+   Testei duas versões com transform (círculo grande recortado, depois
+   scaleY recortado) e as duas esbarraram no mesmo bug de composição:
+   overflow:hidden + border-radius não recorta corretamente um filho
+   TRANSFORMADO nesse ambiente — só pinta o contorno anti-aliased, não o
+   preenchimento. Animar `height` direto não usa transform nenhum, então
+   não tem como cair nesse bug (mais pesado pro navegador recalcular a
+   cada frame, mas pra 5-6 pills pequenas isso é irrelevante). */
 .topnav-links.pill-list {
   display: flex;
   flex-shrink: 0;
@@ -327,46 +335,33 @@ label {
   text-transform: uppercase;
   letter-spacing: 0.02em;
   white-space: nowrap;
-  overflow: hidden;
   cursor: pointer;
+  transition: color 0.25s ease;
 }
-.topnav-links .hover-circle {
+.topnav-links .pill::before {
+  content: '';
   position: absolute;
-  left: 50%;
+  left: 0;
+  right: 0;
   bottom: 0;
-  border-radius: 50%;
+  height: 0;
+  z-index: 0;
+  border-radius: 999px;
   background: #0a0a0a;
-  -webkit-background-clip: initial;
-  background-clip: initial;
-  pointer-events: none;
-  will-change: transform;
+  transition: height 0.3s cubic-bezier(.4,0,.2,1);
 }
-.topnav-links .label-stack { position: relative; display: inline-block; line-height: 1; z-index: 2; }
+.topnav-links .pill:hover::before,
+.topnav-links .pill:focus-visible::before { height: 100%; }
+.topnav-links .pill:hover,
+.topnav-links .pill:focus-visible { color: #fff; }
 .topnav-links .pill-label {
   position: relative;
-  display: inline-block;
-  line-height: 1;
-  will-change: transform;
-  z-index: 2;
+  z-index: 1;
   /* neutraliza o "shiny text" global (effects.css) — aqui o texto é sólido */
   background: none;
   -webkit-background-clip: initial;
   background-clip: initial;
   -webkit-text-fill-color: currentColor;
-  color: #111;
-}
-.topnav-links .pill-label-hover {
-  position: absolute;
-  left: 0;
-  top: 0;
-  background: none;
-  -webkit-background-clip: initial;
-  background-clip: initial;
-  -webkit-text-fill-color: currentColor;
-  display: inline-block;
-  color: #fff;
-  z-index: 3;
-  will-change: transform, opacity;
 }
 .topnav-right { display: flex; align-items: center; gap: 0.6rem; }
 .topnav-menu-btn { display: none; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
