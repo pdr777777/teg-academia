@@ -156,9 +156,13 @@ frequência via catraca nenhuma, o que anularia o ponto principal do recurso.
 - `webhooks.js:26`, `pagamentos.js:55`, `pagamentos.js:61` (reativa matrícula
   pra `ativa`) → `liberarAcesso`.
 - Falhas de rede em qualquer gancho não bloqueiam a requisição principal:
-  cai num job novo (`tipo = 'catraca_sync'`) na fila já existente (`jobs` +
-  `executarJobsPendentes`), reaproveitando o retry/backoff que já existe pro
-  WhatsApp.
+  fica só logada (não propaga erro 500). Não há fila de retry dedicada pra
+  isso (simplificação deliberada, evita inventar mais uma fila além da que
+  já existe pro WhatsApp) — quem fecha o buraco é o `reconciliar()` diário,
+  que compara `catraca_usuarios.grupo_ativo` contra `matriculas.status =
+  'ativa'` de verdade e corrige qualquer divergência (libera quem deveria
+  estar liberado e não está, bloqueia quem deveria estar bloqueado e não
+  está). Pior caso: até 24h de atraso pra corrigir uma falha de rede pontual.
 - `jobWorker.js` ganha um segundo `setInterval` mais curto (30-60s) rodando
   `processarNovosAcessos`, separado do ciclo de 5min já existente (que fica
   só com as automações de cobrança/whatsapp). `reconciliar()` roda 1x/dia.
