@@ -26,12 +26,10 @@ if (statsBar) {
     obs.disconnect();
     api.get('/api/admin/stats')
       .then(function(data) {
-        countUp(document.getElementById('stat-alunos'),     data.alunos_ativos  || 500, '+', 1800);
-        countUp(document.getElementById('stat-modalidades'), data.modalidades    || 15,  '+', 1400);
+        countUp(document.getElementById('stat-alunos'), data.alunos_ativos || 500, '+', 1800);
       })
       .catch(function() {
-        countUp(document.getElementById('stat-alunos'),     500, '+', 1800);
-        countUp(document.getElementById('stat-modalidades'), 15,  '+', 1400);
+        countUp(document.getElementById('stat-alunos'), 500, '+', 1800);
       });
   }, { threshold: 0.4 }).observe(statsBar);
 }
@@ -90,8 +88,8 @@ const FAQS = [
   { q: 'Como funciona a matrícula?', a: 'A matrícula é 100% online. Escolha seu plano, clique em "Começar agora" e você será redirecionado para o WhatsApp para finalizar com nossa equipe. Rápido, sem burocracia.' },
   { q: 'Tem taxa de matrícula?', a: 'Não. Na TEG não cobramos taxa de matrícula nem taxas escondidas. Você paga apenas o valor do plano escolhido.' },
   { q: 'Posso cancelar quando quiser?', a: 'Nos planos mensais, sim, basta avisar com 5 dias de antecedência. Nos planos trimestrais e anuais, o cancelamento antecipado pode implicar em multa proporcional.' },
-  { q: 'Quais modalidades estão incluídas no plano?', a: 'Todos os planos incluem acesso completo a todas as modalidades disponíveis: musculação, cross training, aulas coletivas (spinning, jump, yoga, dança), funcional e HIIT.' },
-  { q: 'Qual é o horário de funcionamento?', a: 'A TEG funciona de segunda a domingo, das 06h às 23h. Confira a grade de aulas coletivas na seção de horários.' },
+  { q: 'A TEG tem outras modalidades além da musculação?', a: 'Por enquanto a TEG é focada 100% em musculação, com estrutura completa e acompanhamento de professores especializados.' },
+  { q: 'Qual é o horário de funcionamento?', a: 'De segunda a sexta, das 05h às 22h. Aos sábados, das 08h às 16h. Fechado aos domingos.' },
   { q: 'O que é a área do aluno?', a: 'É a plataforma digital exclusiva para alunos TEG. Lá você registra treinos, acumula XP, acompanha sua sequência diária e compete no ranking mensal com outros alunos.' },
 ];
 

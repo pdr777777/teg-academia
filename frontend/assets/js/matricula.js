@@ -19,7 +19,7 @@ function getPlanMeta(plano) {
     badge: null,
     nota: plano.descricao || 'Ou R$129,90 no cartão de crédito',
     features: [
-      'Acesso a todas as modalidades',
+      'Acesso completo à musculação',
       'Acompanhamento de professores',
       'Área do aluno com sistema XP',
       'Grade de aulas em tempo real',
@@ -31,7 +31,7 @@ function getPlanMeta(plano) {
     badge: 'Mais popular',
     nota: plano.descricao || `3x ${brl(plano.preco_mensal)} no crédito`,
     features: [
-      'Acesso a todas as modalidades',
+      'Acesso completo à musculação',
       'Acompanhamento de professores',
       'Área do aluno com sistema XP',
       'Grade de aulas em tempo real',
@@ -43,7 +43,7 @@ function getPlanMeta(plano) {
     badge: '🔥 Economize R$240/ano',
     nota: plano.descricao || `12x ${brl(plano.preco_mensal)} recorrente no cartão`,
     features: [
-      'Acesso a todas as modalidades',
+      'Acesso completo à musculação',
       'Acompanhamento de professores',
       'Área do aluno com sistema XP',
       'Grade de aulas em tempo real',
