@@ -1,8 +1,21 @@
 const express = require('express');
+const crypto = require('crypto');
 const pool = require('../config/db');
 const { iniciarSessao } = require('./sessoes');
 
 const router = express.Router();
+
+// Comparação em tempo constante — o segredo chega pelo path da URL (o Control
+// iD não tem como enviar headers customizados), então merece o mesmo cuidado
+// contra timing attack que qualquer outro segredo comparado no backend.
+function segredoValido(recebido) {
+  const esperado = process.env.CATRACA_WEBHOOK_SECRET;
+  if (!esperado || !recebido) return false;
+  const bufRecebido = Buffer.from(recebido);
+  const bufEsperado = Buffer.from(esperado);
+  if (bufRecebido.length !== bufEsperado.length) return false;
+  return crypto.timingSafeEqual(bufRecebido, bufEsperado);
+}
 
 // O formato exato do payload do evento varia por firmware/versão do Control
 // iD e ainda não foi confirmado em produção — tentamos os caminhos mais
@@ -26,7 +39,7 @@ function extrairControlIdUserId(body) {
 // falhar por qualquer motivo, o aluno ainda entra normalmente na academia,
 // só não abre o treino sozinho.
 router.post('/catraca/:secret/:eventType', async (req, res) => {
-  if (req.params.secret !== process.env.CATRACA_WEBHOOK_SECRET) {
+  if (!segredoValido(req.params.secret)) {
     return res.status(401).json({ error: 'Não autorizado' });
   }
 
