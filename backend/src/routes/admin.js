@@ -148,7 +148,7 @@ router.get('/alunos', authMiddleware, requireRole('admin', 'dono', 'professor'),
     if (busca) where += ` AND (u.nome ILIKE $${params.push('%' + busca + '%')} OR u.email ILIKE $${params.push('%' + busca + '%')})`;
 
     const { rows } = await pool.query(
-      `SELECT u.id, u.nome, u.email, u.telefone, u.ativo, u.xp, u.sequencia_atual, u.created_at,
+      `SELECT u.id, u.nome, u.email, u.telefone, u.ativo, u.xp, u.sequencia_atual, u.created_at, u.controlid_user_id,
               m.id as matricula_id, m.status as matricula_status, m.data_vencimento, p.nome as plano_nome
        FROM usuarios u
        LEFT JOIN matriculas m ON m.usuario_id = u.id AND m.status = 'ativa'
@@ -196,6 +196,27 @@ router.patch('/alunos/:id/senha', authMiddleware, requireRole('admin', 'dono'), 
     if (!user) return res.status(404).json({ error: 'Aluno não encontrado' });
     res.json({ ok: true, nome: user.nome });
   } catch (err) {
+    next(err);
+  }
+});
+
+// PATCH /api/admin/alunos/:id/catraca (vincula/desvincula o ID do aluno no Control iD da catraca)
+router.patch('/alunos/:id/catraca', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+  try {
+    const { controlid_user_id } = req.body;
+    const valor = controlid_user_id ? String(controlid_user_id).trim() : null;
+
+    const { rows: [user] } = await pool.query(
+      `UPDATE usuarios SET controlid_user_id = $1, updated_at = NOW()
+       WHERE id = $2 AND role = 'aluno' RETURNING id, nome, controlid_user_id`,
+      [valor, req.params.id]
+    );
+    if (!user) return res.status(404).json({ error: 'Aluno não encontrado' });
+    res.json(user);
+  } catch (err) {
+    if (err.code === '23505') {
+      return res.status(409).json({ error: 'Esse ID do Control iD já está vinculado a outro aluno' });
+    }
     next(err);
   }
 });

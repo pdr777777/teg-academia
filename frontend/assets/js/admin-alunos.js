@@ -41,6 +41,11 @@ async function carregarAlunos(busca = '') {
               <button class="btn btn-ghost btn-sm" data-reset-id="${a.id}" data-reset-nome="${a.nome}" title="Redefinir senha">
                 ${Icons.icon('key', { size: 14 })}
               </button>
+              <button class="btn btn-ghost btn-sm" data-catraca-id="${a.id}" data-catraca-nome="${a.nome}" data-catraca-valor="${a.controlid_user_id || ''}"
+                title="${a.controlid_user_id ? `Vinculado à catraca (ID ${a.controlid_user_id})` : 'Vincular à catraca (reconhecimento facial)'}"
+                style="${a.controlid_user_id ? 'color:var(--color-success)' : ''}">
+                ${Icons.icon('shield-check', { size: 14 })}
+              </button>
             </td>
           </tr>
         `).join('')
@@ -93,6 +98,30 @@ document.getElementById('alunos-body').addEventListener('click', async (ev) => {
   const btnMat = ev.target.closest('[data-mat-id]');
   if (btnMat) {
     await abrirDialogMatricula(btnMat);
+    return;
+  }
+
+  // Vincular ID da catraca (Control iD)
+  const btnCatraca = ev.target.closest('[data-catraca-id]');
+  if (btnCatraca) {
+    const id = btnCatraca.dataset.catracaId;
+    const nome = btnCatraca.dataset.catracaNome;
+    const valorAtual = btnCatraca.dataset.catracaValor;
+    const novoValor = prompt(
+      `ID do aluno no Control iD (catraca) para ${nome}:\nDeixe em branco para desvincular.`,
+      valorAtual
+    );
+    if (novoValor === null) return;
+    btnCatraca.disabled = true;
+    try {
+      await api.patch(`/api/admin/alunos/${id}/catraca`, { controlid_user_id: novoValor.trim() || null });
+      toast(novoValor.trim() ? `${nome} vinculado à catraca.` : `${nome} desvinculado da catraca.`, 'success');
+      carregarAlunos(document.getElementById('busca-aluno').value.trim());
+    } catch (err) {
+      toast(err.message || 'Erro ao vincular catraca.', 'error');
+    } finally {
+      btnCatraca.disabled = false;
+    }
   }
 });
 
