@@ -56,8 +56,34 @@ function fillIcons(root = document) {
   });
 }
 
+// Formata telefone conforme digita: (DD) DDDD-DDDD enquanto pode ser fixo,
+// e assim que o 11º dígito entra, vira celular (DD) DDDDD-DDDD sozinho.
+function maskTelefoneBR(valor) {
+  const digitos = String(valor || '').replace(/\D/g, '').slice(0, 11);
+  if (digitos.length > 10) {
+    return digitos.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, '($1) $2-$3');
+  }
+  return digitos.replace(/^(\d{0,2})(\d{0,4})(\d{0,4}).*/, (_, ddd, p1, p2) => {
+    let out = '';
+    if (ddd) out += `(${ddd}`;
+    if (ddd.length === 2) out += ') ';
+    if (p1) out += p1;
+    if (p2) out += `-${p2}`;
+    return out;
+  });
+}
+
+function ativarMascaraTelefone(root = document) {
+  root.querySelectorAll('input[type="tel"]').forEach((el) => {
+    if (el.dataset.maskTelDone) return;
+    el.dataset.maskTelDone = '1';
+    el.addEventListener('input', () => { el.value = maskTelefoneBR(el.value); });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   fillIcons();
+  ativarMascaraTelefone();
   const menuBtn = document.getElementById('btn-mobile-menu');
   const links = document.querySelector('.topnav-links');
   if (menuBtn && links) {
