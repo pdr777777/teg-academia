@@ -30,7 +30,8 @@ const SIDEBAR_MENU = [
 
 function sidebarCurrentPage() {
   const path = window.location.pathname.split('/').pop();
-  return path === '' ? 'index.html' : path;
+  if (!path) return 'index.html';
+  return path.endsWith('.html') ? path : `${path}.html`;
 }
 
 function sidebarRoleAttr(role) {
