@@ -1,0 +1,107 @@
+jest.mock('./catraca/config');
+const { catracasConfiguradas } = require('./catraca/config');
+const pool = require('../config/db');
+const { criarUsuario } = require('../testUtils/fixtures');
+const catracaService = require('./catracaService');
+
+function clienteFalso() {
+  return {
+    nome: 'catraca1',
+    loadObjects: jest.fn().mockResolvedValue([]),
+    createObjects: jest.fn().mockResolvedValue([999]),
+    destroyObjects: jest.fn().mockResolvedValue(1),
+    setUserImage: jest.fn().mockResolvedValue(undefined),
+    login: jest.fn().mockResolvedValue(undefined),
+  };
+}
+
+describe('garantirEstruturaBase', () => {
+  test('cria grupo, regra, horário e vínculos quando nada existe ainda', async () => {
+    const client = clienteFalso();
+    // loadObjects sempre vazio → tudo é criado do zero
+    const grupoId = await catracaService.garantirEstruturaBase(client);
+
+    expect(grupoId).toBe(999);
+    const chamadasCreate = client.createObjects.mock.calls.map((c) => c[0]);
+    expect(chamadasCreate).toEqual(expect.arrayContaining([
+      'groups', 'access_rules', 'time_zones', 'time_spans', 'access_rule_time_zones', 'group_access_rules',
+    ]));
+  });
+
+  test('não recria nada quando grupo/regra/horário já existem', async () => {
+    const client = clienteFalso();
+    client.loadObjects = jest.fn(async (object) => {
+      if (object === 'groups') return [{ id: 1, name: 'TEG-ativos' }];
+      if (object === 'access_rules') return [{ id: 2, name: 'TEG-liberado' }];
+      if (object === 'time_zones') return [{ id: 3, name: 'TEG-sempre' }];
+      if (object === 'access_rule_time_zones') return [{ access_rule_id: 2, time_zone_id: 3 }];
+      if (object === 'group_access_rules') return [{ group_id: 1, access_rule_id: 2 }];
+      if (object === 'portals') return [];
+      return [];
+    });
+
+    const grupoId = await catracaService.garantirEstruturaBase(client);
+    expect(grupoId).toBe(1);
+    expect(client.createObjects).not.toHaveBeenCalled();
+  });
+});
+
+describe('sincronizarAluno', () => {
+  async function limpar(usuarioId) {
+    await pool.query('DELETE FROM catraca_usuarios WHERE usuario_id = $1', [usuarioId]);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [usuarioId]);
+  }
+
+  test('cria usuário na catraca com registration TEG-<id> e guarda o mapeamento', async () => {
+    const client = clienteFalso();
+    catracasConfiguradas.mockReturnValue([client]);
+    const aluno = await criarUsuario({ nome: 'Aluno Catraca' });
+
+    await catracaService.sincronizarAluno(aluno.id);
+
+    const criarUsuarioChamada = client.createObjects.mock.calls.find((c) => c[0] === 'users');
+    expect(criarUsuarioChamada[1][0].registration).toBe(`TEG-${aluno.id}`);
+
+    const { rows: [mapeamento] } = await pool.query(
+      'SELECT * FROM catraca_usuarios WHERE usuario_id = $1 AND catraca = $2', [aluno.id, 'catraca1']
+    );
+    expect(mapeamento.catraca_user_id).toBe(999);
+    expect(mapeamento.face_status).toBe('pendente_presencial');
+
+    await limpar(aluno.id);
+  });
+
+  test('é idempotente — não cria usuário de novo se já existe mapeamento', async () => {
+    const client = clienteFalso();
+    catracasConfiguradas.mockReturnValue([client]);
+    const aluno = await criarUsuario({ nome: 'Aluno Catraca 2' });
+
+    await catracaService.sincronizarAluno(aluno.id);
+    client.createObjects.mockClear();
+    await catracaService.sincronizarAluno(aluno.id);
+
+    const criouUsuarioDeNovo = client.createObjects.mock.calls.some((c) => c[0] === 'users');
+    expect(criouUsuarioDeNovo).toBe(false);
+
+    await limpar(aluno.id);
+  });
+
+  test('marca face_status como erro quando o envio da foto falha', async () => {
+    const client = clienteFalso();
+    client.setUserImage = jest.fn().mockRejectedValue(new Error('foto inválida'));
+    catracasConfiguradas.mockReturnValue([client]);
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, arrayBuffer: async () => new ArrayBuffer(8) });
+
+    const aluno = await criarUsuario({ nome: 'Aluno Sem Foto Boa', foto_url: 'https://exemplo.com/foto.jpg' });
+    await pool.query('UPDATE usuarios SET foto_url = $1 WHERE id = $2', ['https://exemplo.com/foto.jpg', aluno.id]);
+
+    await catracaService.sincronizarAluno(aluno.id);
+
+    const { rows: [mapeamento] } = await pool.query(
+      'SELECT face_status FROM catraca_usuarios WHERE usuario_id = $1', [aluno.id]
+    );
+    expect(mapeamento.face_status).toBe('pendente_presencial');
+
+    await limpar(aluno.id);
+  });
+});
