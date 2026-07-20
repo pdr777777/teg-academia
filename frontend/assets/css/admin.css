@@ -13,7 +13,7 @@
   border-radius: 0;
   background: none;
   box-shadow: none;
-  color: var(--color-primary);
+  color: var(--color-text);
 }
 .admin-stat-cards .stat-icon svg { color: inherit; }
 .admin-stat-cards strong { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em; }
