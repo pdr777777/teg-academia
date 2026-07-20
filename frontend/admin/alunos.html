@@ -17,20 +17,7 @@
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <a href="../index.html" class="brand" title="Voltar para o site"><img src="../assets/img/logo.svg" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ADMIN</span></a>
-      <nav class="sidebar-nav">
-        <a href="index.html" data-role-adminup><span data-icon="grid" data-icon-size="18"></span>Dashboard</a>
-        <a href="financeiro.html" data-role-dono><span data-icon="wallet" data-icon-size="18"></span>Financeiro</a>
-        <a href="alunos.html" class="active" data-role-adminup><span data-icon="users" data-icon-size="18"></span>Alunos</a>
-        <a href="ranking.html"><span data-icon="award" data-icon-size="18"></span>Ranking</a>
-        <a href="frequencia.html"><span data-icon="clock" data-icon-size="18"></span>Frequência</a>
-        <a href="treinos.html"><span data-icon="dumbbell" data-icon-size="18"></span>Treinos</a>
-        <a href="aulas.html" data-role-adminup><span data-icon="clipboard-list" data-icon-size="18"></span>Aulas</a>
-        <a href="planos.html" data-role-adminup><span data-icon="package" data-icon-size="18"></span>Planos</a>
-        <a href="crm.html" data-role-adminup><span data-icon="columns" data-icon-size="18"></span>CRM</a>
-        <a href="pagamentos.html" data-role-adminup><span data-icon="credit-card" data-icon-size="18"></span>Pagamentos</a>
-        <a href="equipe.html" data-role-dono><span data-icon="briefcase" data-icon-size="18"></span>Equipe</a>
-        <a href="configuracoes.html" data-role-adminup><span data-icon="sliders" data-icon-size="18"></span>Configurações</a>
-      </nav>
+      <nav class="sidebar-nav" id="sidebar-nav"></nav>
       <div class="sidebar-foot">
         <button type="button" id="btn-theme-toggle" data-theme-toggle class="btn btn-ghost btn-sm btn-block" data-icon="sun" data-icon-size="16" style="justify-content:flex-start;gap:0.7rem;padding:0.65rem 0.75rem;color:var(--color-muted)">Tema</button>
         <a href="#" id="btn-logout"><span data-icon="log-out" data-icon-size="18"></span>Sair</a>
@@ -51,6 +38,9 @@
           <span data-icon="search" data-icon-size="16"></span>
           <input type="text" id="busca-aluno" placeholder="Buscar por nome ou e-mail..." />
         </div>
+        <button class="btn btn-primary" id="btn-novo-cliente" data-role-adminup>
+          <span data-icon="user-plus" data-icon-size="16"></span>Novo Cliente
+        </button>
       </div>
 
       <div class="table-wrap" data-reveal>
@@ -65,6 +55,35 @@
       </div>
     </div>
   </div>
+
+  <dialog id="dialog-novo-cliente" class="admin-dialog">
+    <form id="form-novo-cliente" method="dialog">
+      <h2>Novo cliente</h2>
+
+      <label class="field-label">Nome completo <span class="text-danger">*</span></label>
+      <input type="text" id="nc-nome" class="input" placeholder="Nome do cliente" required />
+
+      <label class="field-label" style="margin-top:1rem">E-mail <span class="text-danger">*</span></label>
+      <input type="email" id="nc-email" class="input" placeholder="email@exemplo.com" required />
+
+      <label class="field-label" style="margin-top:1rem">Telefone</label>
+      <input type="tel" id="nc-telefone" class="input" placeholder="(00) 00000-0000" />
+
+      <label class="field-label" style="margin-top:1rem">Senha temporária</label>
+      <div class="row gap-sm">
+        <input type="text" id="nc-senha" class="input" readonly style="flex:1" />
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-nc-copiar-senha" title="Copiar senha">
+          <span data-icon="copy" data-icon-size="14"></span>
+        </button>
+      </div>
+      <p class="text-muted" style="font-size:.78rem;margin-top:.35rem">Repasse essa senha ao cliente — ele pode trocá-la depois em "Esqueci minha senha".</p>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" id="btn-nc-cancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-nc-confirm">Cadastrar e matricular</button>
+      </div>
+    </form>
+  </dialog>
 
   <dialog id="dialog-matricula" class="admin-dialog">
     <form id="form-matricula" method="dialog">
@@ -93,6 +112,7 @@
   <script src="../assets/js/icons.js"></script>
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/sidebar-nav.js"></script>
   <script src="../assets/js/app-effects.js"></script>
   <script src="../assets/js/admin-guard.js"></script>
   <script src="../assets/js/admin-alunos.js"></script>
