@@ -166,3 +166,98 @@ describe('liberarAcesso / bloquearAcesso', () => {
     await limpar(aluno.id);
   });
 });
+
+jest.mock('./sessaoService');
+jest.mock('./frequenciaService');
+const sessaoService = require('./sessaoService');
+const frequenciaService = require('./frequenciaService');
+
+describe('processarNovosAcessos', () => {
+  async function limpar(usuarioId) {
+    await pool.query('DELETE FROM catraca_eventos WHERE usuario_id = $1', [usuarioId]);
+    await pool.query('DELETE FROM catraca_cursor WHERE catraca = $1', ['catraca1']);
+    await pool.query('DELETE FROM catraca_usuarios WHERE usuario_id = $1', [usuarioId]);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [usuarioId]);
+  }
+
+  beforeEach(() => {
+    sessaoService.iniciarSessao.mockReset();
+    frequenciaService.registrarCheckin.mockReset();
+  });
+
+  test('evento autorizado de usuário TEG gera sessão + check-in e avança o cursor', async () => {
+    const aluno = await criarUsuario({ nome: 'Aluno Evento' });
+    await pool.query(
+      `INSERT INTO catraca_usuarios (usuario_id, catraca, catraca_user_id) VALUES ($1, 'catraca1', 777)`,
+      [aluno.id]
+    );
+    sessaoService.iniciarSessao.mockResolvedValue({ id: 1 });
+    frequenciaService.registrarCheckin.mockResolvedValue({ id: 1 });
+
+    const client = clienteFalso();
+    client.loadObjects = jest.fn(async (object) => {
+      if (object === 'access_logs') return [{ id: 10, time: Math.floor(Date.now() / 1000), event: 7, user_id: 777 }];
+      return [];
+    });
+    catracasConfiguradas.mockReturnValue([client]);
+
+    await catracaService.processarNovosAcessos();
+
+    expect(sessaoService.iniciarSessao).toHaveBeenCalledWith(aluno.id, null, 'catraca');
+    expect(frequenciaService.registrarCheckin).toHaveBeenCalledWith(aluno.id, 'catraca');
+
+    const { rows: [evento] } = await pool.query('SELECT * FROM catraca_eventos WHERE usuario_id = $1', [aluno.id]);
+    expect(evento.tipo).toBe('autorizado');
+
+    const { rows: [cursor] } = await pool.query('SELECT ultimo_evento_id FROM catraca_cursor WHERE catraca = $1', ['catraca1']);
+    expect(cursor.ultimo_evento_id).toBe(10);
+
+    await limpar(aluno.id);
+  });
+
+  test('não quebra quando o aluno não tem treino atribuído (iniciarSessao rejeita)', async () => {
+    const aluno = await criarUsuario({ nome: 'Aluno Sem Treino Catraca' });
+    await pool.query(
+      `INSERT INTO catraca_usuarios (usuario_id, catraca, catraca_user_id) VALUES ($1, 'catraca1', 778)`,
+      [aluno.id]
+    );
+    const semTreino = new Error('Aluno não tem treino atribuído');
+    semTreino.status = 400;
+    sessaoService.iniciarSessao.mockRejectedValue(semTreino);
+    frequenciaService.registrarCheckin.mockResolvedValue({ id: 2 });
+
+    const client = clienteFalso();
+    client.loadObjects = jest.fn(async (object) => {
+      if (object === 'access_logs') return [{ id: 11, time: Math.floor(Date.now() / 1000), event: 7, user_id: 778 }];
+      return [];
+    });
+    catracasConfiguradas.mockReturnValue([client]);
+
+    await expect(catracaService.processarNovosAcessos()).resolves.not.toThrow();
+    expect(frequenciaService.registrarCheckin).toHaveBeenCalledWith(aluno.id, 'catraca');
+
+    await limpar(aluno.id);
+  });
+
+  test('evento de usuário não reconhecido pelo TEG só vira telemetria, sem chamar sessão/frequência', async () => {
+    const client = clienteFalso();
+    client.loadObjects = jest.fn(async (object) => {
+      if (object === 'access_logs') return [{ id: 12, time: Math.floor(Date.now() / 1000), event: 7, user_id: 999999 }];
+      return [];
+    });
+    catracasConfiguradas.mockReturnValue([client]);
+
+    await catracaService.processarNovosAcessos();
+
+    expect(sessaoService.iniciarSessao).not.toHaveBeenCalled();
+    expect(frequenciaService.registrarCheckin).not.toHaveBeenCalled();
+
+    const { rows: [evento] } = await pool.query(
+      `SELECT * FROM catraca_eventos WHERE catraca = 'catraca1' ORDER BY id DESC LIMIT 1`
+    );
+    expect(evento.usuario_id).toBeNull();
+
+    await pool.query('DELETE FROM catraca_eventos WHERE id = $1', [evento.id]);
+    await pool.query('DELETE FROM catraca_cursor WHERE catraca = $1', ['catraca1']);
+  });
+});

@@ -2,6 +2,8 @@ const crypto = require('crypto');
 const pool = require('../config/db');
 const { catracasConfiguradas } = require('./catraca/config');
 const logger = require('../utils/logger');
+const sessaoService = require('./sessaoService');
+const frequenciaService = require('./frequenciaService');
 
 const GRUPO_NOME = 'TEG-ativos';
 const REGRA_NOME = 'TEG-liberado';
@@ -134,10 +136,71 @@ async function bloquearAcesso(usuarioId) {
   }
 }
 
+function tipoDoEvento(event) {
+  if (event === 7) return 'autorizado';
+  if (event === 6) return 'negado';
+  return 'nao_identificado';
+}
+
+async function processarEvento(client, evento) {
+  const { rows: [mapeamento] } = await pool.query(
+    'SELECT usuario_id FROM catraca_usuarios WHERE catraca = $1 AND catraca_user_id = $2',
+    [client.nome, evento.user_id]
+  );
+
+  const tipo = tipoDoEvento(evento.event);
+  await pool.query(
+    `INSERT INTO catraca_eventos (usuario_id, catraca, tipo, criado_em) VALUES ($1, $2, $3, to_timestamp($4))`,
+    [mapeamento?.usuario_id || null, client.nome, tipo, evento.time]
+  );
+
+  if (!mapeamento || tipo !== 'autorizado') return;
+
+  try {
+    await sessaoService.iniciarSessao(mapeamento.usuario_id, null, 'catraca');
+  } catch {
+    // Sem treino atribuído é esperado — só não ganha o auto-início de sessão.
+  }
+
+  await frequenciaService.registrarCheckin(mapeamento.usuario_id, 'catraca');
+}
+
+async function processarNovosAcessos() {
+  for (const client of catracasConfiguradas()) {
+    const { rows: [cursorRow] } = await pool.query(
+      'SELECT ultimo_evento_id FROM catraca_cursor WHERE catraca = $1',
+      [client.nome]
+    );
+    const cursor = cursorRow?.ultimo_evento_id || 0;
+
+    const eventos = await client.loadObjects('access_logs', {
+      fields: ['id', 'time', 'event', 'user_id'],
+      where: { access_logs: { id: { '>': cursor } } },
+      order: ['id', 'ascending'],
+      limit: 200,
+    });
+
+    let maiorId = cursor;
+    for (const evento of eventos) {
+      maiorId = Math.max(maiorId, evento.id);
+      await processarEvento(client, evento);
+    }
+
+    if (eventos.length) {
+      await pool.query(
+        `INSERT INTO catraca_cursor (catraca, ultimo_evento_id) VALUES ($1, $2)
+         ON CONFLICT (catraca) DO UPDATE SET ultimo_evento_id = $2`,
+        [client.nome, maiorId]
+      );
+    }
+  }
+}
+
 module.exports = {
   garantirGrupo,
   garantirEstruturaBase,
   sincronizarAluno,
   liberarAcesso,
   bloquearAcesso,
+  processarNovosAcessos,
 };
