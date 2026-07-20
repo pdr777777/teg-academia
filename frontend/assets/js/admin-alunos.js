@@ -1,5 +1,17 @@
 let planosCache = null;
 
+// Origem externa: aluno que entra pela academia mas não tem matrícula cobrada
+// direto pela TEG (Gympass/Totalpass, personal, parceria, convênio...) — vem
+// do import da base antiga da CloudGym. Mostra como badge no lugar do plano.
+const LABELS_ORIGEM_EXTERNA = {
+  gympass_totalpass: 'Gympass/Totalpass',
+};
+
+function labelOrigemExterna(origem) {
+  if (LABELS_ORIGEM_EXTERNA[origem]) return LABELS_ORIGEM_EXTERNA[origem];
+  return origem.charAt(0).toUpperCase() + origem.slice(1).toLowerCase();
+}
+
 async function carregarPlanos() {
   if (planosCache) return planosCache;
   planosCache = await api.get('/api/planos');
@@ -19,11 +31,11 @@ async function carregarAlunos(busca = '') {
           <tr>
             <td>
               <div class="ranking-avatar-row">
-                <span class="avatar-fallback">${iniciais(a.nome)}</span>
-                <div><strong>${a.nome}</strong><div class="text-muted" style="font-size:.78rem">${a.email}</div></div>
+                <span class="avatar-fallback">${escapeHtml(iniciais(a.nome))}</span>
+                <div><strong>${escapeHtml(a.nome)}</strong><div class="text-muted" style="font-size:.78rem">${escapeHtml(a.email)}</div></div>
               </div>
             </td>
-            <td>${a.plano_nome || '-'}</td>
+            <td>${a.plano_nome ? escapeHtml(a.plano_nome) : (a.origem_externa ? `<span class="badge badge-primary">${escapeHtml(labelOrigemExterna(a.origem_externa))}</span>` : '-')}</td>
             <td>${formatData(a.data_vencimento)}</td>
             <td>${a.xp}</td>
             <td>${a.sequencia_atual} dias</td>
@@ -33,16 +45,16 @@ async function carregarAlunos(busca = '') {
                 <input type="checkbox" data-toggle-id="${a.id}" ${a.ativo ? 'checked' : ''} />
                 <span class="slider"></span>
               </label>
-              <button class="btn btn-ghost btn-sm" data-mat-id="${a.id}" data-mat-nome="${a.nome}"
+              <button class="btn btn-ghost btn-sm" data-mat-id="${a.id}" data-mat-nome="${escapeHtml(a.nome)}"
                 data-mat-matricula-id="${a.matricula_id || ''}"
                 title="${a.matricula_status === 'ativa' ? 'Renovar matrícula' : 'Matricular'}">
                 ${a.matricula_status === 'ativa' ? Icons.icon('refresh-cw', { size: 14 }) : Icons.icon('user-plus', { size: 14 })}
               </button>
-              <button class="btn btn-ghost btn-sm" data-reset-id="${a.id}" data-reset-nome="${a.nome}" title="Redefinir senha">
+              <button class="btn btn-ghost btn-sm" data-reset-id="${a.id}" data-reset-nome="${escapeHtml(a.nome)}" title="Redefinir senha">
                 ${Icons.icon('key', { size: 14 })}
               </button>
-              <button class="btn btn-ghost btn-sm" data-catraca-id="${a.id}" data-catraca-nome="${a.nome}" data-catraca-valor="${a.controlid_user_id || ''}"
-                title="${a.controlid_user_id ? `Vinculado à catraca (ID ${a.controlid_user_id})` : 'Vincular à catraca (reconhecimento facial)'}"
+              <button class="btn btn-ghost btn-sm" data-catraca-id="${a.id}" data-catraca-nome="${escapeHtml(a.nome)}" data-catraca-valor="${escapeHtml(a.controlid_user_id || '')}"
+                title="${a.controlid_user_id ? `Vinculado à catraca (ID ${escapeHtml(a.controlid_user_id)})` : 'Vincular à catraca (reconhecimento facial)'}"
                 style="${a.controlid_user_id ? 'color:var(--color-success)' : ''}">
                 ${Icons.icon('shield-check', { size: 14 })}
               </button>

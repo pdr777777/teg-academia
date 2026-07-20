@@ -6,3 +6,6 @@ node_modules/
 .vercel
 .env*
 .superpowers/
+
+# prévias de import com dados reais de aluno (PII) — nunca versionar
+import-*-previa.json
