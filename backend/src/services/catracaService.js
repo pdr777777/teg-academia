@@ -158,8 +158,9 @@ async function processarEvento(client, evento) {
 
   try {
     await sessaoService.iniciarSessao(mapeamento.usuario_id, null, 'catraca');
-  } catch {
+  } catch (err) {
     // Sem treino atribuído é esperado — só não ganha o auto-início de sessão.
+    logger.warn('catraca.iniciarSessao não iniciou sessão automática', { usuarioId: mapeamento.usuario_id, erro: err.message });
   }
 
   await frequenciaService.registrarCheckin(mapeamento.usuario_id, 'catraca');
@@ -167,31 +168,35 @@ async function processarEvento(client, evento) {
 
 async function processarNovosAcessos() {
   for (const client of catracasConfiguradas()) {
-    const { rows: [cursorRow] } = await pool.query(
-      'SELECT ultimo_evento_id FROM catraca_cursor WHERE catraca = $1',
-      [client.nome]
-    );
-    const cursor = cursorRow?.ultimo_evento_id || 0;
-
-    const eventos = await client.loadObjects('access_logs', {
-      fields: ['id', 'time', 'event', 'user_id'],
-      where: { access_logs: { id: { '>': cursor } } },
-      order: ['id', 'ascending'],
-      limit: 200,
-    });
-
-    let maiorId = cursor;
-    for (const evento of eventos) {
-      maiorId = Math.max(maiorId, evento.id);
-      await processarEvento(client, evento);
-    }
-
-    if (eventos.length) {
-      await pool.query(
-        `INSERT INTO catraca_cursor (catraca, ultimo_evento_id) VALUES ($1, $2)
-         ON CONFLICT (catraca) DO UPDATE SET ultimo_evento_id = $2`,
-        [client.nome, maiorId]
+    try {
+      const { rows: [cursorRow] } = await pool.query(
+        'SELECT ultimo_evento_id FROM catraca_cursor WHERE catraca = $1',
+        [client.nome]
       );
+      const cursor = cursorRow?.ultimo_evento_id || 0;
+
+      const eventos = await client.loadObjects('access_logs', {
+        fields: ['id', 'time', 'event', 'user_id'],
+        where: { access_logs: { id: { '>': cursor } } },
+        order: ['id', 'ascending'],
+        limit: 200,
+      });
+
+      let maiorId = cursor;
+      for (const evento of eventos) {
+        maiorId = Math.max(maiorId, evento.id);
+        await processarEvento(client, evento);
+      }
+
+      if (eventos.length) {
+        await pool.query(
+          `INSERT INTO catraca_cursor (catraca, ultimo_evento_id) VALUES ($1, $2)
+           ON CONFLICT (catraca) DO UPDATE SET ultimo_evento_id = $2`,
+          [client.nome, maiorId]
+        );
+      }
+    } catch (err) {
+      logger.error('catraca.processarNovosAcessos falhou', { catraca: client.nome, erro: err.message });
     }
   }
 }
