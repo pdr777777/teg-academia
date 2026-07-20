@@ -1,4 +1,4 @@
--- database/migrations/029_catraca.sql
+-- database/migrations/031_catraca.sql
 -- Integração com as catracas Control iD iDFace MAX. Todo registro criado
 -- pelo TEG na catraca usa registration com prefixo "TEG-" e nunca toca em
 -- objeto criado pelo CloudGym (sistema antigo, continua rodando em paralelo).

@@ -139,3 +139,7 @@ router.post('/catraca-checkin', async (req, res, next) => {
 });
 
 module.exports = router;
+// notificacoes.js (webhook do Control iD, integração paralela) importa
+// iniciarSessao diretamente daqui — mantido por compatibilidade em vez de
+// migrar aquele caller pra sessaoService, pra não tocar em código alheio.
+module.exports.iniciarSessao = sessaoService.iniciarSessao;
