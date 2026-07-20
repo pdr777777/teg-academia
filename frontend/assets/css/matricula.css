@@ -6,7 +6,13 @@
   background: var(--color-primary-soft);
   margin-bottom: 2rem;
 }
-.banner-indicacao .avatar-fallback { flex-shrink: 0; }
+.banner-indicacao .avatar-fallback {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--gradient-flame);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
 .banner-indicacao strong { display: block; }
 .banner-indicacao span { color: var(--color-muted); font-size: 0.85rem; }
 
@@ -198,8 +204,26 @@
 .resumo-card .resumo-linha:last-child { border-bottom: none; }
 .resumo-card .resumo-total { font-weight: 700; font-size: 1.1rem; }
 
-.sucesso-icon { color: var(--color-success); margin-bottom: 1rem; }
+.sucesso-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--color-success-soft);
+  border: 1px solid rgba(34,197,94,.2);
+  color: var(--color-success);
+  font-size: 1.5rem;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.25rem;
+}
 .pagamento-card { border-color: var(--color-success); background: var(--color-success-soft); }
+
+.matricula-wrap .auth-links {
+  margin-top: 1.25rem;
+  font-size: 0.88rem;
+  color: var(--color-muted);
+}
+.matricula-wrap .auth-links a { color: var(--color-primary); text-decoration: none; }
+.matricula-wrap .auth-links a:hover { text-decoration: underline; }
 
 @media (max-width: 860px) {
   #planos-grid { grid-template-columns: 1fr; }
