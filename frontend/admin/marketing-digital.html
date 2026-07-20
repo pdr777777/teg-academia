@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Marketing Digital - Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="../assets/img/favicon.png" />
+  <link rel="stylesheet" href="../assets/css/global.css" />
+  <link rel="stylesheet" href="../assets/css/admin.css" />
+  <link rel="stylesheet" href="../assets/css/app-effects.css" />
+  <script src="../assets/js/theme.js"></script>
+</head>
+<body>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a href="../index.html" class="brand" title="Voltar para o site"><img src="../assets/img/logo.svg" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ADMIN</span></a>
+      <nav class="sidebar-nav" id="sidebar-nav"></nav>
+      <div class="sidebar-foot">
+        <button type="button" id="btn-theme-toggle" data-theme-toggle class="btn btn-ghost btn-sm btn-block" data-icon="sun" data-icon-size="16" style="justify-content:flex-start;gap:0.7rem;padding:0.65rem 0.75rem;color:var(--color-muted)">Tema</button>
+        <a href="#" id="btn-logout"><span data-icon="log-out" data-icon-size="18"></span>Sair</a>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="page-head">
+        <button class="btn btn-ghost btn-sm sidebar-toggle" id="btn-sidebar-toggle" data-icon="menu"></button>
+        <div>
+          <h1>Marketing Digital</h1>
+          <p>Campanhas e automações de marketing.</p>
+        </div>
+      </div>
+
+      <div class="card" style="text-align:center;padding:3rem 1.5rem" data-reveal>
+        <span data-icon="megaphone" data-icon-size="32" style="color:var(--color-muted);margin-bottom:1rem;display:inline-block"></span>
+        <h2 style="margin-bottom:.5rem">Em construção</h2>
+        <p class="text-muted">Essa função está chegando em breve.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/sidebar-nav.js"></script>
+  <script src="../assets/js/app-effects.js"></script>
+  <script src="../assets/js/admin-guard.js"></script>
+</body>
+</html>
