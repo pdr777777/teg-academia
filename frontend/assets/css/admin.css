@@ -368,17 +368,8 @@
   position: fixed;
   inset: 0;
   z-index: -1;
-  background:
-    radial-gradient(ellipse 700px 500px at 85% 0%, rgba(255,122,26,0.14), transparent 65%),
-    linear-gradient(135deg, rgba(122,27,30,0.16) 0%, rgba(182,41,41,0.12) 50%, rgba(255,122,26,0.10) 100%),
-    var(--color-bg);
+  background: var(--color-bg);
   pointer-events: none;
-}
-:root[data-theme="light"] .app-shell::before {
-  background:
-    radial-gradient(ellipse 700px 500px at 85% 0%, rgba(255,122,26,0.08), transparent 65%),
-    linear-gradient(135deg, rgba(122,27,30,0.08) 0%, rgba(182,41,41,0.06) 50%, rgba(255,122,26,0.05) 100%),
-    var(--color-bg);
 }
 
 /* ===== Sidebar em vidro ===== */

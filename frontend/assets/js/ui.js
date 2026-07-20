@@ -21,6 +21,15 @@ function formatData(data) {
   return new Date(data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 }
 
+// Escapa texto antes de injetar em innerHTML — obrigatório pra qualquer campo
+// vindo do banco (nome, e-mail, plano...) já que muitos vêm de cadastro do
+// próprio aluno ou de import externo (CloudGym), nunca confiável como HTML puro.
+function escapeHtml(valor) {
+  return String(valor ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
 function iniciais(nome) {
   if (!nome) return '?';
   return nome.trim().split(/\s+/).slice(0, 2).map((p) => p[0].toUpperCase()).join('');

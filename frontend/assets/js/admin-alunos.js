@@ -1,4 +1,18 @@
 let planosCache = null;
+const ALUNOS_POR_PAGINA = 30;
+let paginaAtual = 1;
+
+// Origem externa: aluno que entra pela academia mas não tem matrícula cobrada
+// direto pela TEG (Gympass/Totalpass, personal, parceria, convênio...) — vem
+// do import da base antiga da CloudGym. Mostra como badge no lugar do plano.
+const LABELS_ORIGEM_EXTERNA = {
+  gympass_totalpass: 'Gympass/Totalpass',
+};
+
+function labelOrigemExterna(origem) {
+  if (LABELS_ORIGEM_EXTERNA[origem]) return LABELS_ORIGEM_EXTERNA[origem];
+  return origem.charAt(0).toUpperCase() + origem.slice(1).toLowerCase();
+}
 
 async function carregarPlanos() {
   if (planosCache) return planosCache;
@@ -6,24 +20,53 @@ async function carregarPlanos() {
   return planosCache;
 }
 
-async function carregarAlunos(busca = '') {
+function renderPaginacao(total, page, limit) {
+  const nav = document.getElementById('alunos-paginacao');
+  if (!nav) return;
+  const totalPaginas = Math.max(Math.ceil(total / limit), 1);
+  if (total === 0) { nav.innerHTML = ''; return; }
+
+  const inicio = (page - 1) * limit + 1;
+  const fim = Math.min(page * limit, total);
+  nav.innerHTML = `
+    <span class="text-muted" style="font-size:.83rem">Mostrando ${inicio}–${fim} de ${total} alunos</span>
+    <div style="display:flex;gap:.4rem;align-items:center">
+      <button class="btn btn-ghost btn-sm" id="btn-pagina-anterior" ${page <= 1 ? 'disabled' : ''}>Anterior</button>
+      <span class="text-muted" style="font-size:.83rem">Página ${page} de ${totalPaginas}</span>
+      <button class="btn btn-ghost btn-sm" id="btn-pagina-proxima" ${page >= totalPaginas ? 'disabled' : ''}>Próxima</button>
+    </div>
+  `;
+  document.getElementById('btn-pagina-anterior')?.addEventListener('click', () => {
+    paginaAtual--;
+    carregarAlunos(document.getElementById('busca-aluno').value.trim(), paginaAtual);
+  });
+  document.getElementById('btn-pagina-proxima')?.addEventListener('click', () => {
+    paginaAtual++;
+    carregarAlunos(document.getElementById('busca-aluno').value.trim(), paginaAtual);
+  });
+}
+
+async function carregarAlunos(busca = '', page = 1) {
+  paginaAtual = page;
   const body = document.getElementById('alunos-body');
   body.innerHTML = '<tr><td colspan="7" class="loading-row"><span class="spinner"></span></td></tr>';
 
   try {
-    const query = busca ? `?busca=${encodeURIComponent(busca)}` : '';
-    const alunos = await api.get(`/api/admin/alunos${query}`);
+    const params = new URLSearchParams({ page, limit: ALUNOS_POR_PAGINA });
+    if (busca) params.set('busca', busca);
+    const { alunos, total, limit } = await api.get(`/api/admin/alunos?${params}`);
+    renderPaginacao(total, page, limit);
 
     body.innerHTML = alunos.length
       ? alunos.map((a) => `
           <tr>
             <td>
               <div class="ranking-avatar-row">
-                <span class="avatar-fallback">${iniciais(a.nome)}</span>
-                <div><strong>${a.nome}</strong><div class="text-muted" style="font-size:.78rem">${a.email}</div></div>
+                <span class="avatar-fallback">${escapeHtml(iniciais(a.nome))}</span>
+                <div><strong>${escapeHtml(a.nome)}</strong><div class="text-muted" style="font-size:.78rem">${escapeHtml(a.email)}</div></div>
               </div>
             </td>
-            <td>${a.plano_nome || '-'}</td>
+            <td>${a.plano_nome ? escapeHtml(a.plano_nome) : (a.origem_externa ? `<span class="badge badge-primary">${escapeHtml(labelOrigemExterna(a.origem_externa))}</span>` : '-')}</td>
             <td>${formatData(a.data_vencimento)}</td>
             <td>${a.xp}</td>
             <td>${a.sequencia_atual} dias</td>
@@ -33,16 +76,16 @@ async function carregarAlunos(busca = '') {
                 <input type="checkbox" data-toggle-id="${a.id}" ${a.ativo ? 'checked' : ''} />
                 <span class="slider"></span>
               </label>
-              <button class="btn btn-ghost btn-sm" data-mat-id="${a.id}" data-mat-nome="${a.nome}"
+              <button class="btn btn-ghost btn-sm" data-mat-id="${a.id}" data-mat-nome="${escapeHtml(a.nome)}"
                 data-mat-matricula-id="${a.matricula_id || ''}"
                 title="${a.matricula_status === 'ativa' ? 'Renovar matrícula' : 'Matricular'}">
                 ${a.matricula_status === 'ativa' ? Icons.icon('refresh-cw', { size: 14 }) : Icons.icon('user-plus', { size: 14 })}
               </button>
-              <button class="btn btn-ghost btn-sm" data-reset-id="${a.id}" data-reset-nome="${a.nome}" title="Redefinir senha">
+              <button class="btn btn-ghost btn-sm" data-reset-id="${a.id}" data-reset-nome="${escapeHtml(a.nome)}" title="Redefinir senha">
                 ${Icons.icon('key', { size: 14 })}
               </button>
-              <button class="btn btn-ghost btn-sm" data-catraca-id="${a.id}" data-catraca-nome="${a.nome}" data-catraca-valor="${a.controlid_user_id || ''}"
-                title="${a.controlid_user_id ? `Vinculado à catraca (ID ${a.controlid_user_id})` : 'Vincular à catraca (reconhecimento facial)'}"
+              <button class="btn btn-ghost btn-sm" data-catraca-id="${a.id}" data-catraca-nome="${escapeHtml(a.nome)}" data-catraca-valor="${escapeHtml(a.controlid_user_id || '')}"
+                title="${a.controlid_user_id ? `Vinculado à catraca (ID ${escapeHtml(a.controlid_user_id)})` : 'Vincular à catraca (reconhecimento facial)'}"
                 style="${a.controlid_user_id ? 'color:var(--color-success)' : ''}">
                 ${Icons.icon('shield-check', { size: 14 })}
               </button>
@@ -116,7 +159,7 @@ document.getElementById('alunos-body').addEventListener('click', async (ev) => {
     try {
       await api.patch(`/api/admin/alunos/${id}/catraca`, { controlid_user_id: novoValor.trim() || null });
       toast(novoValor.trim() ? `${nome} vinculado à catraca.` : `${nome} desvinculado da catraca.`, 'success');
-      carregarAlunos(document.getElementById('busca-aluno').value.trim());
+      carregarAlunos(document.getElementById('busca-aluno').value.trim(), paginaAtual);
     } catch (err) {
       toast(err.message || 'Erro ao vincular catraca.', 'error');
     } finally {
@@ -175,7 +218,7 @@ formMat.addEventListener('submit', async (ev) => {
       toast('Aluno matriculado com sucesso!', 'success');
     }
     dialog.close();
-    carregarAlunos(document.getElementById('busca-aluno').value.trim());
+    carregarAlunos(document.getElementById('busca-aluno').value.trim(), paginaAtual);
   } catch (err) {
     toast(err.message || 'Erro ao salvar matrícula.', 'error');
   } finally {
@@ -185,7 +228,7 @@ formMat.addEventListener('submit', async (ev) => {
 });
 
 document.getElementById('busca-aluno').addEventListener('input', debounce((ev) => {
-  carregarAlunos(ev.target.value.trim());
+  carregarAlunos(ev.target.value.trim(), 1);
 }));
 
 carregarAlunos();
