@@ -32,8 +32,12 @@ individuais prontos: https://github.com/krystonschwarze/coolicons (440+ ícones)
      em vez do ícone solto sem fundo.
    - Mais espaçamento interno nos cards e hierarquia tipográfica mais clara entre
      o número grande e o label.
-   - Mantém 100% a paleta monocromática (preto/branco) já padrão no site — sem
-     gradiente, sem cor de fundo nova.
+   - **Correção após checar o CSS real** (a suposição original abaixo estava
+     errada): o admin ainda usa `--color-primary` laranja (`#ff8a00`) nos ícones
+     dos stat-cards e no gradiente do gráfico — só as telas de auth migraram pro
+     monocromático até agora ([[teg-auth-identidade-visual-2026-07-17]]). Esta
+     iteração **mantém o laranja atual do admin** (decisão do usuário); migrar o
+     admin pro monocromático fica pra uma iteração própria, não agora.
 4. Sem dependências novas: continua tudo SVG inline, sem build step, sem CDN.
 
 ## Fora de escopo
