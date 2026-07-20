@@ -3,6 +3,8 @@ const pool = require('../config/db');
 const { authMiddleware, requireRole } = require('../middleware/authMiddleware');
 const whatsappService = require('../services/whatsappService');
 const xpService = require('../services/xpService');
+const catracaService = require('../services/catracaService');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -42,6 +44,13 @@ router.post('/', authMiddleware, async (req, res, next) => {
     );
     if (indicacao) {
       await xpService.adicionarXP(indicacao.indicador_id, 200, 'indicacao');
+    }
+
+    try {
+      await catracaService.sincronizarAluno(req.user.id);
+      await catracaService.liberarAcesso(req.user.id);
+    } catch (err) {
+      logger.error('catraca.sincronizarAluno/liberarAcesso falhou', { usuarioId: req.user.id, erro: err.message });
     }
 
     res.status(201).json(matricula);
