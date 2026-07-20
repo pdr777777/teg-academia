@@ -79,6 +79,58 @@ function slugifica(nome) {
     .slice(0, 40) || 'aluno';
 }
 
+// Une candidatos que compartilham CPF OU e-mail (mesmo que não seja a mesma
+// chave) — duas linhas com CPF diferente mas o mesmo e-mail, por exemplo,
+// precisam virar UMA conta só, senão a constraint unique(email) estoura na
+// hora de gravar. Union-find simples sobre os índices do array.
+function deduplicaPorCpfOuEmail(candidatos) {
+  const pai = candidatos.map((_, i) => i);
+  function acharRaiz(i) {
+    while (pai[i] !== i) { pai[i] = pai[pai[i]]; i = pai[i]; }
+    return i;
+  }
+  function unir(a, b) {
+    const ra = acharRaiz(a); const rb = acharRaiz(b);
+    if (ra !== rb) pai[ra] = rb;
+  }
+
+  const primeiraOcorrenciaCpf = new Map();
+  const primeiraOcorrenciaEmail = new Map();
+  candidatos.forEach((c, i) => {
+    if (c.cpf) {
+      if (primeiraOcorrenciaCpf.has(c.cpf)) unir(i, primeiraOcorrenciaCpf.get(c.cpf));
+      else primeiraOcorrenciaCpf.set(c.cpf, i);
+    }
+    if (c.email) {
+      if (primeiraOcorrenciaEmail.has(c.email)) unir(i, primeiraOcorrenciaEmail.get(c.email));
+      else primeiraOcorrenciaEmail.set(c.email, i);
+    }
+  });
+
+  const grupos = new Map();
+  candidatos.forEach((_, i) => {
+    const raiz = acharRaiz(i);
+    if (!grupos.has(raiz)) grupos.set(raiz, []);
+    grupos.get(raiz).push(i);
+  });
+
+  let duplicadas = 0;
+  const unicos = [];
+  for (const indices of grupos.values()) {
+    if (indices.length > 1) duplicadas += indices.length - 1;
+    const linhas = indices.map((i) => candidatos[i])
+      .sort((a, b) => (b.dataInicio?.getTime() ?? 0) - (a.dataInicio?.getTime() ?? 0));
+    const base = linhas[0];
+    unicos.push({
+      ...base,
+      cpf: linhas.find((l) => l.cpf)?.cpf ?? null,
+      email: linhas.find((l) => l.email)?.email ?? null,
+      telefone: linhas.find((l) => l.telefone)?.telefone ?? null,
+    });
+  }
+  return { unicos, duplicadas };
+}
+
 async function main() {
   const arquivo = process.argv[2];
   const commit = process.argv.includes('--commit');
@@ -122,20 +174,10 @@ async function main() {
     candidatos.push({ nome, cpf, email, telefone, plano_id, origem_externa, dataInicio, dataVencimento, planoTexto });
   }
 
-  // 2) dedup dentro do arquivo — chave é CPF quando existe, senão e-mail;
-  // fica quem tem o "Início" mais recente
-  const porChave = new Map();
-  for (const c of candidatos) {
-    const chave = c.cpf ? `cpf:${c.cpf}` : (c.email ? `email:${c.email}` : null);
-    if (!chave) { porChave.set(Symbol(), c); continue; } // sem cpf nem email: nada pra deduplicar contra
-    const existente = porChave.get(chave);
-    if (!existente) { porChave.set(chave, c); continue; }
-    relatorio.duplicadasNoArquivo++;
-    const cVence = c.dataInicio?.getTime() ?? 0;
-    const eVence = existente.dataInicio?.getTime() ?? 0;
-    if (cVence > eVence) porChave.set(chave, c);
-  }
-  const unicos = [...porChave.values()];
+  // 2) dedup dentro do arquivo — une quem compartilha CPF OU e-mail
+  // (union-find), não só uma chave preferencial
+  const { unicos, duplicadas } = deduplicaPorCpfOuEmail(candidatos);
+  relatorio.duplicadasNoArquivo = duplicadas;
 
   // 3) contra o banco (email/cpf já cadastrados)
   const { rows: existentes } = await pool.query('SELECT cpf, email FROM usuarios');
@@ -205,11 +247,15 @@ async function main() {
   }
 
   console.log('\n[COMMIT] Gravando', relatorio.paraCriar.length, 'contas no banco...');
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    let criadas = 0;
-    for (const p of relatorio.paraCriar) {
+  // Cada aluno é gravado na sua própria transação (usuário + matrícula) —
+  // se uma linha falhar (constraint que a prévia não pegou, por exemplo),
+  // só ela é perdida, o resto do lote segue normalmente.
+  let criadas = 0;
+  const falhas = [];
+  for (const p of relatorio.paraCriar) {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
       const senhaTemporaria = crypto.randomBytes(16).toString('hex');
       const senha_hash = await bcrypt.hash(senhaTemporaria, 10);
       const linkIndicacao = crypto.randomBytes(5).toString('hex');
@@ -227,18 +273,25 @@ async function main() {
           [usuario.id, p.matricula.plano_id, p.matricula.data_inicio, p.matricula.data_vencimento, p.matricula.status]
         );
       }
+      await client.query('COMMIT');
       criadas++;
+    } catch (err) {
+      await client.query('ROLLBACK');
+      falhas.push({ nome: p.nome, email: p.email, cpf: p.cpf, erro: err.message });
+    } finally {
+      client.release();
     }
-    await client.query('COMMIT');
-    console.log('OK —', criadas, 'contas criadas.');
-  } catch (err) {
-    await client.query('ROLLBACK');
-    console.error('Falhou, nada foi gravado:', err.message);
-    process.exitCode = 1;
-  } finally {
-    client.release();
-    await pool.end();
   }
+
+  console.log('OK —', criadas, 'contas criadas.');
+  if (falhas.length) {
+    console.log(falhas.length, 'linha(s) falharam e foram puladas:');
+    falhas.slice(0, 20).forEach((f) => console.log(' -', f.nome, '|', f.email, '|', f.erro));
+    const falhasPath = path.join(path.dirname(path.resolve(arquivo)), 'import-cloudgym-falhas.json');
+    require('fs').writeFileSync(falhasPath, JSON.stringify(falhas, null, 2));
+    console.log('Lista completa de falhas salva em:', falhasPath);
+  }
+  await pool.end();
 }
 
 main();

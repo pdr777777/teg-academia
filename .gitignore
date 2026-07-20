@@ -7,5 +7,6 @@ node_modules/
 .env*
 .superpowers/
 
-# prévias de import com dados reais de aluno (PII) — nunca versionar
+# prévias/falhas de import com dados reais de aluno (PII) — nunca versionar
 import-*-previa.json
+import-*-falhas.json
