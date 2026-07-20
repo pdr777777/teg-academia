@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Frequência - TEG Academia</title>
+  <title>Catraca - TEG Academia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="../assets/img/favicon.png" />
@@ -22,8 +22,8 @@
         <a href="financeiro.html" data-role-dono><span data-icon="wallet" data-icon-size="18"></span>Financeiro</a>
         <a href="alunos.html" data-role-adminup><span data-icon="users" data-icon-size="18"></span>Alunos</a>
         <a href="ranking.html"><span data-icon="award" data-icon-size="18"></span>Ranking</a>
-        <a href="frequencia.html" class="active"><span data-icon="clock" data-icon-size="18"></span>Frequência</a>
-        <a href="catraca.html" data-role-adminup><span data-icon="shield-check" data-icon-size="18"></span>Catraca</a>
+        <a href="frequencia.html"><span data-icon="clock" data-icon-size="18"></span>Frequência</a>
+        <a href="catraca.html" class="active" data-role-adminup><span data-icon="shield-check" data-icon-size="18"></span>Catraca</a>
         <a href="treinos.html"><span data-icon="dumbbell" data-icon-size="18"></span>Treinos</a>
         <a href="aulas.html" data-role-adminup><span data-icon="clipboard-list" data-icon-size="18"></span>Aulas</a>
         <a href="planos.html" data-role-adminup><span data-icon="package" data-icon-size="18"></span>Planos</a>
@@ -42,28 +42,30 @@
       <div class="page-head">
         <button class="btn btn-ghost btn-sm sidebar-toggle" id="btn-sidebar-toggle" data-icon="menu"></button>
         <div>
-          <h1>Frequência</h1>
-          <p>Quem está sumindo: a base pro lembrete automático de ausência.</p>
+          <h1>Catraca</h1>
+          <p>Controle de acesso das duas iDFace — sincronização, bloqueio automático e check-in.</p>
         </div>
       </div>
 
-      <div class="grid grid-3" id="frequencia-cards">
+      <div class="grid grid-3" id="catraca-status-cards">
         <div class="loading-row" style="grid-column:1/-1"><span class="spinner"></span></div>
       </div>
 
-      <div class="filters-row" style="margin-top:1.5rem">
-        <div class="search-field">
-          <span data-icon="search" data-icon-size="16"></span>
-          <input type="text" id="busca-frequencia" placeholder="Buscar por nome ou e-mail..." />
-        </div>
+      <div class="grid grid-4" id="catraca-cards" style="margin-top:1.5rem">
+        <div class="loading-row" style="grid-column:1/-1"><span class="spinner"></span></div>
       </div>
 
-      <div class="table-wrap" data-reveal>
+      <div class="card" style="margin-top:1.5rem" data-reveal>
+        <h3 style="margin-bottom:1rem">Acessos autorizados por hora (últimos 3 dias)</h3>
+        <div id="catraca-grafico"></div>
+      </div>
+
+      <div class="table-wrap" style="margin-top:1.5rem" data-reveal>
         <table>
           <thead>
-            <tr><th>Aluno</th><th>Último treino</th><th>Dias sem treinar</th><th>Treinos no mês</th></tr>
+            <tr><th>Aluno</th><th>Catraca</th><th>Tipo</th><th>Horário</th></tr>
           </thead>
-          <tbody id="frequencia-body">
+          <tbody id="catraca-feed-body">
             <tr><td colspan="4" class="loading-row"><span class="spinner"></span></td></tr>
           </tbody>
         </table>
@@ -76,6 +78,6 @@
   <script src="../assets/js/ui.js"></script>
   <script src="../assets/js/app-effects.js"></script>
   <script src="../assets/js/admin-guard.js"></script>
-  <script src="../assets/js/admin-frequencia.js"></script>
+  <script src="../assets/js/admin-catraca.js"></script>
 </body>
 </html>
