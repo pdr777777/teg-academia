@@ -174,3 +174,4 @@ router.post('/catraca-checkin', async (req, res, next) => {
 });
 
 module.exports = router;
+module.exports.iniciarSessao = iniciarSessao;

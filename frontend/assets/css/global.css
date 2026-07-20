@@ -296,73 +296,21 @@ label {
 .topnav .brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 800; letter-spacing: -0.02em; font-size: 1.05rem; }
 .topnav .brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--color-primary); }
 .brand-logo { height: 34px; width: auto; display: block; }
-.brand-icon { height: 34px; width: auto; display: block; }
-.brand-text { height: 30px; width: auto; display: block; }
 .brand-fallback { display: none; align-items: center; gap: 0.6rem; }
-
-/* ===== Menu em pills (inspirado no PillNav do React Bits) =====
-   Wipe em CSS puro, animando `height` (layout), não `transform`/`scale`.
-   Testei duas versões com transform (círculo grande recortado, depois
-   scaleY recortado) e as duas esbarraram no mesmo bug de composição:
-   overflow:hidden + border-radius não recorta corretamente um filho
-   TRANSFORMADO nesse ambiente — só pinta o contorno anti-aliased, não o
-   preenchimento. Animar `height` direto não usa transform nenhum, então
-   não tem como cair nesse bug (mais pesado pro navegador recalcular a
-   cada frame, mas pra 5-6 pills pequenas isso é irrelevante). */
-.topnav-links.pill-list {
+.topnav-links { display: flex; align-items: center; gap: 0.25rem; }
+.topnav-links a {
   display: flex;
-  flex-shrink: 0;
   align-items: center;
-  gap: 3px;
-  padding: 3px;
-  background: #0a0a0a;
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 999px;
+  gap: 0.45rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  transition: background-color 0.15s, color 0.15s;
 }
-.topnav-links .pill {
-  position: relative;
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  height: 38px;
-  padding: 0 1.05rem;
-  border-radius: 999px;
-  background: #fff;
-  color: #111;
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: color 0.25s ease;
-}
-.topnav-links .pill::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 0;
-  z-index: 0;
-  border-radius: 999px;
-  background: #0a0a0a;
-  transition: height 0.3s cubic-bezier(.4,0,.2,1);
-}
-.topnav-links .pill:hover::before,
-.topnav-links .pill:focus-visible::before { height: 100%; }
-.topnav-links .pill:hover,
-.topnav-links .pill:focus-visible { color: #fff; }
-.topnav-links .pill-label {
-  position: relative;
-  z-index: 1;
-  /* neutraliza o "shiny text" global (effects.css) — aqui o texto é sólido */
-  background: none;
-  -webkit-background-clip: initial;
-  background-clip: initial;
-  -webkit-text-fill-color: currentColor;
-}
+.topnav-links a:hover { color: var(--color-text); background: var(--color-surface-2); }
+.topnav-links a.active { color: var(--color-text); background: var(--color-surface-2); }
 .topnav-right { display: flex; align-items: center; gap: 0.6rem; }
 .topnav-menu-btn { display: none; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
 
@@ -535,21 +483,17 @@ tbody tr:hover { background: var(--color-surface-2); }
   .sidebar.open { transform: translateX(0); }
   .main-content { padding: 1.25rem; }
   .topnav-menu-btn { display: flex; }
-  .topnav-links.pill-list {
+  .topnav-links {
     display: none;
     position: absolute;
     top: calc(64px + env(safe-area-inset-top, 0px)); left: 0; right: 0;
     flex-direction: column;
-    align-items: stretch;
     background: var(--color-bg);
-    border: none;
     border-bottom: 1px solid var(--color-border);
-    border-radius: 0;
     padding: 0.5rem;
-    gap: 0.35rem;
   }
-  .topnav-links.pill-list.open { display: flex; }
-  .topnav-links .pill { width: 100%; height: 44px; }
+  .topnav-links.open { display: flex; }
+  .topnav-links a { width: 100%; }
   .section { padding: 3rem 0; }
   .section-head { margin-bottom: 2rem; }
 }

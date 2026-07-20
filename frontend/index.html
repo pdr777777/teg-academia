@@ -39,7 +39,7 @@
     "@context": "https://schema.org",
     "@type": "SportsActivityLocation",
     "name": "Academia TEG",
-    "description": "Academia com sistema de gamificação. Musculação, cross training, aulas coletivas e área do aluno com XP e ranking.",
+    "description": "Academia de musculação com sistema de gamificação e área do aluno com XP e ranking.",
     "url": "https://teg-academia.com.br",
     "telephone": "+5567993009296",
     "address": {
@@ -48,12 +48,20 @@
       "addressRegion": "MS",
       "addressCountry": "BR"
     },
-    "openingHoursSpecification": [{
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
-      "opens": "06:00",
-      "closes": "23:00"
-    }],
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+        "opens": "05:00",
+        "closes": "22:00"
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Saturday"],
+        "opens": "08:00",
+        "closes": "16:00"
+      }
+    ],
     "priceRange": "$$",
     "sameAs": ["https://www.instagram.com/teg.academias"]
   }
@@ -84,16 +92,15 @@
   <!-- NAV -->
   <header class="topnav" id="site-nav">
     <a href="index.html" class="brand">
-      <img src="assets/img/logo-icon.svg" alt="" class="brand-icon" onerror="this.style.display='none'" />
-      <img src="assets/img/logo-text.svg" alt="TEG Academia" class="brand-text" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-      <span class="brand-fallback" style="display:none"><span class="dot"></span>TEG ACADEMIA</span>
+      <img src="assets/img/logo.svg" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+      <span class="brand-fallback"><span class="dot"></span>TEG ACADEMIA</span>
     </a>
-    <nav class="topnav-links pill-list" id="site-nav-links">
-      <a href="#estrutura" class="pill"><span class="pill-label">Estrutura</span></a>
-      <a href="#gamificacao" class="pill"><span class="pill-label">Gamificação</span></a>
-      <a href="#planos" class="pill"><span class="pill-label">Planos</span></a>
-      <a href="#depoimentos" class="pill"><span class="pill-label">Depoimentos</span></a>
-      <a href="#localizacao" class="pill"><span class="pill-label">Localização</span></a>
+    <nav class="topnav-links">
+      <a href="#estrutura">Estrutura</a>
+      <a href="#gamificacao">Gamificação</a>
+      <a href="#planos">Planos</a>
+      <a href="#depoimentos">Depoimentos</a>
+      <a href="#localizacao">Localização</a>
     </nav>
     <div class="topnav-right">
       <a href="login.html" class="btn btn-ghost btn-sm">Entrar</a>
@@ -163,17 +170,17 @@
           </div>
           <div class="hero-stat-divider" aria-hidden="true"></div>
           <div class="hero-stat">
-            <strong id="stat-modalidades">0+</strong>
-            <span>modalidades</span>
+            <strong>05h–22h</strong>
+            <span>seg a sex</span>
           </div>
           <div class="hero-stat-divider" aria-hidden="true"></div>
           <div class="hero-stat">
-            <strong>06h–23h</strong>
-            <span>funcionamento</span>
+            <strong>08h–16h</strong>
+            <span>sábado</span>
           </div>
           <div class="hero-stat-divider" aria-hidden="true"></div>
           <div class="hero-stat">
-            <strong>7 dias</strong>
+            <strong>6 dias</strong>
             <span>por semana</span>
           </div>
         </div>
@@ -309,7 +316,7 @@
           </div>
           <p class="plan-note">Ou R$129,90 no cartão de crédito</p>
           <ul class="plan-features">
-            <li><span data-icon="check" data-icon-size="15"></span>Acesso a todas as modalidades</li>
+            <li><span data-icon="check" data-icon-size="15"></span>Acesso completo à musculação</li>
             <li><span data-icon="check" data-icon-size="15"></span>Acompanhamento de professores</li>
             <li><span data-icon="check" data-icon-size="15"></span>Área do aluno com sistema XP</li>
             <li><span data-icon="check" data-icon-size="15"></span>Grade de aulas em tempo real</li>
@@ -327,7 +334,7 @@
           </div>
           <p class="plan-note">3x R$109,90 no crédito</p>
           <ul class="plan-features">
-            <li><span data-icon="check" data-icon-size="15"></span>Acesso a todas as modalidades</li>
+            <li><span data-icon="check" data-icon-size="15"></span>Acesso completo à musculação</li>
             <li><span data-icon="check" data-icon-size="15"></span>Acompanhamento de professores</li>
             <li><span data-icon="check" data-icon-size="15"></span>Área do aluno com sistema XP</li>
             <li><span data-icon="check" data-icon-size="15"></span>Grade de aulas em tempo real</li>
@@ -345,7 +352,7 @@
           </div>
           <p class="plan-note">12x R$99,90 recorrente no Pix</p>
           <ul class="plan-features">
-            <li><span data-icon="check" data-icon-size="15"></span>Acesso a todas as modalidades</li>
+            <li><span data-icon="check" data-icon-size="15"></span>Acesso completo à musculação</li>
             <li><span data-icon="check" data-icon-size="15"></span>Acompanhamento de professores</li>
             <li><span data-icon="check" data-icon-size="15"></span>Área do aluno com sistema XP</li>
             <li><span data-icon="check" data-icon-size="15"></span>Grade de aulas em tempo real</li>
