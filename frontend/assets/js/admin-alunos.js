@@ -97,7 +97,7 @@ document.getElementById('alunos-body').addEventListener('click', async (ev) => {
   // Matricular / Renovar
   const btnMat = ev.target.closest('[data-mat-id]');
   if (btnMat) {
-    await abrirDialogMatricula(btnMat);
+    await abrirDialogMatricula(btnMat.dataset.matId, btnMat.dataset.matNome, btnMat.dataset.matMatriculaId || '');
     return;
   }
 
@@ -135,11 +135,7 @@ const inputMatriculaId = document.getElementById('mat-matricula-id');
 
 document.getElementById('btn-dialog-cancel').addEventListener('click', () => dialog.close());
 
-async function abrirDialogMatricula(btn) {
-  const usuarioId = btn.dataset.matId;
-  const nome = btn.dataset.matNome;
-  const matriculaId = btn.dataset.matMatriculaId || '';
-
+async function abrirDialogMatricula(usuarioId, nome, matriculaId = '') {
   document.getElementById('dialog-titulo').textContent = matriculaId
     ? `Renovar matrícula: ${nome}`
     : `Matricular: ${nome}`;
@@ -193,3 +189,60 @@ document.getElementById('busca-aluno').addEventListener('input', debounce((ev) =
 }));
 
 carregarAlunos();
+
+function gerarSenhaTemp() {
+  const letras = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz';
+  const numeros = '23456789';
+  let senha = '';
+  for (let i = 0; i < 6; i++) senha += letras[Math.floor(Math.random() * letras.length)];
+  for (let i = 0; i < 4; i++) senha += numeros[Math.floor(Math.random() * numeros.length)];
+  return senha;
+}
+
+const dialogNovoCliente = document.getElementById('dialog-novo-cliente');
+const formNovoCliente = document.getElementById('form-novo-cliente');
+const inputNcNome = document.getElementById('nc-nome');
+const inputNcEmail = document.getElementById('nc-email');
+const inputNcTelefone = document.getElementById('nc-telefone');
+const inputNcSenha = document.getElementById('nc-senha');
+
+document.getElementById('btn-novo-cliente').addEventListener('click', () => {
+  formNovoCliente.reset();
+  inputNcSenha.value = gerarSenhaTemp();
+  dialogNovoCliente.showModal();
+});
+
+document.getElementById('btn-nc-cancel').addEventListener('click', () => dialogNovoCliente.close());
+
+document.getElementById('btn-nc-copiar-senha').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(inputNcSenha.value);
+    toast('Senha copiada.', 'success');
+  } catch {
+    toast('Não foi possível copiar. Copie manualmente.', 'error');
+  }
+});
+
+formNovoCliente.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const btnConfirm = document.getElementById('btn-nc-confirm');
+  btnConfirm.disabled = true;
+  btnConfirm.textContent = 'Cadastrando...';
+
+  try {
+    const { user } = await api.post('/api/auth/registro', {
+      nome: inputNcNome.value.trim(),
+      email: inputNcEmail.value.trim(),
+      senha: inputNcSenha.value,
+      telefone: inputNcTelefone.value.trim(),
+    });
+    dialogNovoCliente.close();
+    toast(`${user.nome} cadastrado! Agora escolha o plano.`, 'success');
+    await abrirDialogMatricula(user.id, user.nome, '');
+  } catch (err) {
+    toast(err.message || 'Erro ao cadastrar cliente.', 'error');
+  } finally {
+    btnConfirm.disabled = false;
+    btnConfirm.textContent = 'Cadastrar e matricular';
+  }
+});
