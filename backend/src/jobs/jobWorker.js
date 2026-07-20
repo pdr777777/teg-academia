@@ -268,18 +268,13 @@ async function executarJobsPendentes() {
   }
 }
 
-async function catracaEstaAtiva() {
-  const { rows: [{ catraca_ativa }] } = await pool.query('SELECT catraca_ativa FROM configuracoes WHERE id = 1');
-  return catraca_ativa;
-}
-
 async function processarNovosAcessosSeAtivo() {
-  if (!(await catracaEstaAtiva())) return;
+  if (!(await catracaService.estaAtiva())) return;
   await catracaService.processarNovosAcessos();
 }
 
 async function reconciliarSeAtivo() {
-  if (!(await catracaEstaAtiva())) return;
+  if (!(await catracaService.estaAtiva())) return;
   await catracaService.reconciliar();
 }
 

@@ -15,6 +15,14 @@ function clienteFalso() {
   };
 }
 
+// sincronizarAluno/liberarAcesso/bloquearAcesso agora fazem no-op quando
+// catraca_ativa = FALSE. A maioria dos testes assume o comportamento ativo
+// (default TRUE da migration), então garantimos o estado independentemente
+// da ordem de execução de outros arquivos de teste.
+beforeAll(async () => {
+  await pool.query('UPDATE configuracoes SET catraca_ativa = TRUE WHERE id = 1');
+});
+
 describe('garantirEstruturaBase', () => {
   test('cria grupo, regra, horário e vínculos quando nada existe ainda', async () => {
     const client = clienteFalso();
@@ -374,6 +382,82 @@ describe('reconciliar', () => {
 
     await pool.query('DELETE FROM matriculas WHERE id = $1', [matricula.id]);
     await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
+    await limpar(aluno.id);
+  });
+});
+
+describe('kill switch — catraca_ativa = FALSE torna as escritas no-op', () => {
+  async function limpar(usuarioId) {
+    await pool.query('DELETE FROM catraca_usuarios WHERE usuario_id = $1', [usuarioId]);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [usuarioId]);
+  }
+
+  beforeEach(async () => {
+    await pool.query('UPDATE configuracoes SET catraca_ativa = FALSE WHERE id = 1');
+  });
+
+  afterEach(async () => {
+    await pool.query('UPDATE configuracoes SET catraca_ativa = TRUE WHERE id = 1');
+  });
+
+  test('estaAtiva reflete o flag', async () => {
+    expect(await catracaService.estaAtiva()).toBe(false);
+    await pool.query('UPDATE configuracoes SET catraca_ativa = TRUE WHERE id = 1');
+    expect(await catracaService.estaAtiva()).toBe(true);
+  });
+
+  test('sincronizarAluno não fala com a catraca nem grava mapeamento quando desligada', async () => {
+    const client = clienteFalso();
+    catracasConfiguradas.mockReturnValue([client]);
+    const aluno = await criarUsuario({ nome: 'Aluno Kill Sync' });
+
+    await catracaService.sincronizarAluno(aluno.id);
+
+    expect(client.createObjects).not.toHaveBeenCalled();
+    expect(client.loadObjects).not.toHaveBeenCalled();
+    const { rows } = await pool.query('SELECT * FROM catraca_usuarios WHERE usuario_id = $1', [aluno.id]);
+    expect(rows).toHaveLength(0);
+
+    await limpar(aluno.id);
+  });
+
+  test('liberarAcesso não vincula grupo nem marca grupo_ativo quando desligada', async () => {
+    const client = clienteFalso();
+    client.loadObjects = jest.fn(async (object) => (object === 'groups' ? [{ id: 1, name: 'TEG-ativos' }] : []));
+    catracasConfiguradas.mockReturnValue([client]);
+
+    const aluno = await criarUsuario({ nome: 'Aluno Kill Liberar' });
+    await pool.query(
+      `INSERT INTO catraca_usuarios (usuario_id, catraca, catraca_user_id, grupo_ativo) VALUES ($1, 'catraca1', 700, FALSE)`,
+      [aluno.id]
+    );
+
+    await catracaService.liberarAcesso(aluno.id);
+
+    expect(client.createObjects).not.toHaveBeenCalled();
+    const { rows: [mapeamento] } = await pool.query('SELECT grupo_ativo FROM catraca_usuarios WHERE usuario_id = $1', [aluno.id]);
+    expect(mapeamento.grupo_ativo).toBe(false);
+
+    await limpar(aluno.id);
+  });
+
+  test('bloquearAcesso não remove vínculo nem mexe em grupo_ativo quando desligada', async () => {
+    const client = clienteFalso();
+    client.loadObjects = jest.fn(async (object) => (object === 'groups' ? [{ id: 1, name: 'TEG-ativos' }] : []));
+    catracasConfiguradas.mockReturnValue([client]);
+
+    const aluno = await criarUsuario({ nome: 'Aluno Kill Bloquear' });
+    await pool.query(
+      `INSERT INTO catraca_usuarios (usuario_id, catraca, catraca_user_id, grupo_ativo) VALUES ($1, 'catraca1', 701, TRUE)`,
+      [aluno.id]
+    );
+
+    await catracaService.bloquearAcesso(aluno.id);
+
+    expect(client.destroyObjects).not.toHaveBeenCalled();
+    const { rows: [mapeamento] } = await pool.query('SELECT grupo_ativo FROM catraca_usuarios WHERE usuario_id = $1', [aluno.id]);
+    expect(mapeamento.grupo_ativo).toBe(true);
+
     await limpar(aluno.id);
   });
 });

@@ -311,11 +311,11 @@ describe('processarVencimentos — bloqueio automático na catraca', () => {
 
 describe('startJobWorker — intervalos da catraca', () => {
   test('processarNovosAcessos e reconciliar são invocáveis independentemente do ciclo de 5min', async () => {
+    catracaService.estaAtiva.mockResolvedValue(true);
     catracaService.processarNovosAcessos.mockResolvedValue(undefined);
     catracaService.reconciliar.mockResolvedValue(undefined);
 
     const { processarNovosAcessosSeAtivo, reconciliarSeAtivo } = require('./jobWorker');
-    await pool.query('UPDATE configuracoes SET catraca_ativa = TRUE WHERE id = 1');
 
     await processarNovosAcessosSeAtivo();
     expect(catracaService.processarNovosAcessos).toHaveBeenCalled();
@@ -327,7 +327,9 @@ describe('startJobWorker — intervalos da catraca', () => {
   test('não chama processarNovosAcessos nem reconciliar quando catraca_ativa é falso', async () => {
     catracaService.processarNovosAcessos.mockClear();
     catracaService.reconciliar.mockClear();
-    await pool.query('UPDATE configuracoes SET catraca_ativa = FALSE WHERE id = 1');
+    // O gate agora mora em catracaService.estaAtiva (fronteira do serviço);
+    // aqui o serviço está mockado, então controlamos o flag pelo mock.
+    catracaService.estaAtiva.mockResolvedValue(false);
 
     const { processarNovosAcessosSeAtivo, reconciliarSeAtivo } = require('./jobWorker');
     await processarNovosAcessosSeAtivo();
@@ -336,7 +338,7 @@ describe('startJobWorker — intervalos da catraca', () => {
     expect(catracaService.processarNovosAcessos).not.toHaveBeenCalled();
     expect(catracaService.reconciliar).not.toHaveBeenCalled();
 
-    await pool.query('UPDATE configuracoes SET catraca_ativa = TRUE WHERE id = 1');
+    catracaService.estaAtiva.mockResolvedValue(true);
   });
 });
 

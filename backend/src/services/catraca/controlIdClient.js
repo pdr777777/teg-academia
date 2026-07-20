@@ -2,6 +2,8 @@ class CatracaOfflineError extends Error {}
 class CatracaAuthError extends Error {}
 
 const TIMEOUT_MS = 5000;
+// Upload de foto é payload maior que as chamadas JSON — orçamento mais generoso.
+const IMAGE_TIMEOUT_MS = 15000;
 
 function criarClienteCatraca({ nome, host, porta, usuario, senha }) {
   const baseUrl = `http://${host}:${porta}`;
@@ -73,11 +75,22 @@ function criarClienteCatraca({ nome, host, porta, usuario, senha }) {
     url.searchParams.set('session', session);
     url.searchParams.set('user_id', userId);
 
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/octet-stream' },
-      body: imagemBuffer,
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), IMAGE_TIMEOUT_MS);
+
+    let res;
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: imagemBuffer,
+        signal: controller.signal,
+      });
+    } catch (err) {
+      throw new CatracaOfflineError(`Catraca ${nome} inacessível ao enviar foto: ${err.message}`);
+    } finally {
+      clearTimeout(timeoutId);
+    }
     if (!res.ok) throw new Error(`Falha ao enviar foto pra catraca ${nome}: ${res.status}`);
   }
 

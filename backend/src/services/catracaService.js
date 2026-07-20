@@ -9,6 +9,18 @@ const GRUPO_NOME = 'TEG-ativos';
 const REGRA_NOME = 'TEG-liberado';
 const HORARIO_NOME = 'TEG-sempre';
 
+// Fotos são payloads maiores que as chamadas JSON da API (5s no controlIdClient);
+// dá mais orçamento pro download da foto do host externo antes de abortar.
+const FOTO_TIMEOUT_MS = 15000;
+
+// Kill switch global: com configuracoes.catraca_ativa = false toda a integração
+// vira no-op sem redeploy. Gate na fronteira do serviço garante que qualquer
+// caller — atual ou futuro — respeite o flag sem precisar checar por conta própria.
+async function estaAtiva() {
+  const { rows: [{ catraca_ativa }] } = await pool.query('SELECT catraca_ativa FROM configuracoes WHERE id = 1');
+  return catraca_ativa;
+}
+
 async function garantirGrupo(client) {
   const existentes = await client.loadObjects('groups', { fields: ['id', 'name'], where: { groups: { name: GRUPO_NOME } } });
   if (existentes[0]) return existentes[0].id;
@@ -58,6 +70,8 @@ async function garantirEstruturaBase(client) {
 }
 
 async function sincronizarAluno(usuarioId) {
+  if (!(await estaAtiva())) return;
+
   const { rows: [aluno] } = await pool.query('SELECT id, nome, foto_url FROM usuarios WHERE id = $1', [usuarioId]);
   if (!aluno) throw new Error(`Usuário ${usuarioId} não encontrado`);
 
@@ -82,8 +96,15 @@ async function sincronizarAluno(usuarioId) {
     let faceStatus = mapeamento?.face_status || 'pendente_presencial';
     if (aluno.foto_url && faceStatus !== 'sincronizado') {
       try {
-        const resposta = await fetch(aluno.foto_url);
-        const buffer = Buffer.from(await resposta.arrayBuffer());
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), FOTO_TIMEOUT_MS);
+        let buffer;
+        try {
+          const resposta = await fetch(aluno.foto_url, { signal: controller.signal });
+          buffer = Buffer.from(await resposta.arrayBuffer());
+        } finally {
+          clearTimeout(timeoutId);
+        }
         await client.setUserImage(catracaUserId, buffer);
         faceStatus = 'sincronizado';
       } catch (err) {
@@ -103,6 +124,8 @@ async function sincronizarAluno(usuarioId) {
 }
 
 async function liberarAcesso(usuarioId) {
+  if (!(await estaAtiva())) return;
+
   for (const client of catracasConfiguradas()) {
     const { rows: [mapeamento] } = await pool.query(
       'SELECT catraca_user_id FROM catraca_usuarios WHERE usuario_id = $1 AND catraca = $2',
@@ -120,6 +143,8 @@ async function liberarAcesso(usuarioId) {
 }
 
 async function bloquearAcesso(usuarioId) {
+  if (!(await estaAtiva())) return;
+
   for (const client of catracasConfiguradas()) {
     const { rows: [mapeamento] } = await pool.query(
       'SELECT catraca_user_id FROM catraca_usuarios WHERE usuario_id = $1 AND catraca = $2',
@@ -217,9 +242,13 @@ async function verificarSaude() {
 async function reconciliar() {
   for (const client of catracasConfiguradas()) {
     try {
+      // "Deveria ter acesso" tem que casar com o que processarVencimentos trata
+      // como bloqueável: só 'suspensa'/'cancelada' perdem acesso. 'vencida' está
+      // no período de tolerância (grupo_ativo herdado) e mantém acesso até virar
+      // 'suspensa' — por isso IN ('ativa', 'vencida') e não só 'ativa'.
       const { rows: mapeamentos } = await pool.query(
         `SELECT cu.usuario_id, cu.catraca_user_id, cu.grupo_ativo,
-                EXISTS (SELECT 1 FROM matriculas m WHERE m.usuario_id = cu.usuario_id AND m.status = 'ativa') AS deveria_estar_ativo
+                EXISTS (SELECT 1 FROM matriculas m WHERE m.usuario_id = cu.usuario_id AND m.status IN ('ativa', 'vencida')) AS deveria_estar_ativo
          FROM catraca_usuarios cu WHERE cu.catraca = $1`,
         [client.nome]
       );
@@ -256,6 +285,7 @@ async function reconciliar() {
 }
 
 module.exports = {
+  estaAtiva,
   garantirGrupo,
   garantirEstruturaBase,
   sincronizarAluno,
