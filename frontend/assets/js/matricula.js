@@ -144,7 +144,7 @@ function mostrarSucesso(user, plano) {
   document.getElementById('resumo-valor').textContent = `${brl(plano.preco_mensal)}/mês`;
 
   const msg = encodeURIComponent(
-    `Olá! Acabei de me matricular no plano ${plano.nome} da Academia TEG (${brl(plano.preco_mensal)}/mês) pelo site, em nome de ${user.nome}. Quero finalizar o pagamento.`
+    `Olá! Acabei de me cadastrar no site da Academia TEG em nome de ${user.nome}, para o plano ${plano.nome} (${brl(plano.preco_mensal)}/mês). Quero finalizar o pagamento pra ativar minha matrícula.`
   );
   document.getElementById('btn-sucesso-whatsapp').href = `https://wa.me/${WHATSAPP_NUMERO}?text=${msg}`;
 
@@ -187,7 +187,7 @@ document.getElementById('form-matricula').addEventListener('submit', async (ev) 
     return;
   }
 
-  setBtnLoading(btn, 'Confirmando...');
+  setBtnLoading(btn, 'Enviando...');
 
   try {
     const { token, user } = await api.post('/api/auth/registro', {
@@ -195,18 +195,17 @@ document.getElementById('form-matricula').addEventListener('submit', async (ev) 
       email: form.email.value.trim(),
       senha,
       telefone: form.telefone.value.trim(),
+      cpf: form.cpf.value.trim(),
       link_indicacao_origem: params.get('ref') || undefined,
     });
     localStorage.setItem('token', token);
 
-    await api.post('/api/matriculas', { plano_id: state.planoSelecionado.id });
-
     mostrarSucesso(user, state.planoSelecionado);
   } catch (err) {
     if (err.status === 409) {
-      toast('Esse e-mail já tem uma conta na TEG. Faça login pra continuar sua matrícula.', 'error');
+      toast('Esse e-mail ou CPF já tem uma conta na TEG. Faça login pra continuar.', 'error');
     } else {
-      toast(err.message || 'Erro ao confirmar matrícula. Tente novamente.', 'error');
+      toast(err.message || 'Erro ao enviar seu cadastro. Tente novamente.', 'error');
     }
     resetBtnLoading(btn);
   }

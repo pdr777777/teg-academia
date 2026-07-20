@@ -48,6 +48,10 @@
           <input type="text" id="mat-nome" name="nome" required autocomplete="name" placeholder="Seu nome completo" />
         </div>
         <div class="field">
+          <label for="mat-cpf">CPF</label>
+          <input type="text" id="mat-cpf" name="cpf" required inputmode="numeric" maxlength="14" placeholder="000.000.000-00" />
+        </div>
+        <div class="field">
           <label for="mat-email">E-mail</label>
           <input type="email" id="mat-email" name="email" required autocomplete="email" placeholder="seu@email.com" />
         </div>
@@ -63,16 +67,16 @@
           <label for="mat-confirmar-senha">Confirmar senha</label>
           <input type="password" id="mat-confirmar-senha" name="confirmar_senha" required autocomplete="new-password" placeholder="Repita a senha" />
         </div>
-        <p class="text-muted" style="font-size:.8rem;margin:-.3rem 0 1.25rem">Essa senha dá acesso à sua área do aluno depois da matrícula.</p>
-        <button type="submit" class="btn btn-primary btn-block">Confirmar matrícula</button>
+        <p class="text-muted" style="font-size:.8rem;margin:-.3rem 0 1.25rem">Essa senha já dá acesso à sua área do aluno assim que você enviar o cadastro.</p>
+        <button type="submit" class="btn btn-primary btn-block">Enviar cadastro</button>
       </form>
       <p class="auth-links" style="max-width:480px">Já tem conta? <a href="login.html">Fazer login</a></p>
     </section>
 
     <section id="step-sucesso" class="step-section" style="display:none;text-align:center">
       <div class="sucesso-icon">✓</div>
-      <h1>Matrícula confirmada!</h1>
-      <p class="text-muted" style="margin:0.5rem 0 2rem">Seu plano <strong id="sucesso-plano-nome"></strong> já está reservado. Agora é só finalizar o pagamento.</p>
+      <h1>Cadastro enviado!</h1>
+      <p class="text-muted" style="margin:0.5rem 0 2rem">Seus dados foram registrados para o plano <strong id="sucesso-plano-nome"></strong>. Falta só finalizar o pagamento pra sua matrícula ser ativada.</p>
 
       <div class="card resumo-card" style="max-width:480px;margin:0 auto 1.5rem;text-align:left">
         <div class="resumo-linha"><span>Plano</span><strong id="resumo-plano"></strong></div>
@@ -92,7 +96,7 @@
           <div class="row gap-sm"><span data-icon="map-pin" data-icon-size="16" class="text-primary"></span><span>R. Assunção, 1946, Vila Morumbi, Campo Grande - MS</span></div>
           <div class="row gap-sm" style="margin-top:.6rem"><span data-icon="clock" data-icon-size="16" class="text-primary"></span><span>Aberto todos os dias, das 06h às 23h</span></div>
           <div class="row gap-sm" style="margin-top:.6rem"><span data-icon="phone" data-icon-size="16" class="text-primary"></span><span>(67) 99300-9296</span></div>
-          <p class="text-muted" style="margin-top:.9rem;font-size:.85rem">Sua matrícula já está pré-registrada — é só passar aí pra finalizar o pagamento.</p>
+          <p class="text-muted" style="margin-top:.9rem;font-size:.85rem">Seu cadastro já está registrado — é só passar aí pra finalizar o pagamento e ativar sua matrícula.</p>
         </div>
 
         <a href="dashboard.html" class="btn btn-ghost btn-block" style="margin-top:.75rem">Ir para minha área</a>
