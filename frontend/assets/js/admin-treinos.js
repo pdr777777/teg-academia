@@ -121,7 +121,7 @@ async function carregarAlunosParaAtribuir(busca) {
   lista.innerHTML = '<div class="loading-row"><span class="spinner" style="width:18px;height:18px"></span></div>';
   try {
     const query = busca ? `?busca=${encodeURIComponent(busca)}` : '';
-    const alunos = await api.get(`/api/admin/alunos${query}`);
+    const { alunos } = await api.get(`/api/admin/alunos${query}`);
     lista.innerHTML = alunos.length
       ? alunos.map((a) => `
           <div class="aluno-row-sel${alunoSelecionadoId === a.id ? ' selecionado' : ''}" data-aluno-id="${a.id}">

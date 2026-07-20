@@ -138,26 +138,36 @@ router.get('/financeiro', authMiddleware, requireRole('dono'), async (req, res, 
   }
 });
 
-// GET /api/admin/alunos — admin/dono usam pra gestão completa, professor usa só pra buscar aluno e atribuir treino
+// GET /api/admin/alunos — admin/dono usam pra gestão completa, professor usa só pra buscar aluno e atribuir treino.
+// Paginado: com 1700+ alunos importados da CloudGym, devolver tudo de uma vez
+// não é opção. Retorna { alunos, total, page, limit } pro front montar a paginação.
 router.get('/alunos', authMiddleware, requireRole('admin', 'dono', 'professor'), async (req, res, next) => {
   try {
-    const { busca, page = 1, limit = 20 } = req.query;
+    const { busca } = req.query;
+    const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 100);
+    const page = Math.max(Number(req.query.page) || 1, 1);
     const offset = (page - 1) * limit;
-    const params = [limit, offset];
-    let where = "WHERE u.role = 'aluno'";
-    if (busca) where += ` AND (u.nome ILIKE $${params.push('%' + busca + '%')} OR u.email ILIKE $${params.push('%' + busca + '%')})`;
 
-    const { rows } = await pool.query(
+    const paramsBusca = [];
+    let where = "WHERE u.role = 'aluno'";
+    if (busca) where += ` AND (u.nome ILIKE $${paramsBusca.push('%' + busca + '%')} OR u.email ILIKE $${paramsBusca.push('%' + busca + '%')})`;
+
+    const { rows: [{ total }] } = await pool.query(
+      `SELECT COUNT(*)::int AS total FROM usuarios u ${where}`,
+      paramsBusca
+    );
+
+    const { rows: alunos } = await pool.query(
       `SELECT u.id, u.nome, u.email, u.telefone, u.ativo, u.xp, u.sequencia_atual, u.created_at, u.controlid_user_id, u.origem_externa,
               m.id as matricula_id, m.status as matricula_status, m.data_vencimento, p.nome as plano_nome
        FROM usuarios u
        LEFT JOIN matriculas m ON m.usuario_id = u.id AND m.status = 'ativa'
        LEFT JOIN planos p ON p.id = m.plano_id
        ${where}
-       ORDER BY u.created_at DESC LIMIT $1 OFFSET $2`,
-      params
+       ORDER BY u.created_at DESC LIMIT $${paramsBusca.length + 1} OFFSET $${paramsBusca.length + 2}`,
+      [...paramsBusca, limit, offset]
     );
-    res.json(rows);
+    res.json({ alunos, total, page, limit });
   } catch (err) {
     next(err);
   }

@@ -1,4 +1,6 @@
 let planosCache = null;
+const ALUNOS_POR_PAGINA = 30;
+let paginaAtual = 1;
 
 // Origem externa: aluno que entra pela academia mas não tem matrícula cobrada
 // direto pela TEG (Gympass/Totalpass, personal, parceria, convênio...) — vem
@@ -18,13 +20,42 @@ async function carregarPlanos() {
   return planosCache;
 }
 
-async function carregarAlunos(busca = '') {
+function renderPaginacao(total, page, limit) {
+  const nav = document.getElementById('alunos-paginacao');
+  if (!nav) return;
+  const totalPaginas = Math.max(Math.ceil(total / limit), 1);
+  if (total === 0) { nav.innerHTML = ''; return; }
+
+  const inicio = (page - 1) * limit + 1;
+  const fim = Math.min(page * limit, total);
+  nav.innerHTML = `
+    <span class="text-muted" style="font-size:.83rem">Mostrando ${inicio}–${fim} de ${total} alunos</span>
+    <div style="display:flex;gap:.4rem;align-items:center">
+      <button class="btn btn-ghost btn-sm" id="btn-pagina-anterior" ${page <= 1 ? 'disabled' : ''}>Anterior</button>
+      <span class="text-muted" style="font-size:.83rem">Página ${page} de ${totalPaginas}</span>
+      <button class="btn btn-ghost btn-sm" id="btn-pagina-proxima" ${page >= totalPaginas ? 'disabled' : ''}>Próxima</button>
+    </div>
+  `;
+  document.getElementById('btn-pagina-anterior')?.addEventListener('click', () => {
+    paginaAtual--;
+    carregarAlunos(document.getElementById('busca-aluno').value.trim(), paginaAtual);
+  });
+  document.getElementById('btn-pagina-proxima')?.addEventListener('click', () => {
+    paginaAtual++;
+    carregarAlunos(document.getElementById('busca-aluno').value.trim(), paginaAtual);
+  });
+}
+
+async function carregarAlunos(busca = '', page = 1) {
+  paginaAtual = page;
   const body = document.getElementById('alunos-body');
   body.innerHTML = '<tr><td colspan="7" class="loading-row"><span class="spinner"></span></td></tr>';
 
   try {
-    const query = busca ? `?busca=${encodeURIComponent(busca)}` : '';
-    const alunos = await api.get(`/api/admin/alunos${query}`);
+    const params = new URLSearchParams({ page, limit: ALUNOS_POR_PAGINA });
+    if (busca) params.set('busca', busca);
+    const { alunos, total, limit } = await api.get(`/api/admin/alunos?${params}`);
+    renderPaginacao(total, page, limit);
 
     body.innerHTML = alunos.length
       ? alunos.map((a) => `
@@ -128,7 +159,7 @@ document.getElementById('alunos-body').addEventListener('click', async (ev) => {
     try {
       await api.patch(`/api/admin/alunos/${id}/catraca`, { controlid_user_id: novoValor.trim() || null });
       toast(novoValor.trim() ? `${nome} vinculado à catraca.` : `${nome} desvinculado da catraca.`, 'success');
-      carregarAlunos(document.getElementById('busca-aluno').value.trim());
+      carregarAlunos(document.getElementById('busca-aluno').value.trim(), paginaAtual);
     } catch (err) {
       toast(err.message || 'Erro ao vincular catraca.', 'error');
     } finally {
@@ -191,7 +222,7 @@ formMat.addEventListener('submit', async (ev) => {
       toast('Aluno matriculado com sucesso!', 'success');
     }
     dialog.close();
-    carregarAlunos(document.getElementById('busca-aluno').value.trim());
+    carregarAlunos(document.getElementById('busca-aluno').value.trim(), paginaAtual);
   } catch (err) {
     toast(err.message || 'Erro ao salvar matrícula.', 'error');
   } finally {
@@ -201,7 +232,7 @@ formMat.addEventListener('submit', async (ev) => {
 });
 
 document.getElementById('busca-aluno').addEventListener('input', debounce((ev) => {
-  carregarAlunos(ev.target.value.trim());
+  carregarAlunos(ev.target.value.trim(), 1);
 }));
 
 carregarAlunos();
