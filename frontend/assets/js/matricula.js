@@ -1,7 +1,8 @@
 const params = new URLSearchParams(window.location.search);
-const state = { planos: [] };
+const state = { planos: [], planoSelecionado: null };
 
 const WHATSAPP_NUMERO = '5567993009296';
+const STEPS = ['plano', 'dados', 'sucesso'];
 
 const PLANOS_FALLBACK = [
   { id: 1, nome: 'Mensal', preco_mensal: 119.90, duracao_dias: 30, descricao: 'Cartão de débito ou crédito (R$129,90), ou Pix/dinheiro com desconto de 7,6%' },
@@ -11,6 +12,13 @@ const PLANOS_FALLBACK = [
 
 function brl(valor) {
   return 'R$' + Number(valor).toFixed(2).replace('.', ',');
+}
+
+function slugPlano(plano) {
+  const d = plano.duracao_dias;
+  if (d <= 30) return 'mensal';
+  if (d <= 90) return 'trimestral';
+  return 'anual';
 }
 
 function getPlanMeta(plano) {
@@ -53,17 +61,25 @@ function getPlanMeta(plano) {
   };
 }
 
-function linkWhatsapp(plano) {
-  const ref = params.get('ref');
-  const msg =
-    `Olá! Tenho interesse no plano ${plano.nome} da Academia TEG ` +
-    `(${brl(plano.preco_mensal)}/mês). Pode me ajudar a finalizar minha matrícula?` +
-    (ref ? ` (indicação: ${ref})` : '');
-  return `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(msg)}`;
+function setStep(step) {
+  STEPS.forEach((s) => { document.getElementById(`step-${s}`).style.display = s === step ? '' : 'none'; });
+  document.querySelectorAll('.step-item').forEach((el) => {
+    el.classList.remove('active', 'done');
+    if (STEPS.indexOf(el.dataset.step) < STEPS.indexOf(step)) el.classList.add('done');
+    if (el.dataset.step === step) el.classList.add('active');
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function selecionarPlano(plano) {
+  state.planoSelecionado = plano;
+  document.getElementById('plano-resumo-nome').textContent = plano.nome;
+  document.getElementById('plano-resumo-preco').textContent = `${brl(plano.preco_mensal)}/mês`;
+  setStep('dados');
 }
 
 function renderPlanos(grid) {
-  grid.innerHTML = state.planos.map((p) => {
+  grid.innerHTML = state.planos.map((p, i) => {
     const meta = getPlanMeta(p);
     return `
       <div class="plano-card${meta.destaque ? ' plano-destaque' : ''}" data-reveal>
@@ -76,12 +92,15 @@ function renderPlanos(grid) {
         <ul class="plano-features">
           ${meta.features.map((f) => `<li><span data-icon="check" data-icon-size="14"></span>${f}</li>`).join('')}
         </ul>
-        <a href="${linkWhatsapp(p)}" target="_blank" rel="noopener" class="btn ${meta.destaque ? 'btn-primary' : 'btn-outline'} btn-block plano-cta">
-          <span data-icon="whatsapp" data-icon-size="16"></span>Escolher este plano
-        </a>
+        <button type="button" class="btn ${meta.destaque ? 'btn-primary' : 'btn-outline'} btn-block plano-cta" data-plano-index="${i}">
+          Escolher este plano
+        </button>
       </div>
     `;
   }).join('');
+  grid.querySelectorAll('.plano-cta').forEach((btn) => {
+    btn.addEventListener('click', () => selecionarPlano(state.planos[Number(btn.dataset.planoIndex)]));
+  });
   initReveal();
   fillIcons();
 }
@@ -95,6 +114,12 @@ async function carregarPlanos() {
     state.planos = PLANOS_FALLBACK;
   }
   renderPlanos(grid);
+
+  const planoQuery = params.get('plano');
+  if (planoQuery) {
+    const alvo = state.planos.find((p) => slugPlano(p) === planoQuery);
+    if (alvo) selecionarPlano(alvo);
+  }
 }
 
 async function carregarBannerIndicacao() {
@@ -112,6 +137,79 @@ async function carregarBannerIndicacao() {
     // link inválido ou indicador inativo — segue o fluxo normal sem banner
   }
 }
+
+function mostrarSucesso(user, plano) {
+  document.getElementById('sucesso-plano-nome').textContent = plano.nome;
+  document.getElementById('resumo-plano').textContent = plano.nome;
+  document.getElementById('resumo-valor').textContent = `${brl(plano.preco_mensal)}/mês`;
+
+  const msg = encodeURIComponent(
+    `Olá! Acabei de me cadastrar no site da Academia TEG em nome de ${user.nome}, para o plano ${plano.nome} (${brl(plano.preco_mensal)}/mês). Quero finalizar o pagamento pra ativar minha matrícula.`
+  );
+  document.getElementById('btn-sucesso-whatsapp').href = `https://wa.me/${WHATSAPP_NUMERO}?text=${msg}`;
+
+  const recepcaoInfo = document.getElementById('recepcao-info');
+  recepcaoInfo.style.display = 'none';
+  document.getElementById('btn-sucesso-recepcao').textContent = 'Prefiro finalizar na recepção';
+
+  setStep('sucesso');
+}
+
+document.getElementById('btn-voltar-plano').addEventListener('click', () => setStep('plano'));
+
+document.getElementById('btn-sucesso-recepcao').addEventListener('click', (ev) => {
+  const info = document.getElementById('recepcao-info');
+  const mostrar = info.style.display === 'none';
+  info.style.display = mostrar ? 'block' : 'none';
+  ev.currentTarget.textContent = mostrar ? 'Ocultar informações' : 'Prefiro finalizar na recepção';
+});
+
+document.getElementById('form-matricula').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const form = ev.target;
+  const btn = form.querySelector('button[type="submit"]');
+
+  if (!state.planoSelecionado) {
+    toast('Selecione um plano antes de continuar.', 'error');
+    setStep('plano');
+    return;
+  }
+
+  const senha = form.senha.value;
+  const confirmarSenha = form.confirmar_senha.value;
+
+  if (senha.length < 8 || !/[a-zA-Z]/.test(senha) || !/[0-9]/.test(senha)) {
+    toast('A senha precisa ter no mínimo 8 caracteres, com letra e número.', 'error');
+    return;
+  }
+  if (senha !== confirmarSenha) {
+    toast('As senhas não coincidem.', 'error');
+    return;
+  }
+
+  setBtnLoading(btn, 'Enviando...');
+
+  try {
+    const { token, user } = await api.post('/api/auth/registro', {
+      nome: form.nome.value.trim(),
+      email: form.email.value.trim(),
+      senha,
+      telefone: form.telefone.value.trim(),
+      cpf: form.cpf.value.trim(),
+      link_indicacao_origem: params.get('ref') || undefined,
+    });
+    localStorage.setItem('token', token);
+
+    mostrarSucesso(user, state.planoSelecionado);
+  } catch (err) {
+    if (err.status === 409) {
+      toast('Esse e-mail ou CPF já tem uma conta na TEG. Faça login pra continuar.', 'error');
+    } else {
+      toast(err.message || 'Erro ao enviar seu cadastro. Tente novamente.', 'error');
+    }
+    resetBtnLoading(btn);
+  }
+});
 
 carregarBannerIndicacao();
 carregarPlanos();
