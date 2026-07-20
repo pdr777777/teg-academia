@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const pool = require('../config/db');
 const { catracasConfiguradas } = require('./catraca/config');
+const logger = require('../utils/logger');
 
 const GRUPO_NOME = 'TEG-ativos';
 const REGRA_NOME = 'TEG-liberado';
@@ -83,7 +84,8 @@ async function sincronizarAluno(usuarioId) {
         const buffer = Buffer.from(await resposta.arrayBuffer());
         await client.setUserImage(catracaUserId, buffer);
         faceStatus = 'sincronizado';
-      } catch {
+      } catch (err) {
+        logger.error('catraca.setUserImage falhou', { usuarioId, catraca: client.nome, erro: err.message });
         faceStatus = 'pendente_presencial';
       }
     }
