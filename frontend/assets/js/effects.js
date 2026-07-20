@@ -44,33 +44,6 @@
 
 
 /* ══════════════════════════════════════════════════
-   2. PARALLAX HERO (landonorris.com)
-   Hero visual floats up faster than hero copy,
-   creating depth as the user scrolls.
-   ══════════════════════════════════════════════════ */
-(function () {
-  var heroVisual = document.querySelector('.hero-visual');
-  var heroCopy   = document.querySelector('.hero-copy');
-  if (!heroVisual || !heroCopy) return;
-
-  var ticking = false;
-
-  window.addEventListener('scroll', function () {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(function () {
-      var y = window.scrollY;
-      // visual moves up faster (depth layer behind text)
-      heroVisual.style.transform = 'translateY(' + (y * -0.18) + 'px)';
-      // copy moves up slightly slower (feels closer to viewer)
-      heroCopy.style.transform   = 'translateY(' + (y * -0.08) + 'px)';
-      ticking = false;
-    });
-  }, { passive: true });
-})();
-
-
-/* ══════════════════════════════════════════════════
    3. 3D CARD TILT (lusion.co image hover style)
    Cards rotate on the pointer axes as you move
    the mouse — perspective depth effect.
