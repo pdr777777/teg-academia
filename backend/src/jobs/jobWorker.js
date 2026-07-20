@@ -1,6 +1,8 @@
 const pool = require('../config/db');
 const whatsapp = require('../services/whatsappService');
 const { getGatewayAdapter } = require('../services/gateway');
+const catracaService = require('../services/catracaService');
+const logger = require('../utils/logger');
 
 async function processarJob(job) {
   const { tipo, payload } = job;
@@ -220,14 +222,25 @@ async function processarVencimentos() {
   `);
 
   // 3. Vencidas além da tolerância configurada → suspensa
-  const { rows: [{ dias_tolerancia_bloqueio }] } = await pool.query(
-    'SELECT dias_tolerancia_bloqueio FROM configuracoes WHERE id = 1'
+  const { rows: [{ dias_tolerancia_bloqueio, catraca_ativa }] } = await pool.query(
+    'SELECT dias_tolerancia_bloqueio, catraca_ativa FROM configuracoes WHERE id = 1'
   );
-  await pool.query(
+  const { rows: suspensas } = await pool.query(
     `UPDATE matriculas SET status = 'suspensa', updated_at = NOW()
-     WHERE status = 'vencida' AND data_vencimento::date <= CURRENT_DATE - $1::int`,
+     WHERE status = 'vencida' AND data_vencimento::date <= CURRENT_DATE - $1::int
+     RETURNING usuario_id`,
     [dias_tolerancia_bloqueio]
   );
+
+  if (catraca_ativa) {
+    for (const { usuario_id } of suspensas) {
+      try {
+        await catracaService.bloquearAcesso(usuario_id);
+      } catch (err) {
+        logger.error('jobWorker: falha ao bloquear acesso na catraca', { usuarioId: usuario_id, erro: err.message });
+      }
+    }
+  }
 }
 
 async function executarJobsPendentes() {
@@ -255,6 +268,21 @@ async function executarJobsPendentes() {
   }
 }
 
+async function catracaEstaAtiva() {
+  const { rows: [{ catraca_ativa }] } = await pool.query('SELECT catraca_ativa FROM configuracoes WHERE id = 1');
+  return catraca_ativa;
+}
+
+async function processarNovosAcessosSeAtivo() {
+  if (!(await catracaEstaAtiva())) return;
+  await catracaService.processarNovosAcessos();
+}
+
+async function reconciliarSeAtivo() {
+  if (!(await catracaEstaAtiva())) return;
+  await catracaService.reconciliar();
+}
+
 function startJobWorker() {
   setInterval(async () => {
     try {
@@ -266,7 +294,26 @@ function startJobWorker() {
     }
   }, 5 * 60 * 1000); // a cada 5 minutos
 
+  setInterval(async () => {
+    try {
+      await processarNovosAcessosSeAtivo();
+    } catch (err) {
+      logger.error('jobWorker: erro no polling da catraca', { erro: err.message });
+    }
+  }, 45 * 1000); // a cada 45s — check-in precisa ser rápido
+
+  setInterval(async () => {
+    try {
+      await reconciliarSeAtivo();
+    } catch (err) {
+      logger.error('jobWorker: erro na reconciliação da catraca', { erro: err.message });
+    }
+  }, 24 * 60 * 60 * 1000); // 1x/dia
+
   console.log('⚙️  JobWorker iniciado');
 }
 
-module.exports = { startJobWorker, processarVencimentos, agendarAutomacoes, processarJob };
+module.exports = {
+  startJobWorker, processarVencimentos, agendarAutomacoes, processarJob,
+  processarNovosAcessosSeAtivo, reconciliarSeAtivo,
+};

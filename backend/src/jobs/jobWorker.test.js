@@ -3,10 +3,12 @@ jest.mock('../services/gateway', () => {
   const actual = jest.requireActual('../services/gateway');
   return { ...actual, getGatewayAdapter: jest.fn(actual.getGatewayAdapter) };
 });
+jest.mock('../services/catracaService');
 
 const pool = require('../config/db');
 const { criarUsuario, criarPlano, criarMatricula } = require('../testUtils/fixtures');
 const { getGatewayAdapter } = require('../services/gateway');
+const catracaService = require('../services/catracaService');
 const { processarVencimentos } = require('./jobWorker');
 const { agendarAutomacoes, processarJob } = require('./jobWorker');
 
@@ -280,6 +282,61 @@ describe('processarJob — novos tipos', () => {
       tipo: 'whatsapp_atraso',
       payload: { telefone: '67999999999', nome: 'Maria', dias_atraso: 3 },
     })).resolves.not.toThrow();
+  });
+});
+
+describe('processarVencimentos — bloqueio automático na catraca', () => {
+  test('chama bloquearAcesso pra cada matrícula que vira suspensa', async () => {
+    catracaService.bloquearAcesso.mockResolvedValue(undefined);
+
+    const user = await criarUsuario();
+    const plano = await criarPlano({ preco_mensal: 109.9, duracao_dias: 30 });
+    const matricula = await criarMatricula({
+      usuario_id: user.id, plano_id: plano.id, status: 'vencida',
+      data_vencimento: new Date(Date.now() - 10 * 86400000),
+    });
+    await pool.query('UPDATE configuracoes SET dias_tolerancia_bloqueio = 5 WHERE id = 1');
+
+    await processarVencimentos();
+
+    expect(catracaService.bloquearAcesso).toHaveBeenCalledWith(user.id);
+
+    await pool.query('DELETE FROM pagamentos WHERE matricula_id = $1', [matricula.id]);
+    await pool.query('DELETE FROM matriculas WHERE id = $1', [matricula.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [user.id]);
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
+    await pool.query('UPDATE configuracoes SET dias_tolerancia_bloqueio = 5 WHERE id = 1');
+  });
+});
+
+describe('startJobWorker — intervalos da catraca', () => {
+  test('processarNovosAcessos e reconciliar são invocáveis independentemente do ciclo de 5min', async () => {
+    catracaService.processarNovosAcessos.mockResolvedValue(undefined);
+    catracaService.reconciliar.mockResolvedValue(undefined);
+
+    const { processarNovosAcessosSeAtivo, reconciliarSeAtivo } = require('./jobWorker');
+    await pool.query('UPDATE configuracoes SET catraca_ativa = TRUE WHERE id = 1');
+
+    await processarNovosAcessosSeAtivo();
+    expect(catracaService.processarNovosAcessos).toHaveBeenCalled();
+
+    await reconciliarSeAtivo();
+    expect(catracaService.reconciliar).toHaveBeenCalled();
+  });
+
+  test('não chama processarNovosAcessos nem reconciliar quando catraca_ativa é falso', async () => {
+    catracaService.processarNovosAcessos.mockClear();
+    catracaService.reconciliar.mockClear();
+    await pool.query('UPDATE configuracoes SET catraca_ativa = FALSE WHERE id = 1');
+
+    const { processarNovosAcessosSeAtivo, reconciliarSeAtivo } = require('./jobWorker');
+    await processarNovosAcessosSeAtivo();
+    await reconciliarSeAtivo();
+
+    expect(catracaService.processarNovosAcessos).not.toHaveBeenCalled();
+    expect(catracaService.reconciliar).not.toHaveBeenCalled();
+
+    await pool.query('UPDATE configuracoes SET catraca_ativa = TRUE WHERE id = 1');
   });
 });
 
