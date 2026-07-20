@@ -8,15 +8,14 @@
 
 .admin-stat-cards .stat-card { display: flex; flex-direction: column; gap: 0.85rem; padding: 1.35rem 1.5rem; }
 .admin-stat-cards .stat-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  background: color-mix(in srgb, currentColor 14%, transparent);
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
   color: var(--color-primary);
 }
+.admin-stat-cards .stat-icon svg { color: inherit; }
 .admin-stat-cards strong { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em; }
 .admin-stat-cards span { font-size: 0.82rem; color: var(--color-muted); }
 
