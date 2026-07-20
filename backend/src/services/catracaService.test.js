@@ -1,7 +1,7 @@
 jest.mock('./catraca/config');
 const { catracasConfiguradas } = require('./catraca/config');
 const pool = require('../config/db');
-const { criarUsuario } = require('../testUtils/fixtures');
+const { criarUsuario, criarPlano, criarMatricula } = require('../testUtils/fixtures');
 const catracaService = require('./catracaService');
 
 function clienteFalso() {
@@ -259,5 +259,121 @@ describe('processarNovosAcessos', () => {
 
     await pool.query('DELETE FROM catraca_eventos WHERE id = $1', [evento.id]);
     await pool.query('DELETE FROM catraca_cursor WHERE catraca = $1', ['catraca1']);
+  });
+});
+
+describe('verificarSaude', () => {
+  test('marca online quando login funciona e offline quando falha', async () => {
+    const online = clienteFalso();
+    online.nome = 'catraca1';
+    const offline = clienteFalso();
+    offline.nome = 'catraca2';
+    offline.login = jest.fn().mockRejectedValue(new Error('timeout'));
+    catracasConfiguradas.mockReturnValue([online, offline]);
+
+    const resultado = await catracaService.verificarSaude();
+    expect(resultado).toEqual([
+      { catraca: 'catraca1', online: true },
+      { catraca: 'catraca2', online: false },
+    ]);
+  });
+});
+
+describe('reconciliar', () => {
+  async function limpar(usuarioId) {
+    await pool.query('DELETE FROM catraca_usuarios WHERE usuario_id = $1', [usuarioId]);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [usuarioId]);
+  }
+
+  test('re-sincroniza quando o usuário TEG sumiu da catraca (reset/exclusão manual)', async () => {
+    const aluno = await criarUsuario({ nome: 'Aluno Reconciliar' });
+    await pool.query(
+      `INSERT INTO catraca_usuarios (usuario_id, catraca, catraca_user_id) VALUES ($1, 'catraca1', 888)`,
+      [aluno.id]
+    );
+
+    const client = clienteFalso();
+    client.loadObjects = jest.fn().mockResolvedValue([]); // usuário não existe mais na catraca
+    catracasConfiguradas.mockReturnValue([client]);
+
+    await catracaService.reconciliar();
+
+    // sincronizarAluno recriou o mapeamento com um novo id (999, do mock padrão de createObjects)
+    const { rows: [mapeamento] } = await pool.query(
+      'SELECT catraca_user_id FROM catraca_usuarios WHERE usuario_id = $1 AND catraca = $2', [aluno.id, 'catraca1']
+    );
+    expect(mapeamento.catraca_user_id).toBe(999);
+
+    await limpar(aluno.id);
+  });
+
+  test('não mexe em nada quando o usuário ainda existe na catraca', async () => {
+    const aluno = await criarUsuario({ nome: 'Aluno Reconciliar OK' });
+    await pool.query(
+      `INSERT INTO catraca_usuarios (usuario_id, catraca, catraca_user_id) VALUES ($1, 'catraca1', 889)`,
+      [aluno.id]
+    );
+
+    const client = clienteFalso();
+    client.loadObjects = jest.fn(async (object) => (object === 'users' ? [{ id: 889 }] : []));
+    catracasConfiguradas.mockReturnValue([client]);
+
+    await catracaService.reconciliar();
+    expect(client.createObjects).not.toHaveBeenCalledWith('users', expect.anything());
+
+    await limpar(aluno.id);
+  });
+
+  test('corrige drift: libera quem tem matrícula ativa mas ficou fora do grupo (ex: bloquearAcesso/liberarAcesso falhou antes por rede)', async () => {
+    const aluno = await criarUsuario({ nome: 'Aluno Drift Liberar' });
+    const plano = await criarPlano();
+    const matricula = await criarMatricula({ usuario_id: aluno.id, plano_id: plano.id, status: 'ativa' });
+    await pool.query(
+      `INSERT INTO catraca_usuarios (usuario_id, catraca, catraca_user_id, grupo_ativo) VALUES ($1, 'catraca1', 890, FALSE)`,
+      [aluno.id]
+    );
+
+    const client = clienteFalso();
+    client.loadObjects = jest.fn(async (object) => {
+      if (object === 'users') return [{ id: 890 }];
+      if (object === 'groups') return [{ id: 1, name: 'TEG-ativos' }];
+      return [];
+    });
+    catracasConfiguradas.mockReturnValue([client]);
+
+    await catracaService.reconciliar();
+
+    const vinculoCriado = client.createObjects.mock.calls.find((c) => c[0] === 'user_groups');
+    expect(vinculoCriado[1][0]).toEqual({ user_id: 890, group_id: 1 });
+
+    await pool.query('DELETE FROM matriculas WHERE id = $1', [matricula.id]);
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
+    await limpar(aluno.id);
+  });
+
+  test('corrige drift: bloqueia quem não tem mais matrícula ativa mas ficou no grupo', async () => {
+    const aluno = await criarUsuario({ nome: 'Aluno Drift Bloquear' });
+    const plano = await criarPlano();
+    const matricula = await criarMatricula({ usuario_id: aluno.id, plano_id: plano.id, status: 'suspensa' });
+    await pool.query(
+      `INSERT INTO catraca_usuarios (usuario_id, catraca, catraca_user_id, grupo_ativo) VALUES ($1, 'catraca1', 891, TRUE)`,
+      [aluno.id]
+    );
+
+    const client = clienteFalso();
+    client.loadObjects = jest.fn(async (object) => {
+      if (object === 'users') return [{ id: 891 }];
+      if (object === 'groups') return [{ id: 1, name: 'TEG-ativos' }];
+      return [];
+    });
+    catracasConfiguradas.mockReturnValue([client]);
+
+    await catracaService.reconciliar();
+
+    expect(client.destroyObjects).toHaveBeenCalledWith('user_groups', { user_id: 891, group_id: 1 });
+
+    await pool.query('DELETE FROM matriculas WHERE id = $1', [matricula.id]);
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
+    await limpar(aluno.id);
   });
 });
