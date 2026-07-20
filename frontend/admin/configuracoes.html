@@ -17,20 +17,7 @@
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <a href="../index.html" class="brand" title="Voltar para o site"><img src="../assets/img/logo.svg" alt="TEG Academia" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="brand-fallback"><span class="dot"></span>TEG ADMIN</span></a>
-      <nav class="sidebar-nav">
-        <a href="index.html" data-role-adminup><span data-icon="grid" data-icon-size="18"></span>Dashboard</a>
-        <a href="financeiro.html" data-role-dono><span data-icon="wallet" data-icon-size="18"></span>Financeiro</a>
-        <a href="alunos.html" data-role-adminup><span data-icon="users" data-icon-size="18"></span>Alunos</a>
-        <a href="ranking.html"><span data-icon="award" data-icon-size="18"></span>Ranking</a>
-        <a href="frequencia.html"><span data-icon="clock" data-icon-size="18"></span>Frequência</a>
-        <a href="treinos.html"><span data-icon="dumbbell" data-icon-size="18"></span>Treinos</a>
-        <a href="aulas.html" data-role-adminup><span data-icon="clipboard-list" data-icon-size="18"></span>Aulas</a>
-        <a href="planos.html" data-role-adminup><span data-icon="package" data-icon-size="18"></span>Planos</a>
-        <a href="crm.html" data-role-adminup><span data-icon="columns" data-icon-size="18"></span>CRM</a>
-        <a href="pagamentos.html" data-role-adminup><span data-icon="credit-card" data-icon-size="18"></span>Pagamentos</a>
-        <a href="equipe.html" data-role-dono><span data-icon="briefcase" data-icon-size="18"></span>Equipe</a>
-        <a href="configuracoes.html" class="active" data-role-adminup><span data-icon="sliders" data-icon-size="18"></span>Configurações</a>
-      </nav>
+      <nav class="sidebar-nav" id="sidebar-nav"></nav>
       <div class="sidebar-foot">
         <button type="button" id="btn-theme-toggle" data-theme-toggle class="btn btn-ghost btn-sm btn-block" data-icon="sun" data-icon-size="16" style="justify-content:flex-start;gap:0.7rem;padding:0.65rem 0.75rem;color:var(--color-muted)">Tema</button>
         <a href="#" id="btn-logout"><span data-icon="log-out" data-icon-size="18"></span>Sair</a>
@@ -105,6 +92,7 @@
   <script src="../assets/js/icons.js"></script>
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/sidebar-nav.js"></script>
   <script src="../assets/js/app-effects.js"></script>
   <script src="../assets/js/admin-guard.js"></script>
   <script src="../assets/js/admin-configuracoes.js"></script>
