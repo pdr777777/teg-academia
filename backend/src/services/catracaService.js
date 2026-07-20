@@ -216,37 +216,41 @@ async function verificarSaude() {
 
 async function reconciliar() {
   for (const client of catracasConfiguradas()) {
-    const { rows: mapeamentos } = await pool.query(
-      `SELECT cu.usuario_id, cu.catraca_user_id, cu.grupo_ativo,
-              EXISTS (SELECT 1 FROM matriculas m WHERE m.usuario_id = cu.usuario_id AND m.status = 'ativa') AS deveria_estar_ativo
-       FROM catraca_usuarios cu WHERE cu.catraca = $1`,
-      [client.nome]
-    );
+    try {
+      const { rows: mapeamentos } = await pool.query(
+        `SELECT cu.usuario_id, cu.catraca_user_id, cu.grupo_ativo,
+                EXISTS (SELECT 1 FROM matriculas m WHERE m.usuario_id = cu.usuario_id AND m.status = 'ativa') AS deveria_estar_ativo
+         FROM catraca_usuarios cu WHERE cu.catraca = $1`,
+        [client.nome]
+      );
 
-    for (const mapeamento of mapeamentos) {
-      const encontrados = await client.loadObjects('users', {
-        fields: ['id'],
-        where: { users: { id: mapeamento.catraca_user_id } },
-      });
-      if (!encontrados.length) {
-        // Usuário sumiu da catraca (reset de fábrica, exclusão manual etc.) — recria do zero.
-        await pool.query(
-          'DELETE FROM catraca_usuarios WHERE usuario_id = $1 AND catraca = $2',
-          [mapeamento.usuario_id, client.nome]
-        );
-        await sincronizarAluno(mapeamento.usuario_id);
-        if (mapeamento.deveria_estar_ativo) await liberarAcesso(mapeamento.usuario_id);
-        continue;
-      }
+      for (const mapeamento of mapeamentos) {
+        const encontrados = await client.loadObjects('users', {
+          fields: ['id'],
+          where: { users: { id: mapeamento.catraca_user_id } },
+        });
+        if (!encontrados.length) {
+          // Usuário sumiu da catraca (reset de fábrica, exclusão manual etc.) — recria do zero.
+          await pool.query(
+            'DELETE FROM catraca_usuarios WHERE usuario_id = $1 AND catraca = $2',
+            [mapeamento.usuario_id, client.nome]
+          );
+          await sincronizarAluno(mapeamento.usuario_id);
+          if (mapeamento.deveria_estar_ativo) await liberarAcesso(mapeamento.usuario_id);
+          continue;
+        }
 
-      // Corrige drift entre grupo_ativo e o status real da matrícula — cobre o
-      // caso de liberarAcesso/bloquearAcesso ter falhado antes por rede e
-      // nunca ter sido reprocessado (não há fila de retry pra esses dois).
-      if (mapeamento.deveria_estar_ativo && !mapeamento.grupo_ativo) {
-        await liberarAcesso(mapeamento.usuario_id);
-      } else if (!mapeamento.deveria_estar_ativo && mapeamento.grupo_ativo) {
-        await bloquearAcesso(mapeamento.usuario_id);
+        // Corrige drift entre grupo_ativo e o status real da matrícula — cobre o
+        // caso de liberarAcesso/bloquearAcesso ter falhado antes por rede e
+        // nunca ter sido reprocessado (não há fila de retry pra esses dois).
+        if (mapeamento.deveria_estar_ativo && !mapeamento.grupo_ativo) {
+          await liberarAcesso(mapeamento.usuario_id);
+        } else if (!mapeamento.deveria_estar_ativo && mapeamento.grupo_ativo) {
+          await bloquearAcesso(mapeamento.usuario_id);
+        }
       }
+    } catch (err) {
+      logger.error('catraca.reconciliar falhou', { catraca: client.nome, erro: err.message });
     }
   }
 }
