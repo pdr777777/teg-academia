@@ -21,7 +21,7 @@ const SIDEBAR_MENU = [
   { href: 'marketing-digital.html', icon: 'megaphone', label: 'Marketing Digital', role: 'adminup' },
   { href: 'crm.html', icon: 'columns', label: 'Pipeline de Vendas', role: 'adminup' },
   { href: 'financeiro.html', icon: 'wallet', label: 'Financeiro', role: 'dono' },
-  { href: 'pagamentos.html', icon: 'credit-card', label: 'Faturas', role: 'adminup' },
+  { href: 'pagamentos.html', icon: 'receipt', label: 'Faturas', role: 'adminup' },
   { href: 'relatorio.html', icon: 'file-text', label: 'Relatório', role: 'dono' },
   { href: 'equipe.html', icon: 'briefcase', label: 'Equipe', role: 'dono' },
   { href: 'configuracoes.html', icon: 'sliders', label: 'Configurações', role: 'adminup' },
