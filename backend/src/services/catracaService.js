@@ -100,8 +100,44 @@ async function sincronizarAluno(usuarioId) {
   }
 }
 
+async function liberarAcesso(usuarioId) {
+  for (const client of catracasConfiguradas()) {
+    const { rows: [mapeamento] } = await pool.query(
+      'SELECT catraca_user_id FROM catraca_usuarios WHERE usuario_id = $1 AND catraca = $2',
+      [usuarioId, client.nome]
+    );
+    if (!mapeamento) continue;
+
+    const grupoId = await garantirGrupo(client);
+    await garantirVinculo(client, 'user_groups', { user_id: mapeamento.catraca_user_id, group_id: grupoId });
+    await pool.query(
+      'UPDATE catraca_usuarios SET grupo_ativo = TRUE, updated_at = NOW() WHERE usuario_id = $1 AND catraca = $2',
+      [usuarioId, client.nome]
+    );
+  }
+}
+
+async function bloquearAcesso(usuarioId) {
+  for (const client of catracasConfiguradas()) {
+    const { rows: [mapeamento] } = await pool.query(
+      'SELECT catraca_user_id FROM catraca_usuarios WHERE usuario_id = $1 AND catraca = $2',
+      [usuarioId, client.nome]
+    );
+    if (!mapeamento) continue;
+
+    const grupoId = await garantirGrupo(client);
+    await client.destroyObjects('user_groups', { user_id: mapeamento.catraca_user_id, group_id: grupoId });
+    await pool.query(
+      'UPDATE catraca_usuarios SET grupo_ativo = FALSE, updated_at = NOW() WHERE usuario_id = $1 AND catraca = $2',
+      [usuarioId, client.nome]
+    );
+  }
+}
+
 module.exports = {
   garantirGrupo,
   garantirEstruturaBase,
   sincronizarAluno,
+  liberarAcesso,
+  bloquearAcesso,
 };

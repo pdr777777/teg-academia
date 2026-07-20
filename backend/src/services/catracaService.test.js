@@ -105,3 +105,64 @@ describe('sincronizarAluno', () => {
     await limpar(aluno.id);
   });
 });
+
+describe('liberarAcesso / bloquearAcesso', () => {
+  async function limpar(usuarioId) {
+    await pool.query('DELETE FROM catraca_usuarios WHERE usuario_id = $1', [usuarioId]);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [usuarioId]);
+  }
+
+  test('liberarAcesso vincula o usuário ao grupo TEG-ativos e marca grupo_ativo', async () => {
+    const client = clienteFalso();
+    client.loadObjects = jest.fn(async (object) => (object === 'groups' ? [{ id: 1, name: 'TEG-ativos' }] : []));
+    catracasConfiguradas.mockReturnValue([client]);
+
+    const aluno = await criarUsuario({ nome: 'Aluno Liberar' });
+    await pool.query(
+      `INSERT INTO catraca_usuarios (usuario_id, catraca, catraca_user_id) VALUES ($1, 'catraca1', 555)`,
+      [aluno.id]
+    );
+
+    await catracaService.liberarAcesso(aluno.id);
+
+    const vinculoCriado = client.createObjects.mock.calls.find((c) => c[0] === 'user_groups');
+    expect(vinculoCriado[1][0]).toEqual({ user_id: 555, group_id: 1 });
+
+    const { rows: [mapeamento] } = await pool.query('SELECT grupo_ativo FROM catraca_usuarios WHERE usuario_id = $1', [aluno.id]);
+    expect(mapeamento.grupo_ativo).toBe(true);
+
+    await limpar(aluno.id);
+  });
+
+  test('bloquearAcesso remove o vínculo e marca grupo_ativo como falso', async () => {
+    const client = clienteFalso();
+    client.loadObjects = jest.fn(async (object) => (object === 'groups' ? [{ id: 1, name: 'TEG-ativos' }] : []));
+    catracasConfiguradas.mockReturnValue([client]);
+
+    const aluno = await criarUsuario({ nome: 'Aluno Bloquear' });
+    await pool.query(
+      `INSERT INTO catraca_usuarios (usuario_id, catraca, catraca_user_id, grupo_ativo) VALUES ($1, 'catraca1', 556, TRUE)`,
+      [aluno.id]
+    );
+
+    await catracaService.bloquearAcesso(aluno.id);
+
+    expect(client.destroyObjects).toHaveBeenCalledWith('user_groups', { user_id: 556, group_id: 1 });
+
+    const { rows: [mapeamento] } = await pool.query('SELECT grupo_ativo FROM catraca_usuarios WHERE usuario_id = $1', [aluno.id]);
+    expect(mapeamento.grupo_ativo).toBe(false);
+
+    await limpar(aluno.id);
+  });
+
+  test('não faz nada quando o aluno ainda não foi sincronizado nessa catraca', async () => {
+    const client = clienteFalso();
+    catracasConfiguradas.mockReturnValue([client]);
+    const aluno = await criarUsuario({ nome: 'Aluno Nunca Sincronizado' });
+
+    await catracaService.bloquearAcesso(aluno.id);
+    expect(client.destroyObjects).not.toHaveBeenCalled();
+
+    await limpar(aluno.id);
+  });
+});
