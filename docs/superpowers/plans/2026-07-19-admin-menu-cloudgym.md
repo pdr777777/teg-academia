@@ -467,7 +467,7 @@ Antes do `<dialog id="dialog-matricula">` existente, adicionar o novo dialog:
 
 - [ ] **Step 2: Refatorar `abrirDialogMatricula` em `admin-alunos.js` pra aceitar argumentos em vez de um botão**
 
-Em `frontend/assets/js/admin-alunos.js`, trocar a função (linhas 109-131):
+Em `frontend/assets/js/admin-alunos.js`, trocar a função `abrirDialogMatricula` (localize pelo conteúdo — a integração da catraca deslocou as linhas):
 
 ```js
 async function abrirDialogMatricula(btn) {
@@ -519,13 +519,18 @@ async function abrirDialogMatricula(usuarioId, nome, matriculaId = '') {
 }
 ```
 
-E atualizar o único ponto que chama essa função (linhas 92-96):
+Nota: a integração da catraca (Control iD) já mesclada neste branch adicionou
+um botão extra por linha ("vincular catraca") e um `return;` depois da
+chamada de `abrirDialogMatricula`. Localize o bloco pelo conteúdo abaixo, não
+pela linha, e não mexa no bloco `// Vincular ID da catraca (Control iD)` que
+vem logo depois — ele fica como está:
 
 ```js
   // Matricular / Renovar
   const btnMat = ev.target.closest('[data-mat-id]');
   if (btnMat) {
     await abrirDialogMatricula(btnMat);
+    return;
   }
 ```
 
@@ -536,6 +541,7 @@ por:
   const btnMat = ev.target.closest('[data-mat-id]');
   if (btnMat) {
     await abrirDialogMatricula(btnMat.dataset.matId, btnMat.dataset.matNome, btnMat.dataset.matMatriculaId || '');
+    return;
   }
 ```
 
