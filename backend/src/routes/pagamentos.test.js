@@ -3,11 +3,14 @@ const app = require('../server');
 const pool = require('../config/db');
 const { criarUsuario, criarPlano, criarMatricula, gerarToken } = require('../testUtils/fixtures');
 
-describe('PATCH /api/pagamentos/:id/confirmar', () => {
-  afterAll(async () => {
-    await pool.end();
-  });
+jest.mock('../services/catracaService');
+const catracaService = require('../services/catracaService');
 
+afterAll(async () => {
+  await pool.end();
+});
+
+describe('PATCH /api/pagamentos/:id/confirmar', () => {
   test('pagamento gerado automaticamente estende data_vencimento e reativa a matrícula suspensa', async () => {
     const admin = await criarUsuario({ role: 'dono' });
     const aluno = await criarUsuario();
@@ -140,6 +143,96 @@ describe('PATCH /api/pagamentos/:id/confirmar', () => {
     const { rows: [matriculaAposSegunda] } = await pool.query('SELECT * FROM matriculas WHERE id = $1', [matricula.id]);
     expect(new Date(matriculaAposSegunda.data_vencimento).toISOString())
       .toBe(new Date(matriculaAposPrimeira.data_vencimento).toISOString());
+
+    await pool.query('DELETE FROM pagamentos WHERE id = $1', [pagamento.id]);
+    await pool.query('DELETE FROM matriculas WHERE id = $1', [matricula.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
+  });
+});
+
+describe('PATCH /api/pagamentos/:id/confirmar — integração com a catraca', () => {
+  test('libera acesso na catraca quando a renovação automática é confirmada', async () => {
+    catracaService.liberarAcesso.mockResolvedValue(undefined);
+
+    const admin = await criarUsuario({ role: 'dono' });
+    const aluno = await criarUsuario();
+    const plano = await criarPlano({ duracao_dias: 30 });
+    const vencimentoAntigo = new Date(Date.now() - 10 * 86400000);
+    const matricula = await criarMatricula({
+      usuario_id: aluno.id, plano_id: plano.id, status: 'suspensa', data_vencimento: vencimentoAntigo,
+    });
+    const { rows: [pagamento] } = await pool.query(
+      `INSERT INTO pagamentos (matricula_id, usuario_id, valor, status, gerado_automaticamente)
+       VALUES ($1, $2, $3, 'pendente', TRUE) RETURNING *`,
+      [matricula.id, aluno.id, plano.preco_mensal]
+    );
+
+    const res = await request(app)
+      .patch(`/api/pagamentos/${pagamento.id}/confirmar`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`)
+      .send({ metodo: 'pix' });
+
+    expect(res.status).toBe(200);
+    expect(catracaService.liberarAcesso).toHaveBeenCalledWith(aluno.id);
+
+    await pool.query('DELETE FROM pagamentos WHERE id = $1', [pagamento.id]);
+    await pool.query('DELETE FROM matriculas WHERE id = $1', [matricula.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
+  });
+
+  test('libera acesso na catraca quando o admin reativa manualmente a matrícula suspensa', async () => {
+    catracaService.liberarAcesso.mockResolvedValue(undefined);
+
+    const admin = await criarUsuario({ role: 'dono' });
+    const aluno = await criarUsuario();
+    const plano = await criarPlano();
+    const matricula = await criarMatricula({
+      usuario_id: aluno.id, plano_id: plano.id, status: 'suspensa', data_vencimento: new Date(Date.now() + 20 * 86400000),
+    });
+    const { rows: [pagamento] } = await pool.query(
+      `INSERT INTO pagamentos (matricula_id, usuario_id, valor, status)
+       VALUES ($1, $2, $3, 'pendente') RETURNING *`,
+      [matricula.id, aluno.id, plano.preco_mensal]
+    );
+
+    const res = await request(app)
+      .patch(`/api/pagamentos/${pagamento.id}/confirmar`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`)
+      .send({ metodo: 'pix' });
+
+    expect(res.status).toBe(200);
+    expect(catracaService.liberarAcesso).toHaveBeenCalledWith(aluno.id);
+
+    await pool.query('DELETE FROM pagamentos WHERE id = $1', [pagamento.id]);
+    await pool.query('DELETE FROM matriculas WHERE id = $1', [matricula.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
+  });
+
+  test('não falha a confirmação do pagamento quando a catraca está offline', async () => {
+    catracaService.liberarAcesso.mockRejectedValue(new Error('Catraca catraca1 inacessível'));
+
+    const admin = await criarUsuario({ role: 'dono' });
+    const aluno = await criarUsuario();
+    const plano = await criarPlano({ duracao_dias: 30 });
+    const matricula = await criarMatricula({
+      usuario_id: aluno.id, plano_id: plano.id, status: 'suspensa', data_vencimento: new Date(Date.now() - 5 * 86400000),
+    });
+    const { rows: [pagamento] } = await pool.query(
+      `INSERT INTO pagamentos (matricula_id, usuario_id, valor, status, gerado_automaticamente)
+       VALUES ($1, $2, $3, 'pendente', TRUE) RETURNING *`,
+      [matricula.id, aluno.id, plano.preco_mensal]
+    );
+
+    const res = await request(app)
+      .patch(`/api/pagamentos/${pagamento.id}/confirmar`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`)
+      .send({ metodo: 'pix' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('pago');
 
     await pool.query('DELETE FROM pagamentos WHERE id = $1', [pagamento.id]);
     await pool.query('DELETE FROM matriculas WHERE id = $1', [matricula.id]);

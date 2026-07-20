@@ -17,6 +17,7 @@ const SIDEBAR_MENU = [
   },
   { href: 'ranking.html', icon: 'award', label: 'Ranking' },
   { href: 'frequencia.html', icon: 'clock', label: 'Frequência' },
+  { href: 'catraca.html', icon: 'shield-check', label: 'Catraca', role: 'adminup' },
   { href: 'planos.html', icon: 'package', label: 'Planos', role: 'adminup' },
   { href: 'marketing-digital.html', icon: 'megaphone', label: 'Marketing Digital', role: 'adminup' },
   { href: 'crm.html', icon: 'columns', label: 'Pipeline de Vendas', role: 'adminup' },

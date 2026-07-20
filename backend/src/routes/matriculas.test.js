@@ -3,6 +3,9 @@ const app = require('../server');
 const pool = require('../config/db');
 const { criarUsuario, criarPlano, criarMatricula, gerarToken } = require('../testUtils/fixtures');
 
+jest.mock('../services/catracaService');
+const catracaService = require('../services/catracaService');
+
 afterAll(async () => {
   await pool.end();
 });
@@ -116,5 +119,49 @@ describe('GET /api/matriculas/minha e /api/matriculas (admin)', () => {
     await pool.query('DELETE FROM matriculas WHERE id = $1', [matricula.id]);
     await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
     await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+  });
+});
+
+describe('POST /api/matriculas — integração com a catraca', () => {
+  test('sincroniza e libera acesso na catraca quando a matrícula é criada', async () => {
+    catracaService.sincronizarAluno.mockResolvedValue(undefined);
+    catracaService.liberarAcesso.mockResolvedValue(undefined);
+
+    const aluno = await criarUsuario({ role: 'aluno' });
+    const plano = await criarPlano({ nome: 'Plano Matricula Catraca Teste' });
+
+    const res = await request(app)
+      .post('/api/matriculas')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`)
+      .send({ plano_id: plano.id });
+
+    expect(res.status).toBe(201);
+    expect(catracaService.sincronizarAluno).toHaveBeenCalledWith(aluno.id);
+    expect(catracaService.liberarAcesso).toHaveBeenCalledWith(aluno.id);
+
+    await pool.query('DELETE FROM pagamentos WHERE usuario_id = $1', [aluno.id]);
+    await pool.query('DELETE FROM matriculas WHERE usuario_id = $1', [aluno.id]);
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
+  });
+
+  test('não falha a criação da matrícula quando a catraca está offline', async () => {
+    catracaService.sincronizarAluno.mockRejectedValue(new Error('Catraca catraca1 inacessível'));
+    catracaService.liberarAcesso.mockResolvedValue(undefined);
+
+    const aluno = await criarUsuario({ role: 'aluno' });
+    const plano = await criarPlano({ nome: 'Plano Matricula Catraca Offline Teste' });
+
+    const res = await request(app)
+      .post('/api/matriculas')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`)
+      .send({ plano_id: plano.id });
+
+    expect(res.status).toBe(201);
+
+    await pool.query('DELETE FROM pagamentos WHERE usuario_id = $1', [aluno.id]);
+    await pool.query('DELETE FROM matriculas WHERE usuario_id = $1', [aluno.id]);
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
   });
 });
