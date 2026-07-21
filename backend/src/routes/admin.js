@@ -2,6 +2,8 @@ const express = require('express');
 const pool = require('../config/db');
 const { authMiddleware, requireRole } = require('../middleware/authMiddleware');
 const xpService = require('../services/xpService');
+const catracaService = require('../services/catracaService');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -288,6 +290,13 @@ router.post('/matriculas', authMiddleware, requireRole('admin', 'dono'), async (
       );
       if (indicacao) {
         await xpService.adicionarXP(indicacao.indicador_id, 200, 'indicacao');
+      }
+
+      try {
+        await catracaService.sincronizarAluno(usuario_id);
+        await catracaService.liberarAcesso(usuario_id);
+      } catch (err) {
+        logger.error('catraca.sincronizarAluno/liberarAcesso falhou', { usuarioId: usuario_id, erro: err.message });
       }
     }
 
