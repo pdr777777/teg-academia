@@ -217,3 +217,27 @@ describe('GET /api/admin/alunos/:id — detalhe', () => {
     await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
   });
 });
+
+describe('GET /api/admin/alunos/:id/frequencia', () => {
+  test('retorna 30 dias, marcando os dias com check-in como foi: true', async () => {
+    const admin = await criarUsuario({ role: 'admin' });
+    const aluno = await criarUsuario({ role: 'aluno' });
+    const hoje = new Date().toISOString().slice(0, 10);
+    const ontem = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    await pool.query(`INSERT INTO frequencias (usuario_id, data) VALUES ($1, $2), ($1, $3)`, [aluno.id, hoje, ontem]);
+
+    const res = await request(app)
+      .get(`/api/admin/alunos/${aluno.id}/frequencia`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(30);
+    expect(res.body[res.body.length - 1].data.slice(0, 10)).toBe(hoje);
+    expect(res.body[res.body.length - 1].foi).toBe(true);
+    expect(res.body[res.body.length - 2].foi).toBe(true);
+    expect(res.body[0].foi).toBe(false);
+
+    await pool.query('DELETE FROM frequencias WHERE usuario_id = $1', [aluno.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+  });
+});

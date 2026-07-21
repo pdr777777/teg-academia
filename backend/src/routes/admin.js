@@ -200,6 +200,22 @@ router.get('/alunos/:id', authMiddleware, requireRole('admin', 'dono'), async (r
   }
 });
 
+// GET /api/admin/alunos/:id/frequencia — últimos 30 dias (foi/não foi), pro gráfico do painel
+router.get('/alunos/:id/frequencia', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT gs.dia::date AS data, (f.id IS NOT NULL) AS foi
+       FROM generate_series(CURRENT_DATE - INTERVAL '29 days', CURRENT_DATE, INTERVAL '1 day') AS gs(dia)
+       LEFT JOIN frequencias f ON f.usuario_id = $1 AND f.data = gs.dia::date
+       ORDER BY gs.dia`,
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // PATCH /api/admin/alunos/:id/toggle (ativar/desativar)
 router.patch('/alunos/:id/toggle', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
   try {
