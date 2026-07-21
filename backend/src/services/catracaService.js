@@ -284,6 +284,35 @@ async function reconciliar() {
   }
 }
 
+async function verificarRostoCadastrado(usuarioId) {
+  if (!(await estaAtiva())) return [];
+
+  const resultados = [];
+  for (const client of catracasConfiguradas()) {
+    const { rows: [mapeamento] } = await pool.query(
+      'SELECT catraca_user_id, face_status FROM catraca_usuarios WHERE usuario_id = $1 AND catraca = $2',
+      [usuarioId, client.nome]
+    );
+    if (!mapeamento) continue;
+
+    const faces = await client.loadObjects('user_faces', {
+      fields: ['id'],
+      where: { user_faces: { user_id: mapeamento.catraca_user_id } },
+    });
+    const encontrado = faces.length > 0;
+
+    if (encontrado && mapeamento.face_status !== 'sincronizado') {
+      await pool.query(
+        'UPDATE catraca_usuarios SET face_status = $1, updated_at = NOW() WHERE usuario_id = $2 AND catraca = $3',
+        ['sincronizado', usuarioId, client.nome]
+      );
+    }
+
+    resultados.push({ catraca: client.nome, encontrado });
+  }
+  return resultados;
+}
+
 module.exports = {
   estaAtiva,
   garantirGrupo,
@@ -294,4 +323,5 @@ module.exports = {
   processarNovosAcessos,
   verificarSaude,
   reconciliar,
+  verificarRostoCadastrado,
 };

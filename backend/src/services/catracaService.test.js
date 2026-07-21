@@ -386,6 +386,66 @@ describe('reconciliar', () => {
   });
 });
 
+describe('verificarRostoCadastrado', () => {
+  async function limpar(usuarioId) {
+    await pool.query('DELETE FROM catraca_usuarios WHERE usuario_id = $1', [usuarioId]);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [usuarioId]);
+  }
+
+  test('marca sincronizado quando encontra rosto cadastrado no equipamento', async () => {
+    const client = clienteFalso();
+    client.loadObjects = jest.fn(async (object) => (object === 'user_faces' ? [{ id: 1 }] : []));
+    catracasConfiguradas.mockReturnValue([client]);
+
+    const aluno = await criarUsuario({ nome: 'Aluno Verificar Rosto' });
+    await pool.query(
+      `INSERT INTO catraca_usuarios (usuario_id, catraca, catraca_user_id, face_status) VALUES ($1, 'catraca1', 950, 'pendente_presencial')`,
+      [aluno.id]
+    );
+
+    const resultado = await catracaService.verificarRostoCadastrado(aluno.id);
+
+    expect(resultado).toEqual([{ catraca: 'catraca1', encontrado: true }]);
+    const { rows: [mapeamento] } = await pool.query('SELECT face_status FROM catraca_usuarios WHERE usuario_id = $1', [aluno.id]);
+    expect(mapeamento.face_status).toBe('sincronizado');
+
+    await limpar(aluno.id);
+  });
+
+  test('retorna encontrado: false quando o equipamento ainda não tem rosto cadastrado', async () => {
+    const client = clienteFalso();
+    catracasConfiguradas.mockReturnValue([client]);
+
+    const aluno = await criarUsuario({ nome: 'Aluno Sem Rosto Ainda' });
+    await pool.query(
+      `INSERT INTO catraca_usuarios (usuario_id, catraca, catraca_user_id, face_status) VALUES ($1, 'catraca1', 951, 'pendente_presencial')`,
+      [aluno.id]
+    );
+
+    const resultado = await catracaService.verificarRostoCadastrado(aluno.id);
+
+    expect(resultado).toEqual([{ catraca: 'catraca1', encontrado: false }]);
+    const { rows: [mapeamento] } = await pool.query('SELECT face_status FROM catraca_usuarios WHERE usuario_id = $1', [aluno.id]);
+    expect(mapeamento.face_status).toBe('pendente_presencial');
+
+    await limpar(aluno.id);
+  });
+
+  test('ignora catraca onde o aluno ainda não foi sincronizado', async () => {
+    const client = clienteFalso();
+    catracasConfiguradas.mockReturnValue([client]);
+
+    const aluno = await criarUsuario({ nome: 'Aluno Nunca Sincronizado Rosto' });
+
+    const resultado = await catracaService.verificarRostoCadastrado(aluno.id);
+
+    expect(resultado).toEqual([]);
+    expect(client.loadObjects).not.toHaveBeenCalled();
+
+    await limpar(aluno.id);
+  });
+});
+
 describe('kill switch — catraca_ativa = FALSE torna as escritas no-op', () => {
   async function limpar(usuarioId) {
     await pool.query('DELETE FROM catraca_usuarios WHERE usuario_id = $1', [usuarioId]);
