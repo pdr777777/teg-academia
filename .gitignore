@@ -10,3 +10,11 @@ node_modules/
 # prévias/falhas de import com dados reais de aluno (PII) — nunca versionar
 import-*-previa.json
 import-*-falhas.json
+
+# graphify — mapa de conhecimento do repo. Mantém graph.json/graph.html/GRAPH_REPORT.md/
+# manifest.json versionados (time inteiro parte do mesmo grafo); o resto é cache local
+# ou caminho de interpretador específico da máquina.
+graphify-out/cost.json
+graphify-out/cache/
+graphify-out/.graphify_python
+graphify-out/.graphify_root

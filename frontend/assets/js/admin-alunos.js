@@ -137,7 +137,7 @@ async function abrirDialogMatricula(usuarioId, nome, matriculaId = '') {
 
   try {
     const planos = await carregarPlanos();
-    selPlano.innerHTML = planos.map((p) => `<option value="${p.id}">${p.nome} (${formatMoeda(p.preco_mensal)}/mês)</option>`).join('');
+    selPlano.innerHTML = planos.map((p) => `<option value="${p.id}">${escapeHtml(p.nome)} (${formatMoeda(p.preco_mensal)}/mês)</option>`).join('');
   } catch {
     toast('Erro ao carregar planos.', 'error');
     return;
@@ -265,7 +265,7 @@ document.getElementById('btn-aa-avancar-dados').addEventListener('click', async 
     aaUsuarioId = user.id;
 
     const planos = await carregarPlanos();
-    selAaPlano.innerHTML = planos.map((p) => `<option value="${p.id}">${p.nome} (${formatMoeda(p.preco_mensal)}/mês)</option>`).join('');
+    selAaPlano.innerHTML = planos.map((p) => `<option value="${p.id}">${escapeHtml(p.nome)} (${formatMoeda(p.preco_mensal)}/mês)</option>`).join('');
     selAaMetodo.value = '';
 
     aaIrParaPasso('plano');
