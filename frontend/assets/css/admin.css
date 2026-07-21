@@ -395,6 +395,17 @@
   border-right: 1px solid rgba(255,255,255,0.5);
 }
 
+/* No mobile o menu vira uma gaveta fixa POR CIMA do conteúdo (não do lado,
+   como no desktop) — o backdrop-filter então borra os cards/ícones logo
+   atrás dela, o que lê como mancha. Fundo sólido resolve. */
+@media (max-width: 900px) {
+  .app-shell .sidebar {
+    background: var(--color-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
 /* ===== Cards em vidro (stat cards, gráficos, listas, configurações) =====
    Cobre .card.modal-box (pagamentos.html) automaticamente — não precisa
    de regra separada pro modal, ele já tem a classe .card. */
