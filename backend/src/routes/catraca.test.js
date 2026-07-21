@@ -62,3 +62,30 @@ describe('POST /api/catraca/:usuarioId/sincronizar', () => {
     await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
   });
 });
+
+describe('POST /api/catraca/:usuarioId/verificar-rosto', () => {
+  test('retorna o resultado por catraca', async () => {
+    catracaService.verificarRostoCadastrado.mockResolvedValue([{ catraca: 'catraca1', encontrado: true }]);
+    const admin = await criarUsuario({ role: 'admin' });
+    const aluno = await criarUsuario({ role: 'aluno' });
+
+    const res = await request(app)
+      .post(`/api/catraca/${aluno.id}/verificar-rosto`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.resultados).toEqual([{ catraca: 'catraca1', encontrado: true }]);
+    expect(catracaService.verificarRostoCadastrado).toHaveBeenCalledWith(aluno.id);
+
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+  });
+
+  test('rejeita aluno comum', async () => {
+    const aluno = await criarUsuario({ role: 'aluno' });
+    const res = await request(app)
+      .post(`/api/catraca/${aluno.id}/verificar-rosto`)
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`);
+    expect(res.status).toBe(403);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
+  });
+});

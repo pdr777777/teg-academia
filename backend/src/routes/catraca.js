@@ -59,4 +59,14 @@ router.post('/:usuarioId/sincronizar', authMiddleware, requireRole('admin', 'don
   }
 });
 
+// POST /api/catraca/:usuarioId/verificar-rosto (admin/dono) — confirma cadastro facial feito direto no equipamento
+router.post('/:usuarioId/verificar-rosto', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+  try {
+    const resultados = await catracaService.verificarRostoCadastrado(Number(req.params.usuarioId));
+    res.json({ resultados });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;
