@@ -31,6 +31,9 @@
           <h1>Alunos</h1>
           <p>Gerencie a base de alunos matriculados.</p>
         </div>
+        <button class="btn btn-primary" id="btn-adicionar-aluno" data-role-adminup>
+          <span data-icon="user-check" data-icon-size="16"></span>Adicionar aluno
+        </button>
       </div>
 
       <div class="filters-row">
@@ -107,6 +110,86 @@
         <button type="button" class="btn btn-ghost" id="btn-dialog-cancel">Cancelar</button>
         <button type="submit" class="btn btn-primary" id="btn-dialog-confirm">Confirmar</button>
       </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialog-adicionar-aluno" class="admin-dialog">
+    <form id="form-adicionar-aluno" method="dialog">
+      <div class="wizard-steps">
+        <div class="wizard-step active" data-wizard-step="dados"><span class="wizard-step-num">1</span><span>Dados</span></div>
+        <div class="wizard-step" data-wizard-step="plano"><span class="wizard-step-num">2</span><span>Plano</span></div>
+        <div class="wizard-step" data-wizard-step="facial"><span class="wizard-step-num">3</span><span>Facial</span></div>
+      </div>
+
+      <section data-wizard-section="dados">
+        <h2>Adicionar aluno</h2>
+
+        <label class="field-label">Nome completo <span class="text-danger">*</span></label>
+        <input type="text" id="aa-nome" class="input" placeholder="Nome do aluno" required />
+
+        <label class="field-label" style="margin-top:1rem">E-mail <span class="text-danger">*</span></label>
+        <input type="email" id="aa-email" class="input" placeholder="email@exemplo.com" required />
+
+        <label class="field-label" style="margin-top:1rem">Telefone</label>
+        <input type="tel" id="aa-telefone" class="input" placeholder="(00) 00000-0000" />
+
+        <label class="field-label" style="margin-top:1rem">Senha temporária</label>
+        <div class="row gap-sm">
+          <input type="text" id="aa-senha" class="input" readonly style="flex:1" />
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-aa-copiar-senha" title="Copiar senha">
+            <span data-icon="copy" data-icon-size="14"></span>
+          </button>
+        </div>
+        <p class="text-muted" style="font-size:.78rem;margin-top:.35rem">Repasse essa senha ao aluno — ele pode trocá-la depois em "Esqueci minha senha".</p>
+
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-ghost" id="btn-aa-cancel-1">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btn-aa-avancar-dados">Avançar</button>
+        </div>
+      </section>
+
+      <section data-wizard-section="plano" style="display:none">
+        <h2>Escolher plano</h2>
+
+        <label class="field-label">Plano</label>
+        <select id="aa-plano" class="input" required></select>
+
+        <label class="field-label" style="margin-top:1rem">Pagamento</label>
+        <select id="aa-metodo" class="input">
+          <option value="">Pendente (confirmar depois)</option>
+          <option value="dinheiro">Dinheiro</option>
+          <option value="pix">Pix</option>
+          <option value="cartao">Cartão</option>
+        </select>
+
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-ghost" id="btn-aa-cancel-2">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btn-aa-avancar-plano">Avançar</button>
+        </div>
+      </section>
+
+      <section data-wizard-section="facial" style="display:none">
+        <h2>Matrícula presencial?</h2>
+        <p class="text-muted">Se o aluno estiver na academia agora, cadastre o rosto direto na catraca antes de concluir.</p>
+
+        <label class="switch" style="margin-top:.75rem">
+          <input type="checkbox" id="aa-presencial" />
+          <span class="slider"></span>
+        </label>
+        <span style="margin-left:.6rem" id="aa-presencial-label">Não é presencial</span>
+
+        <div id="aa-facial-painel" style="display:none;margin-top:1.25rem">
+          <p>Leve o aluno até a catraca pra cadastrar o rosto pelo equipamento.</p>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-aa-verificar-rosto">
+            <span data-icon="shield-check" data-icon-size="14"></span>Verificar cadastro
+          </button>
+          <p class="text-muted" id="aa-facial-status" style="margin-top:.5rem"></p>
+        </div>
+
+        <div class="dialog-actions">
+          <button type="submit" class="btn btn-primary" id="btn-aa-concluir">Concluir</button>
+        </div>
+      </section>
     </form>
   </dialog>
 

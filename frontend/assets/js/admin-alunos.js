@@ -289,3 +289,135 @@ formNovoCliente.addEventListener('submit', async (ev) => {
     btnConfirm.textContent = 'Cadastrar e matricular';
   }
 });
+
+// ===== Adicionar aluno (assistente com verificação facial) =====
+const dialogAdicionarAluno = document.getElementById('dialog-adicionar-aluno');
+const formAdicionarAluno = document.getElementById('form-adicionar-aluno');
+const inputAaNome = document.getElementById('aa-nome');
+const inputAaEmail = document.getElementById('aa-email');
+const inputAaTelefone = document.getElementById('aa-telefone');
+const inputAaSenha = document.getElementById('aa-senha');
+const selAaPlano = document.getElementById('aa-plano');
+const selAaMetodo = document.getElementById('aa-metodo');
+const inputAaPresencial = document.getElementById('aa-presencial');
+const labelAaPresencial = document.getElementById('aa-presencial-label');
+const painelAaFacial = document.getElementById('aa-facial-painel');
+const statusAaFacial = document.getElementById('aa-facial-status');
+
+let aaUsuarioId = null;
+
+function aaIrParaPasso(passo) {
+  document.querySelectorAll('[data-wizard-step]').forEach((el) => {
+    el.classList.toggle('active', el.dataset.wizardStep === passo);
+  });
+  document.querySelectorAll('[data-wizard-section]').forEach((el) => {
+    el.style.display = el.dataset.wizardSection === passo ? '' : 'none';
+  });
+}
+
+document.getElementById('btn-adicionar-aluno').addEventListener('click', () => {
+  formAdicionarAluno.reset();
+  aaUsuarioId = null;
+  inputAaSenha.value = gerarSenhaTemp();
+  painelAaFacial.style.display = 'none';
+  statusAaFacial.textContent = '';
+  labelAaPresencial.textContent = 'Não é presencial';
+  aaIrParaPasso('dados');
+  dialogAdicionarAluno.showModal();
+});
+
+document.getElementById('btn-aa-copiar-senha').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(inputAaSenha.value);
+    toast('Senha copiada.', 'success');
+  } catch {
+    toast('Não foi possível copiar. Copie manualmente.', 'error');
+  }
+});
+
+document.getElementById('btn-aa-cancel-1').addEventListener('click', () => dialogAdicionarAluno.close());
+document.getElementById('btn-aa-cancel-2').addEventListener('click', () => dialogAdicionarAluno.close());
+
+document.getElementById('btn-aa-avancar-dados').addEventListener('click', async (ev) => {
+  const btn = ev.currentTarget;
+  if (!inputAaNome.value.trim() || !inputAaEmail.value.trim()) {
+    toast('Preencha nome e e-mail.', 'error');
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Cadastrando...';
+  try {
+    const { user } = await api.post('/api/auth/registro', {
+      nome: inputAaNome.value.trim(),
+      email: inputAaEmail.value.trim(),
+      senha: inputAaSenha.value,
+      telefone: inputAaTelefone.value.trim(),
+    });
+    aaUsuarioId = user.id;
+
+    const planos = await carregarPlanos();
+    selAaPlano.innerHTML = planos.map((p) => `<option value="${p.id}">${p.nome} (${formatMoeda(p.preco_mensal)}/mês)</option>`).join('');
+    selAaMetodo.value = '';
+
+    aaIrParaPasso('plano');
+  } catch (err) {
+    toast(err.message || 'Erro ao cadastrar aluno.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Avançar';
+  }
+});
+
+document.getElementById('btn-aa-avancar-plano').addEventListener('click', async (ev) => {
+  const btn = ev.currentTarget;
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+  try {
+    await api.post('/api/admin/matriculas', {
+      usuario_id: aaUsuarioId,
+      plano_id: selAaPlano.value,
+      metodo_pagamento: selAaMetodo.value || undefined,
+    });
+
+    inputAaPresencial.checked = false;
+    labelAaPresencial.textContent = 'Não é presencial';
+    painelAaFacial.style.display = 'none';
+    statusAaFacial.textContent = '';
+
+    aaIrParaPasso('facial');
+  } catch (err) {
+    toast(err.message || 'Erro ao matricular aluno.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Avançar';
+  }
+});
+
+inputAaPresencial.addEventListener('change', () => {
+  painelAaFacial.style.display = inputAaPresencial.checked ? '' : 'none';
+  labelAaPresencial.textContent = inputAaPresencial.checked ? 'Presencial' : 'Não é presencial';
+});
+
+document.getElementById('btn-aa-verificar-rosto').addEventListener('click', async (ev) => {
+  const btn = ev.currentTarget;
+  btn.disabled = true;
+  statusAaFacial.textContent = 'Verificando...';
+  try {
+    const { resultados } = await api.post(`/api/catraca/${aaUsuarioId}/verificar-rosto`, {});
+    const encontrou = resultados.some((r) => r.encontrado);
+    statusAaFacial.textContent = encontrou
+      ? 'Rosto cadastrado com sucesso!'
+      : 'Ainda não encontramos o cadastro — cadastre o rosto no equipamento e tente de novo.';
+  } catch (err) {
+    statusAaFacial.textContent = err.message || 'Erro ao verificar cadastro.';
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+formAdicionarAluno.addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  dialogAdicionarAluno.close();
+  toast('Aluno adicionado com sucesso!', 'success');
+  carregarAlunos(document.getElementById('busca-aluno').value.trim(), paginaAtual);
+});
