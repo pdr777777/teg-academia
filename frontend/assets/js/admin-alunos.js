@@ -71,23 +71,16 @@ async function carregarAlunos(busca = '', page = 1) {
             <td>${a.xp}</td>
             <td>${a.sequencia_atual} dias</td>
             <td><span class="badge ${a.ativo ? 'badge-success' : 'badge-muted'}">${Icons.icon(a.ativo ? 'unlock' : 'lock', { size: 12 })}${a.ativo ? 'Liberado' : 'Bloqueado'}</span></td>
-            <td style="display:flex;gap:.4rem;align-items:center">
-              <label class="switch" title="Liberar/Bloquear acesso à academia (catraca)">
-                <input type="checkbox" data-toggle-id="${a.id}" ${a.ativo ? 'checked' : ''} />
-                <span class="slider"></span>
-              </label>
-              <button class="btn btn-ghost btn-sm" data-mat-id="${a.id}" data-mat-nome="${escapeHtml(a.nome)}"
-                data-mat-matricula-id="${a.matricula_id || ''}"
-                title="${a.matricula_status === 'ativa' ? 'Renovar matrícula' : 'Matricular'}">
-                ${a.matricula_status === 'ativa' ? Icons.icon('refresh-cw', { size: 14 }) : Icons.icon('user-plus', { size: 14 })}
-              </button>
-              <button class="btn btn-ghost btn-sm" data-reset-id="${a.id}" data-reset-nome="${escapeHtml(a.nome)}" title="Redefinir senha">
-                ${Icons.icon('key', { size: 14 })}
-              </button>
-              <button class="btn btn-ghost btn-sm" data-catraca-id="${a.id}" data-catraca-nome="${escapeHtml(a.nome)}" data-catraca-valor="${escapeHtml(a.controlid_user_id || '')}"
-                title="${a.controlid_user_id ? `Vinculado à catraca (ID ${escapeHtml(a.controlid_user_id)})` : 'Vincular à catraca (reconhecimento facial)'}"
-                style="${a.controlid_user_id ? 'color:var(--color-success)' : ''}">
-                ${Icons.icon('shield-check', { size: 14 })}
+            <td class="acoes-aluno">
+              <div class="switch-row">
+                <label class="switch" title="Liberar/Bloquear acesso à academia (catraca)">
+                  <input type="checkbox" data-toggle-id="${a.id}" ${a.ativo ? 'checked' : ''} />
+                  <span class="slider"></span>
+                </label>
+                <span class="switch-label">Acesso</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" data-detalhe-id="${a.id}" title="Mais opções">
+                ${Icons.icon('more-vertical', { size: 16 })}
               </button>
             </td>
           </tr>
@@ -115,56 +108,11 @@ document.getElementById('alunos-body').addEventListener('change', async (ev) => 
   }
 });
 
-// Clicks na tabela (reset senha + matricular/renovar)
+// Abre o painel "Mais opções"
 document.getElementById('alunos-body').addEventListener('click', async (ev) => {
-  // Redefinir senha
-  const btnReset = ev.target.closest('[data-reset-id]');
-  if (btnReset) {
-    const id = btnReset.dataset.resetId;
-    const nome = btnReset.dataset.resetNome;
-    const nova_senha = prompt(`Nova senha para ${nome} (mínimo 6 caracteres):`);
-    if (!nova_senha) return;
-    if (nova_senha.length < 6) { toast('Senha deve ter no mínimo 6 caracteres.', 'error'); return; }
-    btnReset.disabled = true;
-    try {
-      await api.patch(`/api/admin/alunos/${id}/senha`, { nova_senha });
-      toast(`Senha de ${nome} redefinida com sucesso.`, 'success');
-    } catch (err) {
-      toast(err.message || 'Erro ao redefinir senha.', 'error');
-    } finally {
-      btnReset.disabled = false;
-    }
-    return;
-  }
-
-  // Matricular / Renovar
-  const btnMat = ev.target.closest('[data-mat-id]');
-  if (btnMat) {
-    await abrirDialogMatricula(btnMat.dataset.matId, btnMat.dataset.matNome, btnMat.dataset.matMatriculaId || '');
-    return;
-  }
-
-  // Vincular ID da catraca (Control iD)
-  const btnCatraca = ev.target.closest('[data-catraca-id]');
-  if (btnCatraca) {
-    const id = btnCatraca.dataset.catracaId;
-    const nome = btnCatraca.dataset.catracaNome;
-    const valorAtual = btnCatraca.dataset.catracaValor;
-    const novoValor = prompt(
-      `ID do aluno no Control iD (catraca) para ${nome}:\nDeixe em branco para desvincular.`,
-      valorAtual
-    );
-    if (novoValor === null) return;
-    btnCatraca.disabled = true;
-    try {
-      await api.patch(`/api/admin/alunos/${id}/catraca`, { controlid_user_id: novoValor.trim() || null });
-      toast(novoValor.trim() ? `${nome} vinculado à catraca.` : `${nome} desvinculado da catraca.`, 'success');
-      carregarAlunos(document.getElementById('busca-aluno').value.trim(), paginaAtual);
-    } catch (err) {
-      toast(err.message || 'Erro ao vincular catraca.', 'error');
-    } finally {
-      btnCatraca.disabled = false;
-    }
+  const btnDetalhe = ev.target.closest('[data-detalhe-id]');
+  if (btnDetalhe) {
+    await abrirDialogDetalhe(btnDetalhe.dataset.detalheId);
   }
 });
 
@@ -250,54 +198,6 @@ function gerarSenhaTemp() {
   for (let i = 0; i < 4; i++) senha += caractereAleatorio(numeros);
   return senha;
 }
-
-const dialogNovoCliente = document.getElementById('dialog-novo-cliente');
-const formNovoCliente = document.getElementById('form-novo-cliente');
-const inputNcNome = document.getElementById('nc-nome');
-const inputNcEmail = document.getElementById('nc-email');
-const inputNcTelefone = document.getElementById('nc-telefone');
-const inputNcSenha = document.getElementById('nc-senha');
-
-document.getElementById('btn-novo-cliente').addEventListener('click', () => {
-  formNovoCliente.reset();
-  inputNcSenha.value = gerarSenhaTemp();
-  dialogNovoCliente.showModal();
-});
-
-document.getElementById('btn-nc-cancel').addEventListener('click', () => dialogNovoCliente.close());
-
-document.getElementById('btn-nc-copiar-senha').addEventListener('click', async () => {
-  try {
-    await navigator.clipboard.writeText(inputNcSenha.value);
-    toast('Senha copiada.', 'success');
-  } catch {
-    toast('Não foi possível copiar. Copie manualmente.', 'error');
-  }
-});
-
-formNovoCliente.addEventListener('submit', async (ev) => {
-  ev.preventDefault();
-  const btnConfirm = document.getElementById('btn-nc-confirm');
-  btnConfirm.disabled = true;
-  btnConfirm.textContent = 'Cadastrando...';
-
-  try {
-    const { user } = await api.post('/api/auth/registro', {
-      nome: inputNcNome.value.trim(),
-      email: inputNcEmail.value.trim(),
-      senha: inputNcSenha.value,
-      telefone: inputNcTelefone.value.trim(),
-    });
-    dialogNovoCliente.close();
-    toast(`${user.nome} cadastrado! Agora escolha o plano.`, 'success');
-    await abrirDialogMatricula(user.id, user.nome, '');
-  } catch (err) {
-    toast(err.message || 'Erro ao cadastrar cliente.', 'error');
-  } finally {
-    btnConfirm.disabled = false;
-    btnConfirm.textContent = 'Cadastrar e matricular';
-  }
-});
 
 // ===== Adicionar aluno (assistente com verificação facial) =====
 const dialogAdicionarAluno = document.getElementById('dialog-adicionar-aluno');
