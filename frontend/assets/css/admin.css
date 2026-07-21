@@ -158,9 +158,7 @@
 /* ===== Modal ===== */
 .modal-overlay {
   position: fixed; inset: 0; z-index: 60;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  background: rgba(0,0,0,0.85);
   display: flex; align-items: center; justify-content: center;
   padding: 1.5rem;
 }
@@ -169,10 +167,6 @@
 @media (max-width: 900px) {
   .sidebar-toggle { display: inline-flex; }
   .page-head { position: relative; padding-left: 0; }
-  /* mesmo motivo do menu lateral e do .admin-dialog: no mobile o modal cobre
-     quase a tela toda, então o blur do fundo borra bastante conteúdo atrás
-     dele — sólido evita o efeito de mancha */
-  .modal-overlay { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(0,0,0,0.85); }
 }
 
 /* ===== Trend pill (variação % vs período anterior) ===== */
@@ -322,51 +316,31 @@
   .treinos-layout { grid-template-columns: 1fr; }
 }
 
-/* ===== Admin Dialog ===== */
+/* ===== Admin Dialog =====
+   Era vidro (backdrop-filter + máscara de canto) — tirado pelo mesmo
+   motivo do resto do arquivo: além de borrar conteúdo atrás, a combinação
+   com mask-image gerava artefato visual (mancha) por conta própria. */
 .admin-dialog {
   position: relative;
   overflow: hidden;
   width: 100%; max-width: 400px;
-  border: 1px solid rgba(255,255,255,0.09);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015) 55%);
-  backdrop-filter: blur(22px) saturate(160%);
-  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  background: var(--color-surface);
   color: var(--color-text);
   padding: 2rem;
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.14),
-    inset 0 -8px 18px rgba(0,0,0,0.25),
-    0 24px 64px rgba(0,0,0,0.5);
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  box-shadow: var(--shadow-card);
 }
 .admin-dialog[open] { animation: dialog-in 0.25s cubic-bezier(.16,1,.3,1); }
-
-/* Mesmo motivo do menu lateral: no mobile a tela é pequena e o dialog cobre
-   quase tudo, então o blur borra bastante conteúdo atrás dele. Sólido evita
-   o mesmo efeito de mancha. */
-@media (max-width: 900px) {
-  .admin-dialog {
-    background: var(--color-surface);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-}
 @keyframes dialog-in {
   from { opacity: 0; transform: scale(0.96) translateY(10px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 .admin-dialog::backdrop {
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(3px);
+  background: rgba(0,0,0,0.75);
   animation: backdrop-in 0.2s ease;
 }
 @keyframes backdrop-in { from { opacity: 0; } to { opacity: 1; } }
-/* Precisa vir DEPOIS da regra base acima — mesma especificidade
-   (.admin-dialog::backdrop), então quem vem por último no arquivo vence. */
-@media (max-width: 900px) {
-  .admin-dialog::backdrop { background: rgba(0,0,0,0.85); backdrop-filter: none; }
-}
 .admin-dialog h2 { margin-bottom: 1.25rem; font-size: 1.1rem; }
 .admin-dialog .field-label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--color-muted); margin-bottom: 0.4rem; }
 .dialog-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
@@ -403,90 +377,16 @@
   pointer-events: none;
 }
 
-/* ===== Sidebar em vidro ===== */
-.app-shell .sidebar {
-  background: linear-gradient(160deg, rgba(255,255,255,0.055), rgba(255,255,255,0.012) 55%);
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border-right: 1px solid rgba(255,255,255,0.08);
-}
-:root[data-theme="light"] .app-shell .sidebar {
-  background: linear-gradient(160deg, rgba(255,255,255,0.6), rgba(255,255,255,0.28) 55%);
-  border-right: 1px solid rgba(255,255,255,0.5);
-}
-
-/* No mobile o menu vira uma gaveta fixa POR CIMA do conteúdo (não do lado,
-   como no desktop) — o backdrop-filter então borra os cards/ícones logo
-   atrás dela, o que lê como mancha. Fundo sólido resolve. */
-@media (max-width: 900px) {
-  .app-shell .sidebar {
-    background: var(--color-surface);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-}
-
-/* ===== Cards em vidro (stat cards, gráficos, listas, configurações) =====
-   Cobre .card.modal-box (pagamentos.html) automaticamente — não precisa
-   de regra separada pro modal, ele já tem a classe .card. */
-.app-shell .card {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015) 55%);
-  backdrop-filter: blur(22px) saturate(160%);
-  -webkit-backdrop-filter: blur(22px) saturate(160%);
-  border: 1px solid rgba(255,255,255,0.09);
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.14),
-    inset 0 -8px 18px rgba(0,0,0,0.25),
-    0 10px 26px rgba(0,0,0,0.4);
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
-}
-:root[data-theme="light"] .app-shell .card {
-  background: linear-gradient(160deg, rgba(255,255,255,0.62), rgba(255,255,255,0.3) 55%);
-  border: 1px solid rgba(255,255,255,0.55);
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.7),
-    inset 0 -8px 18px rgba(20,18,15,0.04),
-    0 10px 26px rgba(20,18,15,0.08);
-}
-
-/* ===== Tabelas em vidro ===== */
-.app-shell .table-wrap {
-  position: relative;
-  overflow-x: auto;
-  overflow-y: hidden;
-  background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012) 55%);
-  backdrop-filter: blur(18px) saturate(150%);
-  -webkit-backdrop-filter: blur(18px) saturate(150%);
-  border: 1px solid rgba(255,255,255,0.09);
-}
-:root[data-theme="light"] .app-shell .table-wrap {
-  background: linear-gradient(160deg, rgba(255,255,255,0.6), rgba(255,255,255,0.28) 55%);
-  border: 1px solid rgba(255,255,255,0.5);
-}
-
-/* ===== Kanban do CRM em vidro =====
-   .kanban-card fica menos transparente que os outros elementos de vidro —
-   ele empilha em cima da coluna (que já é vidro) e precisa de bom
-   contraste de texto durante o arraste. */
-.app-shell .kanban-col {
-  background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012) 55%);
-  backdrop-filter: blur(18px) saturate(150%);
-  -webkit-backdrop-filter: blur(18px) saturate(150%);
-  border: 1px solid rgba(255,255,255,0.09);
-}
-.app-shell .kanban-card {
-  background: linear-gradient(160deg, rgba(255,255,255,0.09), rgba(255,255,255,0.025) 55%);
-  backdrop-filter: blur(14px) saturate(150%);
-  -webkit-backdrop-filter: blur(14px) saturate(150%);
-  border: 1px solid rgba(255,255,255,0.11);
-}
-:root[data-theme="light"] .app-shell .kanban-col {
-  background: linear-gradient(160deg, rgba(255,255,255,0.6), rgba(255,255,255,0.28) 55%);
-  border: 1px solid rgba(255,255,255,0.5);
-}
-:root[data-theme="light"] .app-shell .kanban-card {
-  background: linear-gradient(160deg, rgba(255,255,255,0.78), rgba(255,255,255,0.45) 55%);
-  border: 1px solid rgba(255,255,255,0.6);
-}
+/* ===== Sidebar, cards, tabelas, kanban =====
+   Era um efeito de "vidro" (fundo translúcido + backdrop-filter blur +
+   máscara de canto). Tirado de vez: além do blur borrar o conteúdo atrás
+   em qualquer tela pequena/overlay, a combinação mask-image+backdrop-filter
+   também gerava um artefato diagonal (tipo mancha) direto dentro do card,
+   sem precisar de overlay nenhum — bug de renderização do WebView, não
+   dava pra confiar nisso. Fundo sólido em todo lugar, mesmo padrão do
+   .card normal (global.css). */
+.app-shell .sidebar { background: var(--color-surface); border-right: 1px solid var(--color-border); }
+.app-shell .card { background: var(--color-surface); border: 1px solid var(--color-border); box-shadow: var(--shadow-card); }
+.app-shell .table-wrap { background: var(--color-surface); border: 1px solid var(--color-border); }
+.app-shell .kanban-col { background: var(--color-surface); border: 1px solid var(--color-border); }
+.app-shell .kanban-card { background: var(--color-surface-2); border: 1px solid var(--color-border); }
