@@ -412,7 +412,7 @@
 .app-shell .kanban-col { background: var(--color-surface); border: 1px solid var(--color-border); }
 .app-shell .kanban-card { background: var(--color-surface-2); border: 1px solid var(--color-border); }
 
-/* ===== Reskin "Capsule" — só no dashboard admin (frontend/admin/index.html) =====
+/* ===== Paleta do dashboard admin (frontend/admin/index.html) =====
    Mesma técnica de escopo por variável que o resto do admin já usa (ver bloco
    acima): redefine a marca localmente em .dash-capsule, então tudo que já lê
    var(--color-primary/-wine/-coral)/--gradient-flame — ícones dos stat-cards,
@@ -422,14 +422,14 @@
    sólidos por padrão (bloco acima), então não precisa achatar vidro aqui —
    só a paleta e o layout dos stat-cards mudam. */
 .dash-capsule {
-  --color-primary: #0068f7;
-  --color-primary-hover: #005fe1;
-  --color-primary-soft: rgba(0, 104, 247, 0.14);
-  --color-wine: #003988;
-  --color-wine-soft: rgba(0, 44, 104, 0.12);
-  --color-coral: #005fe1;
-  --color-coral-soft: rgba(0, 95, 225, 0.14);
-  --gradient-flame: linear-gradient(135deg, #3386f9 0%, #0068f7 32%, #005fe1 68%, #003988 100%);
+  --color-primary: #d946ef;
+  --color-primary-hover: #c026d3;
+  --color-primary-soft: rgba(217, 70, 239, 0.14);
+  --color-wine: #6d28d9;
+  --color-wine-soft: rgba(109, 40, 217, 0.12);
+  --color-coral: #9333ea;
+  --color-coral-soft: rgba(147, 51, 234, 0.14);
+  --gradient-flame: linear-gradient(135deg, #f0abfc 0%, #d946ef 32%, #9333ea 68%, #6d28d9 100%);
 }
 
 /* Stat-cards: ícone em badge circular tintado + rótulo lado a lado, valor grande embaixo */
@@ -444,11 +444,11 @@
 }
 .dash-capsule .admin-stat-cards strong { font-size: 1.85rem; }
 
-/* Card "hero" (Faturamento do mês) — equivalente ao "Total balance" do Capsule */
+/* Card "hero" (Faturamento do mês) — destaque cheio, tipo "total balance" */
 .dash-capsule .stat-card-hero {
   background: var(--gradient-flame);
   border-color: transparent;
-  box-shadow: 0 10px 28px rgba(0, 104, 247, 0.35), inset 0 1px 0 rgba(255,255,255,.15);
+  box-shadow: 0 10px 28px rgba(217, 70, 239, 0.3), inset 0 1px 0 rgba(255,255,255,.15);
 }
 .dash-capsule .stat-card-hero .stat-icon { background: rgba(255,255,255,.2); }
 .dash-capsule .stat-card-hero .stat-icon,
