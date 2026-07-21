@@ -465,3 +465,17 @@ formConfirmarExclusao.addEventListener('submit', async (ev) => {
     toast(err.message || 'Erro ao excluir aluno.', 'error');
   }
 });
+
+async function renderFrequencia30Dias(usuarioId) {
+  const grid = document.getElementById('detalhe-frequencia-grid');
+  try {
+    const dias = await api.get(`/api/admin/alunos/${usuarioId}/frequencia`);
+    grid.innerHTML = dias.map((d) => {
+      const data = new Date(d.data);
+      const label = `${String(data.getUTCDate()).padStart(2, '0')}/${String(data.getUTCMonth() + 1).padStart(2, '0')}`;
+      return `<div class="freq30-dia${d.foi ? ' foi' : ''}" title="${label}${d.foi ? ' — foi' : ' — faltou'}"></div>`;
+    }).join('');
+  } catch {
+    grid.innerHTML = '<div class="empty-state">Não foi possível carregar a frequência.</div>';
+  }
+}

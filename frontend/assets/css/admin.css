@@ -44,6 +44,13 @@
 .detalhe-grid .text-muted { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; display: block; margin-bottom: 0.15rem; }
 .detalhe-atalhos { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
 .detalhe-frequencia h3 { font-size: 0.92rem; margin-bottom: 0.75rem; }
+.freq30-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 0.3rem; }
+.freq30-dia { aspect-ratio: 1; border-radius: 5px; background: var(--color-surface-2); }
+.freq30-dia.foi { background: var(--color-primary); }
+.freq30-legenda { display: flex; gap: 1rem; margin-top: 0.6rem; font-size: 0.76rem; color: var(--color-muted); }
+.freq30-legenda-item { display: flex; align-items: center; gap: 0.35rem; }
+.freq30-legenda-dot { width: 12px; height: 12px; border-radius: 3px; background: var(--color-surface-2); }
+.freq30-legenda-dot.foi { background: var(--color-primary); }
 
 /* ===== Gráfico simples de barras (sem dependências) ===== */
 .chart-bars { display: flex; align-items: flex-end; gap: 1rem; height: 200px; padding-top: 1rem; }
