@@ -233,12 +233,21 @@ document.getElementById('busca-aluno').addEventListener('input', debounce((ev) =
 
 carregarAlunos();
 
+// Math.random() não é seguro pra gerar senha (previsível/reproduzível) —
+// usa o CSPRNG do navegador. O viés de módulo aqui é desprezível pro
+// tamanho desses alfabetos, não compensa a complexidade de rejection sampling.
+function caractereAleatorio(alfabeto) {
+  const buf = new Uint32Array(1);
+  crypto.getRandomValues(buf);
+  return alfabeto[buf[0] % alfabeto.length];
+}
+
 function gerarSenhaTemp() {
   const letras = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz';
   const numeros = '23456789';
   let senha = '';
-  for (let i = 0; i < 6; i++) senha += letras[Math.floor(Math.random() * letras.length)];
-  for (let i = 0; i < 4; i++) senha += numeros[Math.floor(Math.random() * numeros.length)];
+  for (let i = 0; i < 6; i++) senha += caractereAleatorio(letras);
+  for (let i = 0; i < 4; i++) senha += caractereAleatorio(numeros);
   return senha;
 }
 

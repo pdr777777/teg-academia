@@ -11,7 +11,7 @@ function renderStatusCatracas(catracas) {
         ${Icons.icon(c.online ? 'shield-check' : 'shield', { size: 20 })}
       </span>
       <strong>${c.online ? 'Online' : 'Offline'}</strong>
-      <span>${c.catraca}</span>
+      <span>${escapeHtml(c.catraca)}</span>
     </div>
   `).join('');
 }
@@ -41,9 +41,9 @@ async function carregarCatraca() {
     } else {
       feedBody.innerHTML = d.feed.map((f) => `
         <tr>
-          <td>${f.nome || 'Não identificado'}</td>
-          <td>${f.catraca}</td>
-          <td>${f.tipo}</td>
+          <td>${escapeHtml(f.nome || 'Não identificado')}</td>
+          <td>${escapeHtml(f.catraca)}</td>
+          <td>${escapeHtml(f.tipo)}</td>
           <td>${formatarData(f.criado_em)}</td>
         </tr>
       `).join('');
