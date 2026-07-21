@@ -1,0 +1,7 @@
+# Empacotamento nativo (Capacitor) — boilerplate gerado, sem valor semantico pro grafo
+android/
+ios/
+
+# Fontes de icone/splash duplicadas em varias resolucoes
+assets/
+frontend/assets/img/
