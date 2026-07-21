@@ -151,7 +151,7 @@ router.get('/alunos', authMiddleware, requireRole('admin', 'dono', 'professor'),
     const offset = (page - 1) * limit;
 
     const paramsBusca = [];
-    let where = "WHERE u.role = 'aluno'";
+    let where = "WHERE u.role = 'aluno' AND u.excluido_em IS NULL";
     if (busca) where += ` AND (u.nome ILIKE $${paramsBusca.push('%' + busca + '%')} OR u.email ILIKE $${paramsBusca.push('%' + busca + '%')})`;
 
     const { rows: [{ total }] } = await pool.query(
@@ -160,7 +160,7 @@ router.get('/alunos', authMiddleware, requireRole('admin', 'dono', 'professor'),
     );
 
     const { rows: alunos } = await pool.query(
-      `SELECT u.id, u.nome, u.email, u.telefone, u.ativo, u.xp, u.sequencia_atual, u.created_at, u.controlid_user_id, u.origem_externa,
+      `SELECT u.id, u.nome, u.email, u.telefone, u.ativo, u.xp, u.sequencia_atual, u.created_at, u.controlid_user_id, u.origem_externa, u.foto_url,
               m.id as matricula_id, m.status as matricula_status, m.data_vencimento, p.nome as plano_nome
        FROM usuarios u
        LEFT JOIN matriculas m ON m.usuario_id = u.id AND m.status = 'ativa'
@@ -175,6 +175,69 @@ router.get('/alunos', authMiddleware, requireRole('admin', 'dono', 'professor'),
   }
 });
 
+// GET /api/admin/alunos/:id — detalhe completo de 1 aluno (painel "Mais opções")
+router.get('/alunos/:id', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+  try {
+    const { rows: [aluno] } = await pool.query(
+      `SELECT u.id, u.nome, u.email, u.telefone, u.cpf, u.apelido, u.foto_url, u.ativo, u.controlid_user_id,
+              m.id as matricula_id, m.status as matricula_status, m.data_vencimento, p.nome as plano_nome
+       FROM usuarios u
+       LEFT JOIN matriculas m ON m.usuario_id = u.id AND m.status = 'ativa'
+       LEFT JOIN planos p ON p.id = m.plano_id
+       WHERE u.id = $1 AND u.role = 'aluno'`,
+      [req.params.id]
+    );
+    if (!aluno) return res.status(404).json({ error: 'Aluno não encontrado' });
+
+    const { rows: [{ ultima_mensalidade }] } = await pool.query(
+      `SELECT MAX(data_pagamento) AS ultima_mensalidade FROM pagamentos WHERE usuario_id = $1 AND status = 'pago'`,
+      [req.params.id]
+    );
+
+    res.json({ ...aluno, ultima_mensalidade });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/admin/alunos/:id/frequencia — últimos 30 dias (foi/não foi), pro gráfico do painel
+router.get('/alunos/:id/frequencia', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT gs.dia::date AS data, (f.id IS NOT NULL) AS foi
+       FROM generate_series(CURRENT_DATE - INTERVAL '29 days', CURRENT_DATE, INTERVAL '1 day') AS gs(dia)
+       LEFT JOIN frequencias f ON f.usuario_id = $1 AND f.data = gs.dia::date
+       ORDER BY gs.dia`,
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DELETE /api/admin/alunos/:id — exclusão lógica (soma da lista, bloqueia acesso, preserva histórico)
+router.delete('/alunos/:id', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+  try {
+    const { rows: [user] } = await pool.query(
+      `UPDATE usuarios SET excluido_em = NOW(), ativo = FALSE, updated_at = NOW()
+       WHERE id = $1 AND role = 'aluno' RETURNING id`,
+      [req.params.id]
+    );
+    if (!user) return res.status(404).json({ error: 'Aluno não encontrado' });
+
+    try {
+      await catracaService.bloquearAcesso(user.id);
+    } catch (err) {
+      logger.error('catraca.bloquearAcesso falhou (exclusão)', { usuarioId: user.id, erro: err.message });
+    }
+
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // PATCH /api/admin/alunos/:id/toggle (ativar/desativar)
 router.patch('/alunos/:id/toggle', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
   try {
@@ -183,6 +246,14 @@ router.patch('/alunos/:id/toggle', authMiddleware, requireRole('admin', 'dono'),
       [req.params.id]
     );
     if (!user) return res.status(404).json({ error: 'Aluno não encontrado' });
+
+    try {
+      if (user.ativo) await catracaService.liberarAcesso(user.id);
+      else await catracaService.bloquearAcesso(user.id);
+    } catch (err) {
+      logger.error('catraca.liberarAcesso/bloquearAcesso falhou (toggle)', { usuarioId: user.id, erro: err.message });
+    }
+
     res.json(user);
   } catch (err) {
     next(err);

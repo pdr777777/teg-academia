@@ -35,6 +35,13 @@ function iniciais(nome) {
   return nome.trim().split(/\s+/).slice(0, 2).map((p) => p[0].toUpperCase()).join('');
 }
 
+function renderAvatar(nome, fotoUrl, sizePx = 40) {
+  if (fotoUrl) {
+    return `<img src="${escapeHtml(fotoUrl)}" alt="${escapeHtml(nome)}" class="avatar-img" style="width:${sizePx}px;height:${sizePx}px" />`;
+  }
+  return `<span class="avatar-fallback" style="width:${sizePx}px;height:${sizePx}px;font-size:${Math.round(sizePx * 0.32)}px">${escapeHtml(iniciais(nome))}</span>`;
+}
+
 function logout() {
   localStorage.removeItem('token');
   window.location.href = '/login.html';

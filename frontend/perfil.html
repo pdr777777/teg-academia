@@ -43,10 +43,14 @@
 
         <form id="form-perfil" class="card" style="margin-top:1.5rem;max-width:520px">
           <div class="row gap-md" style="align-items:center;margin-bottom:1.5rem">
-            <span class="avatar-fallback" id="perfil-avatar" style="width:56px;height:56px;font-size:1.1rem">-</span>
+            <div id="perfil-avatar-wrap"></div>
             <div>
               <strong id="perfil-nome-display">-</strong>
               <div class="text-muted" style="font-size:.85rem" id="perfil-email-display">-</div>
+              <label class="btn btn-ghost btn-sm" style="margin-top:.5rem;cursor:pointer">
+                Trocar foto
+                <input type="file" id="perfil-foto-input" accept="image/jpeg,image/png,image/webp" style="display:none" />
+              </label>
             </div>
           </div>
 
@@ -67,6 +71,10 @@
           <div class="field">
             <label for="perfil-cpf">CPF</label>
             <input type="text" id="perfil-cpf" disabled />
+          </div>
+          <div class="field">
+            <label for="perfil-apelido">Apelido</label>
+            <input type="text" id="perfil-apelido" placeholder="Como prefere ser chamado" maxlength="60" />
           </div>
 
           <button type="submit" class="btn btn-primary" id="btn-perfil-salvar">Salvar alterações</button>

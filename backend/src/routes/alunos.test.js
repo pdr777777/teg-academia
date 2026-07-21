@@ -114,6 +114,82 @@ describe('notificacoes_whatsapp — preferência de notificação', () => {
   });
 });
 
+describe('apelido no perfil', () => {
+  test('GET /api/alunos/perfil inclui apelido', async () => {
+    const aluno = await criarUsuario({ role: 'aluno' });
+    await pool.query('UPDATE usuarios SET apelido = $1 WHERE id = $2', ['Alunão', aluno.id]);
+
+    const res = await request(app)
+      .get('/api/alunos/perfil')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.apelido).toBe('Alunão');
+
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
+  });
+
+  test('PATCH /api/alunos/perfil salva apelido', async () => {
+    const aluno = await criarUsuario({ role: 'aluno' });
+
+    const res = await request(app)
+      .patch('/api/alunos/perfil')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`)
+      .send({ apelido: 'Turbo' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.apelido).toBe('Turbo');
+
+    const { rows: [row] } = await pool.query('SELECT apelido FROM usuarios WHERE id = $1', [aluno.id]);
+    expect(row.apelido).toBe('Turbo');
+
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
+  });
+});
+
+jest.mock('../services/supabaseStorageService');
+const supabaseStorageService = require('../services/supabaseStorageService');
+
+describe('POST /api/alunos/perfil/foto', () => {
+  test('sobe a foto e grava foto_url no usuário', async () => {
+    supabaseStorageService.uploadFotoPerfil.mockResolvedValue('https://exemplo.supabase.co/foto-nova.jpg');
+    const aluno = await criarUsuario({ role: 'aluno' });
+
+    const res = await request(app)
+      .post('/api/alunos/perfil/foto')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`)
+      .attach('foto', Buffer.from('fake-image-bytes'), { filename: 'foto.jpg', contentType: 'image/jpeg' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.foto_url).toBe('https://exemplo.supabase.co/foto-nova.jpg');
+    expect(supabaseStorageService.uploadFotoPerfil).toHaveBeenCalledWith(aluno.id, expect.any(Buffer), 'image/jpeg');
+
+    const { rows: [row] } = await pool.query('SELECT foto_url FROM usuarios WHERE id = $1', [aluno.id]);
+    expect(row.foto_url).toBe('https://exemplo.supabase.co/foto-nova.jpg');
+
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
+  });
+
+  test('rejeita sem arquivo', async () => {
+    const aluno = await criarUsuario({ role: 'aluno' });
+    const res = await request(app)
+      .post('/api/alunos/perfil/foto')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`);
+    expect(res.status).toBe(400);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
+  });
+
+  test('rejeita tipo de arquivo não suportado', async () => {
+    const aluno = await criarUsuario({ role: 'aluno' });
+    const res = await request(app)
+      .post('/api/alunos/perfil/foto')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`)
+      .attach('foto', Buffer.from('fake-pdf-bytes'), { filename: 'doc.pdf', contentType: 'application/pdf' });
+    expect(res.status).toBe(400);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
+  });
+});
+
 afterAll(async () => {
   await pool.end();
 });

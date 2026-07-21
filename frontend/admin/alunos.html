@@ -41,15 +41,12 @@
           <span data-icon="search" data-icon-size="16"></span>
           <input type="text" id="busca-aluno" placeholder="Buscar por nome ou e-mail..." />
         </div>
-        <button class="btn btn-primary" id="btn-novo-cliente" data-role-adminup>
-          <span data-icon="user-plus" data-icon-size="16"></span>Novo Cliente
-        </button>
       </div>
 
       <div class="table-wrap" data-reveal>
         <table>
           <thead>
-            <tr><th>Aluno</th><th>Plano</th><th>Vencimento</th><th>XP</th><th>Sequência</th><th>Acesso à academia</th><th style="width:150px"></th></tr>
+            <tr><th>Aluno</th><th>Plano</th><th>Vencimento</th><th>XP</th><th>Sequência</th><th>Acesso à academia</th><th style="width:190px"></th></tr>
           </thead>
           <tbody id="alunos-body">
             <tr><td colspan="7" class="loading-row"><span class="spinner"></span></td></tr>
@@ -59,35 +56,6 @@
       <div id="alunos-paginacao" style="display:flex;justify-content:space-between;align-items:center;padding:.85rem .2rem"></div>
     </div>
   </div>
-
-  <dialog id="dialog-novo-cliente" class="admin-dialog">
-    <form id="form-novo-cliente" method="dialog">
-      <h2>Novo cliente</h2>
-
-      <label class="field-label">Nome completo <span class="text-danger">*</span></label>
-      <input type="text" id="nc-nome" class="input" placeholder="Nome do cliente" required />
-
-      <label class="field-label" style="margin-top:1rem">E-mail <span class="text-danger">*</span></label>
-      <input type="email" id="nc-email" class="input" placeholder="email@exemplo.com" required />
-
-      <label class="field-label" style="margin-top:1rem">Telefone</label>
-      <input type="tel" id="nc-telefone" class="input" placeholder="(00) 00000-0000" />
-
-      <label class="field-label" style="margin-top:1rem">Senha temporária</label>
-      <div class="row gap-sm">
-        <input type="text" id="nc-senha" class="input" readonly style="flex:1" />
-        <button type="button" class="btn btn-ghost btn-sm" id="btn-nc-copiar-senha" title="Copiar senha">
-          <span data-icon="copy" data-icon-size="14"></span>
-        </button>
-      </div>
-      <p class="text-muted" style="font-size:.78rem;margin-top:.35rem">Repasse essa senha ao cliente — ele pode trocá-la depois em "Esqueci minha senha".</p>
-
-      <div class="dialog-actions">
-        <button type="button" class="btn btn-ghost" id="btn-nc-cancel">Cancelar</button>
-        <button type="submit" class="btn btn-primary" id="btn-nc-confirm">Cadastrar e matricular</button>
-      </div>
-    </form>
-  </dialog>
 
   <dialog id="dialog-matricula" class="admin-dialog">
     <form id="form-matricula" method="dialog">
@@ -190,6 +158,21 @@
           <button type="submit" class="btn btn-primary" id="btn-aa-concluir">Concluir</button>
         </div>
       </section>
+    </form>
+  </dialog>
+
+  <dialog id="dialog-detalhe-aluno" class="admin-dialog admin-dialog-lg">
+    <div id="detalhe-conteudo"></div>
+  </dialog>
+
+  <dialog id="dialog-confirmar-exclusao" class="admin-dialog">
+    <form id="form-confirmar-exclusao" method="dialog">
+      <h2>Excluir aluno</h2>
+      <p class="text-muted" id="confirmar-exclusao-texto"></p>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" id="btn-confirmar-exclusao-cancelar">Cancelar</button>
+        <button type="submit" class="btn btn-danger" id="btn-confirmar-exclusao-ok">Excluir</button>
+      </div>
     </form>
   </dialog>
 

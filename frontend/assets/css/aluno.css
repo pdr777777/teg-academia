@@ -68,6 +68,7 @@
   font-size: 0.78rem; font-weight: 800; color: #fff;
   flex-shrink: 0;
 }
+.avatar-img { border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 
 /* ===== Transaction item (histórico de pagamentos) ===== */
 .transaction-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid var(--color-border); }

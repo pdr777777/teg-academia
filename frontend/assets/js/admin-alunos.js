@@ -62,7 +62,7 @@ async function carregarAlunos(busca = '', page = 1) {
           <tr>
             <td>
               <div class="ranking-avatar-row">
-                <span class="avatar-fallback">${escapeHtml(iniciais(a.nome))}</span>
+                ${renderAvatar(a.nome, a.foto_url, 36)}
                 <div><strong>${escapeHtml(a.nome)}</strong><div class="text-muted" style="font-size:.78rem">${escapeHtml(a.email)}</div></div>
               </div>
             </td>
@@ -71,23 +71,16 @@ async function carregarAlunos(busca = '', page = 1) {
             <td>${a.xp}</td>
             <td>${a.sequencia_atual} dias</td>
             <td><span class="badge ${a.ativo ? 'badge-success' : 'badge-muted'}">${Icons.icon(a.ativo ? 'unlock' : 'lock', { size: 12 })}${a.ativo ? 'Liberado' : 'Bloqueado'}</span></td>
-            <td style="display:flex;gap:.4rem;align-items:center">
-              <label class="switch" title="Liberar/Bloquear acesso à academia (catraca)">
-                <input type="checkbox" data-toggle-id="${a.id}" ${a.ativo ? 'checked' : ''} />
-                <span class="slider"></span>
-              </label>
-              <button class="btn btn-ghost btn-sm" data-mat-id="${a.id}" data-mat-nome="${escapeHtml(a.nome)}"
-                data-mat-matricula-id="${a.matricula_id || ''}"
-                title="${a.matricula_status === 'ativa' ? 'Renovar matrícula' : 'Matricular'}">
-                ${a.matricula_status === 'ativa' ? Icons.icon('refresh-cw', { size: 14 }) : Icons.icon('user-plus', { size: 14 })}
-              </button>
-              <button class="btn btn-ghost btn-sm" data-reset-id="${a.id}" data-reset-nome="${escapeHtml(a.nome)}" title="Redefinir senha">
-                ${Icons.icon('key', { size: 14 })}
-              </button>
-              <button class="btn btn-ghost btn-sm" data-catraca-id="${a.id}" data-catraca-nome="${escapeHtml(a.nome)}" data-catraca-valor="${escapeHtml(a.controlid_user_id || '')}"
-                title="${a.controlid_user_id ? `Vinculado à catraca (ID ${escapeHtml(a.controlid_user_id)})` : 'Vincular à catraca (reconhecimento facial)'}"
-                style="${a.controlid_user_id ? 'color:var(--color-success)' : ''}">
-                ${Icons.icon('shield-check', { size: 14 })}
+            <td class="acoes-aluno">
+              <div class="switch-row">
+                <label class="switch" title="Liberar/Bloquear acesso à academia (catraca)">
+                  <input type="checkbox" data-toggle-id="${a.id}" ${a.ativo ? 'checked' : ''} />
+                  <span class="slider"></span>
+                </label>
+                <span class="switch-label">Acesso</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" data-detalhe-id="${a.id}" title="Mais opções">
+                ${Icons.icon('more-vertical', { size: 16 })}
               </button>
             </td>
           </tr>
@@ -115,56 +108,11 @@ document.getElementById('alunos-body').addEventListener('change', async (ev) => 
   }
 });
 
-// Clicks na tabela (reset senha + matricular/renovar)
+// Abre o painel "Mais opções"
 document.getElementById('alunos-body').addEventListener('click', async (ev) => {
-  // Redefinir senha
-  const btnReset = ev.target.closest('[data-reset-id]');
-  if (btnReset) {
-    const id = btnReset.dataset.resetId;
-    const nome = btnReset.dataset.resetNome;
-    const nova_senha = prompt(`Nova senha para ${nome} (mínimo 6 caracteres):`);
-    if (!nova_senha) return;
-    if (nova_senha.length < 6) { toast('Senha deve ter no mínimo 6 caracteres.', 'error'); return; }
-    btnReset.disabled = true;
-    try {
-      await api.patch(`/api/admin/alunos/${id}/senha`, { nova_senha });
-      toast(`Senha de ${nome} redefinida com sucesso.`, 'success');
-    } catch (err) {
-      toast(err.message || 'Erro ao redefinir senha.', 'error');
-    } finally {
-      btnReset.disabled = false;
-    }
-    return;
-  }
-
-  // Matricular / Renovar
-  const btnMat = ev.target.closest('[data-mat-id]');
-  if (btnMat) {
-    await abrirDialogMatricula(btnMat.dataset.matId, btnMat.dataset.matNome, btnMat.dataset.matMatriculaId || '');
-    return;
-  }
-
-  // Vincular ID da catraca (Control iD)
-  const btnCatraca = ev.target.closest('[data-catraca-id]');
-  if (btnCatraca) {
-    const id = btnCatraca.dataset.catracaId;
-    const nome = btnCatraca.dataset.catracaNome;
-    const valorAtual = btnCatraca.dataset.catracaValor;
-    const novoValor = prompt(
-      `ID do aluno no Control iD (catraca) para ${nome}:\nDeixe em branco para desvincular.`,
-      valorAtual
-    );
-    if (novoValor === null) return;
-    btnCatraca.disabled = true;
-    try {
-      await api.patch(`/api/admin/alunos/${id}/catraca`, { controlid_user_id: novoValor.trim() || null });
-      toast(novoValor.trim() ? `${nome} vinculado à catraca.` : `${nome} desvinculado da catraca.`, 'success');
-      carregarAlunos(document.getElementById('busca-aluno').value.trim(), paginaAtual);
-    } catch (err) {
-      toast(err.message || 'Erro ao vincular catraca.', 'error');
-    } finally {
-      btnCatraca.disabled = false;
-    }
+  const btnDetalhe = ev.target.closest('[data-detalhe-id]');
+  if (btnDetalhe) {
+    await abrirDialogDetalhe(btnDetalhe.dataset.detalheId);
   }
 });
 
@@ -250,54 +198,6 @@ function gerarSenhaTemp() {
   for (let i = 0; i < 4; i++) senha += caractereAleatorio(numeros);
   return senha;
 }
-
-const dialogNovoCliente = document.getElementById('dialog-novo-cliente');
-const formNovoCliente = document.getElementById('form-novo-cliente');
-const inputNcNome = document.getElementById('nc-nome');
-const inputNcEmail = document.getElementById('nc-email');
-const inputNcTelefone = document.getElementById('nc-telefone');
-const inputNcSenha = document.getElementById('nc-senha');
-
-document.getElementById('btn-novo-cliente').addEventListener('click', () => {
-  formNovoCliente.reset();
-  inputNcSenha.value = gerarSenhaTemp();
-  dialogNovoCliente.showModal();
-});
-
-document.getElementById('btn-nc-cancel').addEventListener('click', () => dialogNovoCliente.close());
-
-document.getElementById('btn-nc-copiar-senha').addEventListener('click', async () => {
-  try {
-    await navigator.clipboard.writeText(inputNcSenha.value);
-    toast('Senha copiada.', 'success');
-  } catch {
-    toast('Não foi possível copiar. Copie manualmente.', 'error');
-  }
-});
-
-formNovoCliente.addEventListener('submit', async (ev) => {
-  ev.preventDefault();
-  const btnConfirm = document.getElementById('btn-nc-confirm');
-  btnConfirm.disabled = true;
-  btnConfirm.textContent = 'Cadastrando...';
-
-  try {
-    const { user } = await api.post('/api/auth/registro', {
-      nome: inputNcNome.value.trim(),
-      email: inputNcEmail.value.trim(),
-      senha: inputNcSenha.value,
-      telefone: inputNcTelefone.value.trim(),
-    });
-    dialogNovoCliente.close();
-    toast(`${user.nome} cadastrado! Agora escolha o plano.`, 'success');
-    await abrirDialogMatricula(user.id, user.nome, '');
-  } catch (err) {
-    toast(err.message || 'Erro ao cadastrar cliente.', 'error');
-  } finally {
-    btnConfirm.disabled = false;
-    btnConfirm.textContent = 'Cadastrar e matricular';
-  }
-});
 
 // ===== Adicionar aluno (assistente com verificação facial) =====
 const dialogAdicionarAluno = document.getElementById('dialog-adicionar-aluno');
@@ -430,3 +330,152 @@ formAdicionarAluno.addEventListener('submit', (ev) => {
   toast('Aluno adicionado com sucesso!', 'success');
   carregarAlunos(document.getElementById('busca-aluno').value.trim(), paginaAtual);
 });
+
+// ===== Painel "Mais opções" (detalhe do aluno) =====
+const dialogDetalhe = document.getElementById('dialog-detalhe-aluno');
+const detalheConteudo = document.getElementById('detalhe-conteudo');
+let detalheAlunoAtual = null;
+
+function renderDetalheAluno(aluno) {
+  detalheConteudo.innerHTML = `
+    <div class="detalhe-head">
+      ${renderAvatar(aluno.nome, aluno.foto_url, 56)}
+      <div>
+        <strong>${escapeHtml(aluno.nome)}</strong>
+        ${aluno.apelido ? `<div class="text-muted" style="font-size:.85rem">"${escapeHtml(aluno.apelido)}"</div>` : ''}
+      </div>
+    </div>
+
+    <div class="detalhe-grid">
+      <div><span class="text-muted">CPF</span><div>${escapeHtml(aluno.cpf || 'Não informado')}</div></div>
+      <div><span class="text-muted">E-mail</span><div>${escapeHtml(aluno.email)}</div></div>
+      <div><span class="text-muted">Telefone</span><div>${escapeHtml(aluno.telefone || 'Não informado')}</div></div>
+      <div><span class="text-muted">Plano</span><div>${aluno.plano_nome ? escapeHtml(aluno.plano_nome) : 'Sem plano ativo'}</div></div>
+      <div><span class="text-muted">Vencimento</span><div>${formatData(aluno.data_vencimento)}</div></div>
+      <div><span class="text-muted">Última mensalidade</span><div>${formatData(aluno.ultima_mensalidade)}</div></div>
+    </div>
+
+    <div class="detalhe-atalhos">
+      <button type="button" class="btn btn-ghost btn-sm" id="btn-detalhe-matricular">
+        ${Icons.icon(aluno.matricula_status === 'ativa' ? 'refresh-cw' : 'user-plus', { size: 14 })}
+        ${aluno.matricula_status === 'ativa' ? 'Renovar matrícula' : 'Matricular'}
+      </button>
+      <button type="button" class="btn btn-ghost btn-sm" id="btn-detalhe-senha">
+        ${Icons.icon('key', { size: 14 })}Redefinir senha
+      </button>
+      <button type="button" class="btn btn-ghost btn-sm" id="btn-detalhe-catraca" style="${aluno.controlid_user_id ? 'color:var(--color-success)' : ''}">
+        ${Icons.icon('shield-check', { size: 14 })}
+        ${aluno.controlid_user_id ? `Vinculado (ID ${escapeHtml(aluno.controlid_user_id)})` : 'Vincular à catraca'}
+      </button>
+    </div>
+
+    <div class="detalhe-frequencia">
+      <h3>Frequência (últimos 30 dias)</h3>
+      <div id="detalhe-frequencia-grid" class="freq30-grid"></div>
+      <div class="freq30-legenda">
+        <span class="freq30-legenda-item"><span class="freq30-legenda-dot foi"></span>Foi</span>
+        <span class="freq30-legenda-item"><span class="freq30-legenda-dot"></span>Faltou</span>
+      </div>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-danger btn-sm" id="btn-detalhe-excluir">
+        ${Icons.icon('trash-2', { size: 14 })}Excluir aluno
+      </button>
+      <button type="button" class="btn btn-ghost" id="btn-detalhe-fechar">Fechar</button>
+    </div>
+  `;
+
+  document.getElementById('btn-detalhe-fechar').addEventListener('click', () => dialogDetalhe.close());
+
+  document.getElementById('btn-detalhe-matricular').addEventListener('click', async () => {
+    dialogDetalhe.close();
+    await abrirDialogMatricula(aluno.id, aluno.nome, aluno.matricula_id || '');
+  });
+
+  document.getElementById('btn-detalhe-senha').addEventListener('click', async () => {
+    const nova_senha = prompt(`Nova senha para ${aluno.nome} (mínimo 6 caracteres):`);
+    if (!nova_senha) return;
+    if (nova_senha.length < 6) { toast('Senha deve ter no mínimo 6 caracteres.', 'error'); return; }
+    try {
+      await api.patch(`/api/admin/alunos/${aluno.id}/senha`, { nova_senha });
+      toast(`Senha de ${aluno.nome} redefinida com sucesso.`, 'success');
+    } catch (err) {
+      toast(err.message || 'Erro ao redefinir senha.', 'error');
+    }
+  });
+
+  document.getElementById('btn-detalhe-catraca').addEventListener('click', async () => {
+    const novoValor = prompt(
+      `ID do aluno no Control iD (catraca) para ${aluno.nome}:\nDeixe em branco para desvincular.`,
+      aluno.controlid_user_id || ''
+    );
+    if (novoValor === null) return;
+    try {
+      await api.patch(`/api/admin/alunos/${aluno.id}/catraca`, { controlid_user_id: novoValor.trim() || null });
+      toast(novoValor.trim() ? `${aluno.nome} vinculado à catraca.` : `${aluno.nome} desvinculado da catraca.`, 'success');
+      dialogDetalhe.close();
+      carregarAlunos(document.getElementById('busca-aluno').value.trim(), paginaAtual);
+    } catch (err) {
+      toast(err.message || 'Erro ao vincular catraca.', 'error');
+    }
+  });
+
+  document.getElementById('btn-detalhe-excluir').addEventListener('click', () => {
+    dialogDetalhe.close();
+    abrirConfirmarExclusao(aluno);
+  });
+
+  renderFrequencia30Dias(aluno.id);
+}
+
+async function abrirDialogDetalhe(usuarioId) {
+  try {
+    detalheAlunoAtual = await api.get(`/api/admin/alunos/${usuarioId}`);
+    renderDetalheAluno(detalheAlunoAtual);
+    dialogDetalhe.showModal();
+  } catch (err) {
+    toast(err.message || 'Erro ao carregar dados do aluno.', 'error');
+  }
+}
+
+// ===== Confirmação de exclusão =====
+const dialogConfirmarExclusao = document.getElementById('dialog-confirmar-exclusao');
+const formConfirmarExclusao = document.getElementById('form-confirmar-exclusao');
+let alunoParaExcluir = null;
+
+function abrirConfirmarExclusao(aluno) {
+  alunoParaExcluir = aluno;
+  document.getElementById('confirmar-exclusao-texto').textContent =
+    `Isso vai remover ${aluno.nome} da lista de alunos e bloquear o acesso dele na academia. O histórico financeiro é mantido.`;
+  dialogConfirmarExclusao.showModal();
+}
+
+document.getElementById('btn-confirmar-exclusao-cancelar').addEventListener('click', () => dialogConfirmarExclusao.close());
+
+formConfirmarExclusao.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  if (!alunoParaExcluir) return;
+  try {
+    await api.del(`/api/admin/alunos/${alunoParaExcluir.id}`);
+    toast(`${alunoParaExcluir.nome} foi excluído.`, 'success');
+    dialogConfirmarExclusao.close();
+    carregarAlunos(document.getElementById('busca-aluno').value.trim(), paginaAtual);
+  } catch (err) {
+    toast(err.message || 'Erro ao excluir aluno.', 'error');
+  }
+});
+
+async function renderFrequencia30Dias(usuarioId) {
+  const grid = document.getElementById('detalhe-frequencia-grid');
+  try {
+    const dias = await api.get(`/api/admin/alunos/${usuarioId}/frequencia`);
+    grid.innerHTML = dias.map((d) => {
+      const data = new Date(d.data);
+      const label = `${String(data.getUTCDate()).padStart(2, '0')}/${String(data.getUTCMonth() + 1).padStart(2, '0')}`;
+      return `<div class="freq30-dia${d.foi ? ' foi' : ''}" title="${label}${d.foi ? ' — foi' : ' — faltou'}"></div>`;
+    }).join('');
+  } catch {
+    grid.innerHTML = '<div class="empty-state">Não foi possível carregar a frequência.</div>';
+  }
+}

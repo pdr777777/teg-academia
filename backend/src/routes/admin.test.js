@@ -103,3 +103,187 @@ describe('POST /api/admin/matriculas — integração com a catraca', () => {
     await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
   });
 });
+
+describe('PATCH /api/admin/alunos/:id/toggle — integração com a catraca', () => {
+  beforeEach(() => {
+    catracaService.liberarAcesso.mockReset();
+    catracaService.bloquearAcesso.mockReset();
+  });
+
+  test('libera acesso na catraca quando a chavinha liga (ativo: false -> true)', async () => {
+    catracaService.liberarAcesso.mockResolvedValue(undefined);
+    const admin = await criarUsuario({ role: 'admin' });
+    const aluno = await criarUsuario({ role: 'aluno' });
+    await pool.query('UPDATE usuarios SET ativo = FALSE WHERE id = $1', [aluno.id]);
+
+    const res = await request(app)
+      .patch(`/api/admin/alunos/${aluno.id}/toggle`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.ativo).toBe(true);
+    expect(catracaService.liberarAcesso).toHaveBeenCalledWith(aluno.id);
+    expect(catracaService.bloquearAcesso).not.toHaveBeenCalled();
+
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+  });
+
+  test('bloqueia acesso na catraca quando a chavinha desliga (ativo: true -> false)', async () => {
+    catracaService.bloquearAcesso.mockResolvedValue(undefined);
+    const admin = await criarUsuario({ role: 'admin' });
+    const aluno = await criarUsuario({ role: 'aluno' });
+
+    const res = await request(app)
+      .patch(`/api/admin/alunos/${aluno.id}/toggle`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.ativo).toBe(false);
+    expect(catracaService.bloquearAcesso).toHaveBeenCalledWith(aluno.id);
+    expect(catracaService.liberarAcesso).not.toHaveBeenCalled();
+
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+  });
+
+  test('não falha o toggle quando a catraca está offline', async () => {
+    catracaService.bloquearAcesso.mockRejectedValue(new Error('Catraca catraca1 inacessível'));
+    const admin = await criarUsuario({ role: 'admin' });
+    const aluno = await criarUsuario({ role: 'aluno' });
+
+    const res = await request(app)
+      .patch(`/api/admin/alunos/${aluno.id}/toggle`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+
+    expect(res.status).toBe(200);
+
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+  });
+});
+
+describe('GET /api/admin/alunos/:id — detalhe', () => {
+  test('retorna dados completos, plano ativo e ultima mensalidade paga', async () => {
+    const admin = await criarUsuario({ role: 'admin' });
+    const aluno = await criarUsuario({ nome: 'Aluno Detalhe', role: 'aluno' });
+    await pool.query(
+      `UPDATE usuarios SET cpf = $1, apelido = $2, telefone = $3 WHERE id = $4`,
+      ['11122233344', 'Alunão', '67988887777', aluno.id]
+    );
+    const plano = await criarPlano({ nome: 'Plano Detalhe Teste' });
+    const matricula = await criarMatricula({ usuario_id: aluno.id, plano_id: plano.id, status: 'ativa' });
+    const pagamentoAntigo = new Date(Date.now() - 40 * 86400000);
+    const pagamentoRecente = new Date(Date.now() - 2 * 86400000);
+    await pool.query(
+      `INSERT INTO pagamentos (matricula_id, usuario_id, valor, status, data_pagamento) VALUES ($1, $2, 100, 'pago', $3)`,
+      [matricula.id, aluno.id, pagamentoAntigo]
+    );
+    await pool.query(
+      `INSERT INTO pagamentos (matricula_id, usuario_id, valor, status, data_pagamento) VALUES ($1, $2, 100, 'pago', $3)`,
+      [matricula.id, aluno.id, pagamentoRecente]
+    );
+
+    const res = await request(app)
+      .get(`/api/admin/alunos/${aluno.id}`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.nome).toBe('Aluno Detalhe');
+    expect(res.body.cpf).toBe('11122233344');
+    expect(res.body.apelido).toBe('Alunão');
+    expect(res.body.plano_nome).toBe('Plano Detalhe Teste');
+    expect(res.body.matricula_status).toBe('ativa');
+    expect(new Date(res.body.ultima_mensalidade).toDateString()).toBe(pagamentoRecente.toDateString());
+
+    await pool.query('DELETE FROM pagamentos WHERE matricula_id = $1', [matricula.id]);
+    await pool.query('DELETE FROM matriculas WHERE id = $1', [matricula.id]);
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+  });
+
+  test('404 quando o aluno não existe', async () => {
+    const admin = await criarUsuario({ role: 'admin' });
+    const res = await request(app)
+      .get('/api/admin/alunos/999999999')
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+    expect(res.status).toBe(404);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [admin.id]);
+  });
+
+  test('rejeita aluno comum', async () => {
+    const aluno = await criarUsuario({ role: 'aluno' });
+    const res = await request(app)
+      .get(`/api/admin/alunos/${aluno.id}`)
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`);
+    expect(res.status).toBe(403);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
+  });
+});
+
+describe('GET /api/admin/alunos/:id/frequencia', () => {
+  test('retorna 30 dias, marcando os dias com check-in como foi: true', async () => {
+    const admin = await criarUsuario({ role: 'admin' });
+    const aluno = await criarUsuario({ role: 'aluno' });
+    const hoje = new Date().toISOString().slice(0, 10);
+    const ontem = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    await pool.query(`INSERT INTO frequencias (usuario_id, data) VALUES ($1, $2), ($1, $3)`, [aluno.id, hoje, ontem]);
+
+    const res = await request(app)
+      .get(`/api/admin/alunos/${aluno.id}/frequencia`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(30);
+    expect(res.body[res.body.length - 1].data.slice(0, 10)).toBe(hoje);
+    expect(res.body[res.body.length - 1].foi).toBe(true);
+    expect(res.body[res.body.length - 2].foi).toBe(true);
+    expect(res.body[0].foi).toBe(false);
+
+    await pool.query('DELETE FROM frequencias WHERE usuario_id = $1', [aluno.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+  });
+});
+
+describe('DELETE /api/admin/alunos/:id — exclusão (soft-delete)', () => {
+  beforeEach(() => {
+    catracaService.bloquearAcesso.mockReset();
+  });
+
+  test('marca excluido_em, desativa e some da listagem, sem apagar matricula/pagamento', async () => {
+    catracaService.bloquearAcesso.mockResolvedValue(undefined);
+    const admin = await criarUsuario({ role: 'admin' });
+    const aluno = await criarUsuario({ nome: 'Aluno Pra Excluir', role: 'aluno' });
+    const plano = await criarPlano({ nome: 'Plano Exclusao Teste' });
+    const matricula = await criarMatricula({ usuario_id: aluno.id, plano_id: plano.id, status: 'ativa' });
+
+    const res = await request(app)
+      .delete(`/api/admin/alunos/${aluno.id}`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+
+    expect(res.status).toBe(200);
+    expect(catracaService.bloquearAcesso).toHaveBeenCalledWith(aluno.id);
+
+    const { rows: [row] } = await pool.query('SELECT ativo, excluido_em FROM usuarios WHERE id = $1', [aluno.id]);
+    expect(row.ativo).toBe(false);
+    expect(row.excluido_em).not.toBeNull();
+
+    const { rows: [matriculaAinda] } = await pool.query('SELECT id FROM matriculas WHERE id = $1', [matricula.id]);
+    expect(matriculaAinda).toBeDefined();
+
+    const listagem = await request(app)
+      .get('/api/admin/alunos?limit=100')
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+    expect(listagem.body.alunos.some((a) => a.id === aluno.id)).toBe(false);
+
+    await pool.query('DELETE FROM matriculas WHERE id = $1', [matricula.id]);
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+  });
+
+  test('404 quando o aluno não existe', async () => {
+    const admin = await criarUsuario({ role: 'admin' });
+    const res = await request(app)
+      .delete('/api/admin/alunos/999999999')
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+    expect(res.status).toBe(404);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [admin.id]);
+  });
+});
