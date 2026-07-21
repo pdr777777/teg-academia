@@ -21,15 +21,90 @@
   <main class="matricula-wrap">
     <div id="banner-indicacao" class="card banner-indicacao" style="display:none"></div>
 
-    <section id="step-plano">
+    <div class="steps-bar">
+      <div class="step-item active" data-step="plano"><span class="step-num">1</span><span>Plano</span></div>
+      <div class="step-item" data-step="dados"><span class="step-num">2</span><span>Seus dados</span></div>
+      <div class="step-item" data-step="sucesso"><span class="step-num">3</span><span>Confirmação</span></div>
+    </div>
+
+    <section id="step-plano" class="step-section">
       <h1>Escolha o seu plano</h1>
-      <p class="text-muted">Escolha abaixo e finalize direto com nossa equipe no WhatsApp.</p>
+      <p class="text-muted">Matricule-se em menos de 2 minutos, direto pelo site.</p>
       <div id="planos-grid" style="margin-top:2rem">
         <div class="loading-row" style="grid-column:1/-1"><span class="spinner"></span></div>
       </div>
     </section>
+
+    <section id="step-dados" class="step-section" style="display:none">
+      <button type="button" class="btn btn-ghost btn-sm step-back" id="btn-voltar-plano">
+        <span data-icon="chevron-left" data-icon-size="16"></span> Voltar
+      </button>
+      <h1>Seus dados</h1>
+      <p class="text-muted">Plano selecionado: <strong id="plano-resumo-nome"></strong> — <span id="plano-resumo-preco"></span></p>
+
+      <form id="form-matricula" class="card" style="margin-top:1.5rem;max-width:480px" autocomplete="off">
+        <div class="field">
+          <label for="mat-nome">Nome completo</label>
+          <input type="text" id="mat-nome" name="nome" required autocomplete="name" placeholder="Seu nome completo" />
+        </div>
+        <div class="field">
+          <label for="mat-cpf">CPF</label>
+          <input type="text" id="mat-cpf" name="cpf" required inputmode="numeric" maxlength="14" placeholder="000.000.000-00" />
+        </div>
+        <div class="field">
+          <label for="mat-email">E-mail</label>
+          <input type="email" id="mat-email" name="email" required autocomplete="email" placeholder="seu@email.com" />
+        </div>
+        <div class="field">
+          <label for="mat-telefone">WhatsApp</label>
+          <input type="tel" id="mat-telefone" name="telefone" required autocomplete="tel" placeholder="(67) 99999-9999" />
+        </div>
+        <div class="field">
+          <label for="mat-senha">Crie uma senha</label>
+          <input type="password" id="mat-senha" name="senha" required minlength="8" autocomplete="new-password" placeholder="Mínimo 8 caracteres com letra e número" />
+        </div>
+        <div class="field">
+          <label for="mat-confirmar-senha">Confirmar senha</label>
+          <input type="password" id="mat-confirmar-senha" name="confirmar_senha" required autocomplete="new-password" placeholder="Repita a senha" />
+        </div>
+        <p class="text-muted" style="font-size:.8rem;margin:-.3rem 0 1.25rem">Essa senha já dá acesso à sua área do aluno assim que você enviar o cadastro.</p>
+        <button type="submit" class="btn btn-primary btn-block">Enviar cadastro</button>
+      </form>
+      <p class="auth-links" style="max-width:480px">Já tem conta? <a href="login.html">Fazer login</a></p>
+    </section>
+
+    <section id="step-sucesso" class="step-section" style="display:none;text-align:center">
+      <div class="sucesso-icon">✓</div>
+      <h1>Cadastro enviado!</h1>
+      <p class="text-muted" style="margin:0.5rem 0 2rem">Seus dados foram registrados para o plano <strong id="sucesso-plano-nome"></strong>. Falta só finalizar o pagamento pra sua matrícula ser ativada.</p>
+
+      <div class="card resumo-card" style="max-width:480px;margin:0 auto 1.5rem;text-align:left">
+        <div class="resumo-linha"><span>Plano</span><strong id="resumo-plano"></strong></div>
+        <div class="resumo-linha"><span>Valor</span><strong id="resumo-valor"></strong></div>
+        <div class="resumo-linha resumo-total"><span>Pagamento</span><strong>A combinar</strong></div>
+      </div>
+
+      <div style="max-width:480px;margin:0 auto">
+        <a id="btn-sucesso-whatsapp" href="#" target="_blank" rel="noopener" class="btn btn-primary btn-block">
+          <span data-icon="whatsapp" data-icon-size="16"></span> Finalizar pelo WhatsApp
+        </a>
+        <button type="button" id="btn-sucesso-recepcao" class="btn btn-outline btn-block" style="margin-top:.75rem">
+          Prefiro finalizar na recepção
+        </button>
+
+        <div id="recepcao-info" class="card" style="display:none;margin-top:1rem;text-align:left">
+          <div class="row gap-sm"><span data-icon="map-pin" data-icon-size="16" class="text-primary"></span><span>R. Assunção, 1946, Vila Morumbi, Campo Grande - MS</span></div>
+          <div class="row gap-sm" style="margin-top:.6rem"><span data-icon="clock" data-icon-size="16" class="text-primary"></span><span>Aberto todos os dias, das 06h às 23h</span></div>
+          <div class="row gap-sm" style="margin-top:.6rem"><span data-icon="phone" data-icon-size="16" class="text-primary"></span><span>(67) 99300-9296</span></div>
+          <p class="text-muted" style="margin-top:.9rem;font-size:.85rem">Seu cadastro já está registrado — é só passar aí pra finalizar o pagamento e ativar sua matrícula.</p>
+        </div>
+
+        <a href="dashboard.html" class="btn btn-ghost btn-block" style="margin-top:.75rem">Ir para minha área</a>
+      </div>
+    </section>
   </main>
 
+  <div id="toast-root"></div>
   <script src="assets/js/icons.js"></script>
   <script src="assets/js/api.js"></script>
   <script src="assets/js/ui.js"></script>

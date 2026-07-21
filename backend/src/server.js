@@ -28,6 +28,7 @@ const equipeRoutes = require('./routes/equipe');
 const whatsappRoutes = require('./routes/whatsapp');
 const webhooksRoutes = require('./routes/webhooks');
 const notificacoesRoutes = require('./routes/notificacoes');
+const catracaRoutes = require('./routes/catraca');
 
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
   console.warn('⚠️  JWT_SECRET fraco ou ausente — defina no .env');
@@ -104,6 +105,7 @@ app.use('/api/equipe', equipeRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/webhooks', webhooksRoutes);
 app.use('/api/notifications', notificacoesRoutes);
+app.use('/api/catraca', catracaRoutes);
 
 app.get('/health', async (req, res) => {
   const health = { status: 'ok', timestamp: new Date().toISOString(), dependencies: {} };

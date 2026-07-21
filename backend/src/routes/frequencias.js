@@ -1,29 +1,15 @@
 const express = require('express');
 const pool = require('../config/db');
 const { authMiddleware, requireRole } = require('../middleware/authMiddleware');
-const xpService = require('../services/xpService');
+const frequenciaService = require('../services/frequenciaService');
 
 const router = express.Router();
 
 // POST /api/frequencias/checkin
 router.post('/checkin', authMiddleware, async (req, res, next) => {
   try {
-    const hoje = new Date().toISOString().split('T')[0];
-
-    const { rows: existing } = await pool.query(
-      'SELECT id FROM frequencias WHERE usuario_id = $1 AND data = $2',
-      [req.user.id, hoje]
-    );
-    if (existing[0]) return res.status(409).json({ error: 'Check-in já realizado hoje' });
-
-    const { rows: [freq] } = await pool.query(
-      'INSERT INTO frequencias (usuario_id, data) VALUES ($1, $2) RETURNING *',
-      [req.user.id, hoje]
-    );
-
-    await xpService.adicionarXP(req.user.id, 50, 'treino');
-    await xpService.atualizarSequencia(req.user.id);
-
+    const freq = await frequenciaService.registrarCheckin(req.user.id, 'app');
+    if (!freq) return res.status(409).json({ error: 'Check-in já realizado hoje' });
     res.status(201).json(freq);
   } catch (err) {
     next(err);

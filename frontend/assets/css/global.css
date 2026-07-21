@@ -364,6 +364,29 @@ label {
 .sidebar-user-info span { font-size: 0.72rem; color: var(--color-muted); }
 .sidebar-foot a { display: flex; align-items: center; gap: 0.7rem; padding: 0.65rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.9rem; color: var(--color-muted); }
 .sidebar-foot a:hover { background: var(--color-surface-2); color: var(--color-danger); }
+.sidebar-nav-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+.sidebar-nav-group-toggle:hover { background: var(--color-surface-2); color: var(--color-text); }
+.sidebar-nav-group-label { flex: 1; }
+.sidebar-nav-group-chevron { transition: transform 0.15s; flex-shrink: 0; }
+.sidebar-nav-group.open .sidebar-nav-group-chevron { transform: rotate(180deg); }
+.sidebar-nav-submenu { display: none; flex-direction: column; gap: 0.15rem; padding-left: 1.6rem; }
+.sidebar-nav-group.open .sidebar-nav-submenu { display: flex; }
+.sidebar-nav-submenu a { padding: 0.5rem 0.75rem; font-size: 0.85rem; }
 .main-content { flex: 1; min-width: 0; padding: 2rem; }
 .page-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; gap: 1rem; flex-wrap: wrap; }
 .page-head h1 { font-size: 1.5rem; }

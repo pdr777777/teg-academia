@@ -6,9 +6,17 @@
   justify-content: center;
 }
 
-.admin-stat-cards .stat-card { display: flex; flex-direction: column; gap: 0.5rem; }
-.admin-stat-cards .stat-icon { color: var(--color-primary); }
-.admin-stat-cards strong { font-size: 1.5rem; }
+.admin-stat-cards .stat-card { display: flex; flex-direction: column; gap: 0.85rem; padding: 1.35rem 1.5rem; }
+.admin-stat-cards .stat-icon {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--color-text);
+}
+.admin-stat-cards .stat-icon svg { color: inherit; }
+.admin-stat-cards strong { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em; }
 .admin-stat-cards span { font-size: 0.82rem; color: var(--color-muted); }
 
 /* ===== Gráfico simples de barras (sem dependências) ===== */

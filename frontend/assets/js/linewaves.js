@@ -192,6 +192,19 @@
   gl.uniform1f(uMouseInfl,   2.0);
   gl.uniform1i(uEnableMouse, 0);
 
+  /* Desacelera o movimento conforme o scroll desce, até ficar parado ao
+     alcançar a section #estrutura ("Ambiente feito pra você evoluir"), logo
+     após a hero. Smoothstep faz a curva começar e terminar em derivada zero,
+     então nem o início nem a parada final chamam atenção. */
+  var decelTarget = document.getElementById('estrutura');
+  var decelRange = 0;
+  function updateDecelRange() {
+    decelRange = decelTarget ? (decelTarget.getBoundingClientRect().top + window.scrollY) : 0;
+  }
+  function smoothstep(t) {
+    return t * t * (3 - 2 * t);
+  }
+
   function resize() {
     var w = window.innerWidth;
     var h = window.innerHeight;
@@ -199,15 +212,28 @@
     canvas.height = h;
     gl.viewport(0, 0, w, h);
     gl.uniform3f(uResolution, w, h, w / h);
+    updateDecelRange();
   }
   window.addEventListener('resize', resize);
+  window.addEventListener('load', updateDecelRange);
   resize();
 
   var raf;
+  var virtualTime = 0;
+  var lastT = null;
   function frame(t) {
     raf = requestAnimationFrame(frame);
+
+    if (lastT !== null) {
+      var dt = Math.min((t - lastT) / 1000, 0.1);
+      var progress = decelRange > 0 ? Math.min(window.scrollY / decelRange, 1) : 0;
+      var speedFactor = 1 - smoothstep(progress);
+      virtualTime += dt * speedFactor;
+    }
+    lastT = t;
+
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.uniform1f(uTime, t * 0.001);
+    gl.uniform1f(uTime, virtualTime);
     gl.bindVertexArray(vao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.bindVertexArray(null);

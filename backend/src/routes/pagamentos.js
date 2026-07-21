@@ -2,6 +2,8 @@ const express = require('express');
 const pool = require('../config/db');
 const { authMiddleware, requireRole } = require('../middleware/authMiddleware');
 const xpService = require('../services/xpService');
+const catracaService = require('../services/catracaService');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -56,6 +58,12 @@ router.patch('/:id/confirmar', authMiddleware, requireRole('admin', 'dono'), asy
         `UPDATE matriculas SET status = 'ativa', data_vencimento = $1, updated_at = NOW() WHERE id = $2`,
         [base, pag.matricula_id]
       );
+
+      try {
+        await catracaService.liberarAcesso(matricula.usuario_id);
+      } catch (err) {
+        logger.error('catraca.liberarAcesso falhou', { usuarioId: matricula.usuario_id, erro: err.message });
+      }
     } else {
       // Matrícula criada sem pagamento imediato (fluxo existente do admin)
       const { rows: [matriculaAtivada] } = await pool.query(
@@ -74,6 +82,12 @@ router.patch('/:id/confirmar', authMiddleware, requireRole('admin', 'dono'), asy
         );
         if (indicacao) {
           await xpService.adicionarXP(indicacao.indicador_id, 200, 'indicacao');
+        }
+
+        try {
+          await catracaService.liberarAcesso(matriculaAtivada.usuario_id);
+        } catch (err) {
+          logger.error('catraca.liberarAcesso falhou', { usuarioId: matriculaAtivada.usuario_id, erro: err.message });
         }
       }
     }

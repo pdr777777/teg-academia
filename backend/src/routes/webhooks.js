@@ -1,6 +1,8 @@
 const express = require('express');
 const pool = require('../config/db');
 const { getGatewayAdapter } = require('../services/gateway');
+const catracaService = require('../services/catracaService');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -16,7 +18,7 @@ router.post('/pagamento', async (req, res, next) => {
     const { gateway_charge_id, status } = await adapter.processarWebhook(req.body);
 
     const { rows: [pagamento] } = await pool.query(
-      `UPDATE pagamentos SET status = $1, data_pagamento = CASE WHEN $1 = 'pago' THEN NOW() ELSE data_pagamento END
+      `UPDATE pagamentos SET status = $1::varchar, data_pagamento = CASE WHEN $1::varchar = 'pago' THEN NOW() ELSE data_pagamento END
        WHERE gateway_charge_id = $2 RETURNING *`,
       [status, gateway_charge_id]
     );
@@ -27,6 +29,12 @@ router.post('/pagamento', async (req, res, next) => {
         `UPDATE matriculas SET status = 'ativa', updated_at = NOW() WHERE id = $1`,
         [pagamento.matricula_id]
       );
+
+      try {
+        await catracaService.liberarAcesso(pagamento.usuario_id);
+      } catch (err) {
+        logger.error('catraca.liberarAcesso falhou', { usuarioId: pagamento.usuario_id, erro: err.message });
+      }
     }
 
     res.json({ ok: true });
