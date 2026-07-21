@@ -183,6 +183,14 @@ router.patch('/alunos/:id/toggle', authMiddleware, requireRole('admin', 'dono'),
       [req.params.id]
     );
     if (!user) return res.status(404).json({ error: 'Aluno não encontrado' });
+
+    try {
+      if (user.ativo) await catracaService.liberarAcesso(user.id);
+      else await catracaService.bloquearAcesso(user.id);
+    } catch (err) {
+      logger.error('catraca.liberarAcesso/bloquearAcesso falhou (toggle)', { usuarioId: user.id, erro: err.message });
+    }
+
     res.json(user);
   } catch (err) {
     next(err);

@@ -103,3 +103,59 @@ describe('POST /api/admin/matriculas — integração com a catraca', () => {
     await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
   });
 });
+
+describe('PATCH /api/admin/alunos/:id/toggle — integração com a catraca', () => {
+  beforeEach(() => {
+    catracaService.liberarAcesso.mockReset();
+    catracaService.bloquearAcesso.mockReset();
+  });
+
+  test('libera acesso na catraca quando a chavinha liga (ativo: false -> true)', async () => {
+    catracaService.liberarAcesso.mockResolvedValue(undefined);
+    const admin = await criarUsuario({ role: 'admin' });
+    const aluno = await criarUsuario({ role: 'aluno' });
+    await pool.query('UPDATE usuarios SET ativo = FALSE WHERE id = $1', [aluno.id]);
+
+    const res = await request(app)
+      .patch(`/api/admin/alunos/${aluno.id}/toggle`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.ativo).toBe(true);
+    expect(catracaService.liberarAcesso).toHaveBeenCalledWith(aluno.id);
+    expect(catracaService.bloquearAcesso).not.toHaveBeenCalled();
+
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+  });
+
+  test('bloqueia acesso na catraca quando a chavinha desliga (ativo: true -> false)', async () => {
+    catracaService.bloquearAcesso.mockResolvedValue(undefined);
+    const admin = await criarUsuario({ role: 'admin' });
+    const aluno = await criarUsuario({ role: 'aluno' });
+
+    const res = await request(app)
+      .patch(`/api/admin/alunos/${aluno.id}/toggle`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.ativo).toBe(false);
+    expect(catracaService.bloquearAcesso).toHaveBeenCalledWith(aluno.id);
+    expect(catracaService.liberarAcesso).not.toHaveBeenCalled();
+
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+  });
+
+  test('não falha o toggle quando a catraca está offline', async () => {
+    catracaService.bloquearAcesso.mockRejectedValue(new Error('Catraca catraca1 inacessível'));
+    const admin = await criarUsuario({ role: 'admin' });
+    const aluno = await criarUsuario({ role: 'aluno' });
+
+    const res = await request(app)
+      .patch(`/api/admin/alunos/${aluno.id}/toggle`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+
+    expect(res.status).toBe(200);
+
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+  });
+});
