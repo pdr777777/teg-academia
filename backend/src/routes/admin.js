@@ -151,7 +151,7 @@ router.get('/alunos', authMiddleware, requireRole('admin', 'dono', 'professor'),
     const offset = (page - 1) * limit;
 
     const paramsBusca = [];
-    let where = "WHERE u.role = 'aluno'";
+    let where = "WHERE u.role = 'aluno' AND u.excluido_em IS NULL";
     if (busca) where += ` AND (u.nome ILIKE $${paramsBusca.push('%' + busca + '%')} OR u.email ILIKE $${paramsBusca.push('%' + busca + '%')})`;
 
     const { rows: [{ total }] } = await pool.query(
@@ -211,6 +211,28 @@ router.get('/alunos/:id/frequencia', authMiddleware, requireRole('admin', 'dono'
       [req.params.id]
     );
     res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DELETE /api/admin/alunos/:id — exclusão lógica (soma da lista, bloqueia acesso, preserva histórico)
+router.delete('/alunos/:id', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+  try {
+    const { rows: [user] } = await pool.query(
+      `UPDATE usuarios SET excluido_em = NOW(), ativo = FALSE, updated_at = NOW()
+       WHERE id = $1 AND role = 'aluno' RETURNING id`,
+      [req.params.id]
+    );
+    if (!user) return res.status(404).json({ error: 'Aluno não encontrado' });
+
+    try {
+      await catracaService.bloquearAcesso(user.id);
+    } catch (err) {
+      logger.error('catraca.bloquearAcesso falhou (exclusão)', { usuarioId: user.id, erro: err.message });
+    }
+
+    res.json({ ok: true });
   } catch (err) {
     next(err);
   }

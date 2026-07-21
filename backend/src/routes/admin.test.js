@@ -241,3 +241,49 @@ describe('GET /api/admin/alunos/:id/frequencia', () => {
     await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
   });
 });
+
+describe('DELETE /api/admin/alunos/:id — exclusão (soft-delete)', () => {
+  beforeEach(() => {
+    catracaService.bloquearAcesso.mockReset();
+  });
+
+  test('marca excluido_em, desativa e some da listagem, sem apagar matricula/pagamento', async () => {
+    catracaService.bloquearAcesso.mockResolvedValue(undefined);
+    const admin = await criarUsuario({ role: 'admin' });
+    const aluno = await criarUsuario({ nome: 'Aluno Pra Excluir', role: 'aluno' });
+    const plano = await criarPlano({ nome: 'Plano Exclusao Teste' });
+    const matricula = await criarMatricula({ usuario_id: aluno.id, plano_id: plano.id, status: 'ativa' });
+
+    const res = await request(app)
+      .delete(`/api/admin/alunos/${aluno.id}`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+
+    expect(res.status).toBe(200);
+    expect(catracaService.bloquearAcesso).toHaveBeenCalledWith(aluno.id);
+
+    const { rows: [row] } = await pool.query('SELECT ativo, excluido_em FROM usuarios WHERE id = $1', [aluno.id]);
+    expect(row.ativo).toBe(false);
+    expect(row.excluido_em).not.toBeNull();
+
+    const { rows: [matriculaAinda] } = await pool.query('SELECT id FROM matriculas WHERE id = $1', [matricula.id]);
+    expect(matriculaAinda).toBeDefined();
+
+    const listagem = await request(app)
+      .get('/api/admin/alunos?limit=100')
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+    expect(listagem.body.alunos.some((a) => a.id === aluno.id)).toBe(false);
+
+    await pool.query('DELETE FROM matriculas WHERE id = $1', [matricula.id]);
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, aluno.id]]);
+  });
+
+  test('404 quando o aluno não existe', async () => {
+    const admin = await criarUsuario({ role: 'admin' });
+    const res = await request(app)
+      .delete('/api/admin/alunos/999999999')
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+    expect(res.status).toBe(404);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [admin.id]);
+  });
+});
