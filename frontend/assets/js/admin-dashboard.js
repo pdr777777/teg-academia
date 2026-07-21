@@ -1,6 +1,6 @@
 const CARDS = [
   { key: 'alunos_ativos', icone: 'users', label: 'Alunos ativos', fmt: (v) => v, money: false },
-  { key: 'faturamento_mes', icone: 'banknote', label: 'Faturamento do mês', fmt: formatMoeda, money: true },
+  { key: 'faturamento_mes', icone: 'banknote', label: 'Faturamento do mês', fmt: formatMoeda, money: true, hero: true },
   { key: 'inadimplentes', icone: 'alert-triangle', label: 'Inadimplentes', fmt: (v) => v, cor: 'var(--color-danger)', money: false },
   { key: 'novos_mes', icone: 'user-check', label: 'Novos alunos no mês', fmt: (v) => v, cor: 'var(--color-success)', money: false },
   { key: 'cancelamentos_mes', icone: 'user-x', label: 'Cancelamentos no mês', fmt: (v) => v, cor: 'var(--color-danger)', money: false },
@@ -13,10 +13,12 @@ async function carregarDashboard() {
     const d = await api.get('/api/admin/dashboard');
 
     container.innerHTML = CARDS.map((c) => `
-      <div class="card stat-card" data-reveal>
-        <span class="stat-icon" style="${c.cor ? `color:${c.cor}` : ''}">${Icons.icon(c.icone, { size: 20 })}</span>
+      <div class="card stat-card${c.hero ? ' stat-card-hero' : ''}" data-reveal>
+        <div class="stat-card-head">
+          <span class="stat-icon" style="${c.cor ? `color:${c.cor}` : ''}">${Icons.icon(c.icone, { size: 18 })}</span>
+          <span class="stat-card-label">${c.label}</span>
+        </div>
         <strong data-key="${c.key}">0</strong>
-        <span>${c.label}</span>
       </div>
     `).join('');
     initReveal();

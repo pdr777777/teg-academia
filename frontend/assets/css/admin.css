@@ -459,3 +459,61 @@
   background: linear-gradient(160deg, rgba(255,255,255,0.78), rgba(255,255,255,0.45) 55%);
   border: 1px solid rgba(255,255,255,0.6);
 }
+
+/* ===== Reskin "Capsule" — só no dashboard admin (frontend/admin/index.html) =====
+   Mesma técnica de escopo por variável que o resto do admin já usa (ver bloco
+   "Liquid glass" acima): redefine a marca localmente em .dash-capsule, então
+   tudo que já lê var(--color-primary/-wine/-coral)/--gradient-flame — ícones
+   dos stat-cards, gráfico de faturamento, nav ativa da sidebar, barra de
+   destaque do card do gráfico — recolore sozinho, sem tocar em .js. Não afeta
+   nenhuma outra página do admin (elas não têm essa classe). */
+.dash-capsule {
+  --color-primary: #0068f7;
+  --color-primary-hover: #005fe1;
+  --color-primary-soft: rgba(0, 104, 247, 0.14);
+  --color-wine: #003988;
+  --color-wine-soft: rgba(0, 44, 104, 0.12);
+  --color-coral: #005fe1;
+  --color-coral-soft: rgba(0, 95, 225, 0.14);
+  --gradient-flame: linear-gradient(135deg, #3386f9 0%, #0068f7 32%, #005fe1 68%, #003988 100%);
+}
+
+/* Capsule usa cards/sidebar sólidos, não vidro — achata só aqui */
+.dash-capsule .card,
+.dash-capsule .sidebar {
+  background: var(--color-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.dash-capsule .card { border: 1px solid var(--color-border); box-shadow: var(--shadow-card); }
+.dash-capsule .sidebar { border-right: 1px solid var(--color-border); }
+:root[data-theme="light"] .dash-capsule .card,
+:root[data-theme="light"] .dash-capsule .sidebar {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+/* Stat-cards: ícone em badge circular tintado + rótulo lado a lado, valor grande embaixo */
+.dash-capsule .stat-card-head { display: flex; align-items: center; gap: 0.65rem; }
+.dash-capsule .stat-card-label { font-size: 0.82rem; color: var(--color-muted); font-weight: 500; }
+.dash-capsule .admin-stat-cards .stat-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: color-mix(in srgb, currentColor 15%, transparent);
+  flex-shrink: 0;
+}
+.dash-capsule .admin-stat-cards strong { font-size: 1.85rem; }
+
+/* Card "hero" (Faturamento do mês) — equivalente ao "Total balance" do Capsule */
+.dash-capsule .stat-card-hero {
+  background: var(--gradient-flame);
+  border-color: transparent;
+  box-shadow: 0 10px 28px rgba(0, 104, 247, 0.35), inset 0 1px 0 rgba(255,255,255,.15);
+}
+.dash-capsule .stat-card-hero .stat-icon { background: rgba(255,255,255,.2); }
+.dash-capsule .stat-card-hero .stat-icon,
+.dash-capsule .stat-card-hero .stat-card-label,
+.dash-capsule .stat-card-hero strong { color: #fff; }
