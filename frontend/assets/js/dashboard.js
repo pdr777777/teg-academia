@@ -48,7 +48,7 @@ async function carregarDashboard() {
 
     animateNumber(document.getElementById('stat-total-treinos'), d.total_treinos);
 
-    document.getElementById('profile-avatar').textContent = iniciais(d.nome);
+    document.getElementById('profile-avatar').outerHTML = renderAvatar(d.nome, d.foto_url, 40).replace('class="avatar-fallback"', 'class="avatar-fallback" id="profile-avatar"').replace('class="avatar-img"', 'class="avatar-img" id="profile-avatar"');
     document.getElementById('profile-nome').textContent = d.nome;
     document.getElementById('profile-email').textContent = d.email;
     document.getElementById('profile-plano').textContent = d.plano_nome ? `Plano ${d.plano_nome}` : 'Sem plano';

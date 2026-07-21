@@ -62,7 +62,7 @@ async function carregarAlunos(busca = '', page = 1) {
           <tr>
             <td>
               <div class="ranking-avatar-row">
-                <span class="avatar-fallback">${escapeHtml(iniciais(a.nome))}</span>
+                ${renderAvatar(a.nome, a.foto_url, 36)}
                 <div><strong>${escapeHtml(a.nome)}</strong><div class="text-muted" style="font-size:.78rem">${escapeHtml(a.email)}</div></div>
               </div>
             </td>
@@ -339,7 +339,7 @@ let detalheAlunoAtual = null;
 function renderDetalheAluno(aluno) {
   detalheConteudo.innerHTML = `
     <div class="detalhe-head">
-      <span class="avatar-fallback" style="width:56px;height:56px;font-size:1.1rem">${escapeHtml(iniciais(aluno.nome))}</span>
+      ${renderAvatar(aluno.nome, aluno.foto_url, 56)}
       <div>
         <strong>${escapeHtml(aluno.nome)}</strong>
         ${aluno.apelido ? `<div class="text-muted" style="font-size:.85rem">"${escapeHtml(aluno.apelido)}"</div>` : ''}

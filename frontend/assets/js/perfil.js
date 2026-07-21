@@ -3,13 +3,14 @@ document.getElementById('btn-logout').addEventListener('click', logout);
 async function carregarPerfil() {
   try {
     const u = await api.get('/api/alunos/perfil');
-    document.getElementById('perfil-avatar').textContent = iniciais(u.nome);
+    document.getElementById('perfil-avatar-wrap').innerHTML = renderAvatar(u.nome, u.foto_url, 56);
     document.getElementById('perfil-nome-display').textContent = u.nome;
     document.getElementById('perfil-email-display').textContent = u.email;
     document.getElementById('perfil-nome').value = u.nome || '';
     document.getElementById('perfil-telefone').value = u.telefone || '';
     document.getElementById('perfil-nascimento').value = u.data_nascimento ? u.data_nascimento.slice(0, 10) : '';
     document.getElementById('perfil-cpf').value = u.cpf || 'Não informado';
+    document.getElementById('perfil-apelido').value = u.apelido || '';
 
     const statusBadge = document.getElementById('assinatura-status-badge');
     const statusMap = {
@@ -60,6 +61,7 @@ document.getElementById('form-perfil').addEventListener('submit', async (ev) => 
       nome: document.getElementById('perfil-nome').value.trim(),
       telefone: document.getElementById('perfil-telefone').value.trim(),
       data_nascimento: document.getElementById('perfil-nascimento').value || null,
+      apelido: document.getElementById('perfil-apelido').value.trim() || null,
     });
     toast('Perfil atualizado!', 'success');
     carregarPerfil();
@@ -67,6 +69,33 @@ document.getElementById('form-perfil').addEventListener('submit', async (ev) => 
     toast(err.message || 'Erro ao salvar perfil.', 'error');
   } finally {
     resetBtnLoading(btn);
+  }
+});
+
+document.getElementById('perfil-foto-input').addEventListener('change', async (ev) => {
+  const arquivo = ev.target.files[0];
+  if (!arquivo) return;
+
+  const formData = new FormData();
+  formData.append('foto', arquivo);
+
+  try {
+    const token = localStorage.getItem('token');
+    const resposta = await fetch(`${API_URL}/api/alunos/perfil/foto`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+    if (!resposta.ok) {
+      const erro = await resposta.json();
+      throw new Error(erro.error || 'Erro ao enviar foto');
+    }
+    toast('Foto atualizada!', 'success');
+    carregarPerfil();
+  } catch (err) {
+    toast(err.message || 'Erro ao enviar foto.', 'error');
+  } finally {
+    ev.target.value = '';
   }
 });
 

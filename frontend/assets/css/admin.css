@@ -259,6 +259,7 @@
   font-size: 0.78rem; font-weight: 800; color: #fff;
   flex-shrink: 0;
 }
+.avatar-img { border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 
 /* ===== Treinos layout ===== */
 .treinos-layout { display: grid; grid-template-columns: 340px 1fr; gap: 1.25rem; align-items: start; }

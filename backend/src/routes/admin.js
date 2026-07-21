@@ -160,7 +160,7 @@ router.get('/alunos', authMiddleware, requireRole('admin', 'dono', 'professor'),
     );
 
     const { rows: alunos } = await pool.query(
-      `SELECT u.id, u.nome, u.email, u.telefone, u.ativo, u.xp, u.sequencia_atual, u.created_at, u.controlid_user_id, u.origem_externa,
+      `SELECT u.id, u.nome, u.email, u.telefone, u.ativo, u.xp, u.sequencia_atual, u.created_at, u.controlid_user_id, u.origem_externa, u.foto_url,
               m.id as matricula_id, m.status as matricula_status, m.data_vencimento, p.nome as plano_nome
        FROM usuarios u
        LEFT JOIN matriculas m ON m.usuario_id = u.id AND m.status = 'ativa'
