@@ -1,8 +1,21 @@
 const express = require('express');
+const multer = require('multer');
 const pool = require('../config/db');
 const { authMiddleware } = require('../middleware/authMiddleware');
+const supabaseStorageService = require('../services/supabaseStorageService');
 
 const router = express.Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
+      return cb(new Error('Formato de imagem não suportado (use JPEG, PNG ou WEBP)'));
+    }
+    cb(null, true);
+  },
+});
 
 // GET /api/alunos/dashboard — dados completos da área do aluno
 router.get('/dashboard', authMiddleware, async (req, res, next) => {
@@ -89,6 +102,22 @@ router.patch('/perfil', authMiddleware, async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+// POST /api/alunos/perfil/foto — upload da foto de perfil (Supabase Storage)
+router.post('/perfil/foto', authMiddleware, (req, res, next) => {
+  upload.single('foto')(req, res, async (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+
+    try {
+      const foto_url = await supabaseStorageService.uploadFotoPerfil(req.user.id, req.file.buffer, req.file.mimetype);
+      await pool.query('UPDATE usuarios SET foto_url = $1, updated_at = NOW() WHERE id = $2', [foto_url, req.user.id]);
+      res.json({ foto_url });
+    } catch (uploadErr) {
+      next(uploadErr);
+    }
+  });
 });
 
 module.exports = router;

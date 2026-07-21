@@ -147,6 +147,49 @@ describe('apelido no perfil', () => {
   });
 });
 
+jest.mock('../services/supabaseStorageService');
+const supabaseStorageService = require('../services/supabaseStorageService');
+
+describe('POST /api/alunos/perfil/foto', () => {
+  test('sobe a foto e grava foto_url no usuário', async () => {
+    supabaseStorageService.uploadFotoPerfil.mockResolvedValue('https://exemplo.supabase.co/foto-nova.jpg');
+    const aluno = await criarUsuario({ role: 'aluno' });
+
+    const res = await request(app)
+      .post('/api/alunos/perfil/foto')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`)
+      .attach('foto', Buffer.from('fake-image-bytes'), { filename: 'foto.jpg', contentType: 'image/jpeg' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.foto_url).toBe('https://exemplo.supabase.co/foto-nova.jpg');
+    expect(supabaseStorageService.uploadFotoPerfil).toHaveBeenCalledWith(aluno.id, expect.any(Buffer), 'image/jpeg');
+
+    const { rows: [row] } = await pool.query('SELECT foto_url FROM usuarios WHERE id = $1', [aluno.id]);
+    expect(row.foto_url).toBe('https://exemplo.supabase.co/foto-nova.jpg');
+
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
+  });
+
+  test('rejeita sem arquivo', async () => {
+    const aluno = await criarUsuario({ role: 'aluno' });
+    const res = await request(app)
+      .post('/api/alunos/perfil/foto')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`);
+    expect(res.status).toBe(400);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
+  });
+
+  test('rejeita tipo de arquivo não suportado', async () => {
+    const aluno = await criarUsuario({ role: 'aluno' });
+    const res = await request(app)
+      .post('/api/alunos/perfil/foto')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`)
+      .attach('foto', Buffer.from('fake-pdf-bytes'), { filename: 'doc.pdf', contentType: 'application/pdf' });
+    expect(res.status).toBe(400);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
+  });
+});
+
 afterAll(async () => {
   await pool.end();
 });
