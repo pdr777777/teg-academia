@@ -37,6 +37,14 @@
 .switch-row { display: flex; align-items: center; gap: 0.4rem; }
 .switch-label { font-size: 0.72rem; color: var(--color-muted); white-space: nowrap; }
 
+/* ===== Painel "Mais opções" (detalhe do aluno) ===== */
+.admin-dialog-lg { max-width: 560px; }
+.detalhe-head { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1.25rem; }
+.detalhe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; font-size: 0.88rem; margin-bottom: 1.25rem; }
+.detalhe-grid .text-muted { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.03em; display: block; margin-bottom: 0.15rem; }
+.detalhe-atalhos { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.detalhe-frequencia h3 { font-size: 0.92rem; margin-bottom: 0.75rem; }
+
 /* ===== Gráfico simples de barras (sem dependências) ===== */
 .chart-bars { display: flex; align-items: flex-end; gap: 1rem; height: 200px; padding-top: 1rem; }
 .chart-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 0.5rem; height: 100%; }
