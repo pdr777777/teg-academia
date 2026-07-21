@@ -51,7 +51,7 @@ router.get('/dashboard', authMiddleware, async (req, res, next) => {
 router.get('/perfil', authMiddleware, async (req, res, next) => {
   try {
     const { rows: [user] } = await pool.query(
-      `SELECT u.id, u.nome, u.email, u.telefone, u.cpf, u.data_nascimento, u.foto_url, u.notificacoes_whatsapp,
+      `SELECT u.id, u.nome, u.email, u.telefone, u.cpf, u.apelido, u.data_nascimento, u.foto_url, u.notificacoes_whatsapp,
               m.status as matricula_status, m.data_vencimento, p.nome as plano_nome
        FROM usuarios u
        LEFT JOIN LATERAL (
@@ -70,7 +70,7 @@ router.get('/perfil', authMiddleware, async (req, res, next) => {
 // PATCH /api/alunos/perfil
 router.patch('/perfil', authMiddleware, async (req, res, next) => {
   try {
-    const CAMPOS_PERMITIDOS = ['nome', 'telefone', 'foto_url', 'data_nascimento', 'notificacoes_whatsapp'];
+    const CAMPOS_PERMITIDOS = ['nome', 'telefone', 'foto_url', 'data_nascimento', 'notificacoes_whatsapp', 'apelido'];
     const updates = [];
     const values = [];
     for (const campo of CAMPOS_PERMITIDOS) {
@@ -82,7 +82,7 @@ router.patch('/perfil', authMiddleware, async (req, res, next) => {
 
     values.push(req.user.id);
     const { rows: [user] } = await pool.query(
-      `UPDATE usuarios SET ${updates.join(', ')}, updated_at = NOW() WHERE id = $${values.length} RETURNING id, nome, email, telefone, foto_url, notificacoes_whatsapp`,
+      `UPDATE usuarios SET ${updates.join(', ')}, updated_at = NOW() WHERE id = $${values.length} RETURNING id, nome, email, telefone, foto_url, apelido, notificacoes_whatsapp`,
       values
     );
     res.json(user);
