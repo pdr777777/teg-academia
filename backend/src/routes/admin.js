@@ -175,6 +175,31 @@ router.get('/alunos', authMiddleware, requireRole('admin', 'dono', 'professor'),
   }
 });
 
+// GET /api/admin/alunos/:id — detalhe completo de 1 aluno (painel "Mais opções")
+router.get('/alunos/:id', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
+  try {
+    const { rows: [aluno] } = await pool.query(
+      `SELECT u.id, u.nome, u.email, u.telefone, u.cpf, u.apelido, u.foto_url, u.ativo, u.controlid_user_id,
+              m.id as matricula_id, m.status as matricula_status, m.data_vencimento, p.nome as plano_nome
+       FROM usuarios u
+       LEFT JOIN matriculas m ON m.usuario_id = u.id AND m.status = 'ativa'
+       LEFT JOIN planos p ON p.id = m.plano_id
+       WHERE u.id = $1 AND u.role = 'aluno'`,
+      [req.params.id]
+    );
+    if (!aluno) return res.status(404).json({ error: 'Aluno não encontrado' });
+
+    const { rows: [{ ultima_mensalidade }] } = await pool.query(
+      `SELECT MAX(data_pagamento) AS ultima_mensalidade FROM pagamentos WHERE usuario_id = $1 AND status = 'pago'`,
+      [req.params.id]
+    );
+
+    res.json({ ...aluno, ultima_mensalidade });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // PATCH /api/admin/alunos/:id/toggle (ativar/desativar)
 router.patch('/alunos/:id/toggle', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
   try {
