@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const jwt = require('jsonwebtoken');
 
 const errorMiddleware = require('./middleware/errorMiddleware');
 const requestId = require('./middleware/requestId');
@@ -79,7 +80,28 @@ app.use(express.json({
 // suíte de integração, e o log/métrica de cada chamada só faz ruído nos testes.
 if (process.env.NODE_ENV !== 'test') {
   const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
-  const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
+  // Sem isso, o wizard "Adicionar aluno" do admin (que chama POST
+  // /api/auth/registro pra cada matrícula presencial) trava o próprio admin
+  // fora do sistema no 11º cadastro em 15min num dia de matrícula em massa —
+  // o mesmo limite pensado pra login por força bruta também batia na
+  // ferramenta administrativa. Admin/dono com token já válido (portanto já
+  // autenticado, não é o cenário de força bruta que o limite existe pra
+  // barrar) fica de fora; login/registro/esqueci-senha público continuam
+  // limitados normalmente.
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    skip: (req) => {
+      const header = req.headers.authorization;
+      if (!header?.startsWith('Bearer ')) return false;
+      try {
+        const payload = jwt.verify(header.slice(7), process.env.JWT_SECRET);
+        return payload.role === 'admin' || payload.role === 'dono';
+      } catch {
+        return false;
+      }
+    },
+  });
 
   app.use('/api', limiter);
   app.use('/api/auth', authLimiter);
