@@ -92,7 +92,7 @@ function renderPlanos(grid) {
         <ul class="plano-features">
           ${meta.features.map((f) => `<li><span data-icon="check" data-icon-size="14"></span>${f}</li>`).join('')}
         </ul>
-        <button type="button" class="btn ${meta.destaque ? 'btn-primary' : 'btn-outline'} btn-block plano-cta" data-plano-index="${i}">
+        <button type="button" class="btn btn-outline btn-block plano-cta" data-plano-index="${i}">
           Escolher este plano
         </button>
       </div>
@@ -103,6 +103,109 @@ function renderPlanos(grid) {
   });
   initReveal();
   fillIcons();
+  initElectricBorder(grid);
+}
+
+// ===== Borda elétrica animada no card destaque (mesmo efeito da landing) =====
+function initElectricBorder(grid) {
+  const card = grid.querySelector('.plano-card.plano-destaque');
+  if (!card) return;
+  const antigo = card.querySelector('.plano-electric-canvas');
+  if (antigo) antigo.remove();
+
+  const canvas = document.createElement('canvas');
+  canvas.className = 'plano-electric-canvas';
+  canvas.setAttribute('aria-hidden', 'true');
+  card.prepend(canvas);
+
+  const ctx    = canvas.getContext('2d');
+  const PAD    = 12;  // deve bater com inset: -12px no CSS
+  const BR     = 20;  // border-radius
+  const COLOR  = '#a90000';
+  const SPEED  = 1.2;
+  const CHAOS  = 0.16;
+  const THICK  = 2;
+  const CHAOS_PX = CHAOS * 40;
+
+  function resize() {
+    canvas.width  = card.offsetWidth  + PAD * 2;
+    canvas.height = card.offsetHeight + PAD * 2;
+  }
+  resize();
+  new ResizeObserver(resize).observe(card);
+
+  function perimeter(W, H, r, N) {
+    const segs = [
+      { len: W-2*r, fn: t => [PAD+r+t*(W-2*r), PAD,     0, -1] },
+      { len: r*Math.PI/2, fn: t => { const a=-Math.PI/2+t*Math.PI/2; return [PAD+W-r+Math.cos(a)*r, PAD+r+Math.sin(a)*r, Math.cos(a), Math.sin(a)]; }},
+      { len: H-2*r, fn: t => [PAD+W,   PAD+r+t*(H-2*r),  1,  0] },
+      { len: r*Math.PI/2, fn: t => { const a=t*Math.PI/2;             return [PAD+W-r+Math.cos(a)*r, PAD+H-r+Math.sin(a)*r, Math.cos(a), Math.sin(a)]; }},
+      { len: W-2*r, fn: t => [PAD+W-r-t*(W-2*r), PAD+H,  0,  1] },
+      { len: r*Math.PI/2, fn: t => { const a=Math.PI/2+t*Math.PI/2;  return [PAD+r+Math.cos(a)*r, PAD+H-r+Math.sin(a)*r, Math.cos(a), Math.sin(a)]; }},
+      { len: H-2*r, fn: t => [PAD,   PAD+H-r-t*(H-2*r), -1,  0] },
+      { len: r*Math.PI/2, fn: t => { const a=Math.PI+t*Math.PI/2;    return [PAD+r+Math.cos(a)*r, PAD+r+Math.sin(a)*r, Math.cos(a), Math.sin(a)]; }},
+    ];
+    const total = segs.reduce((s, g) => s + g.len, 0);
+    const pts = [];
+    for (const seg of segs) {
+      const cnt = Math.max(3, Math.round(N * seg.len / total));
+      for (let i = 0; i < cnt; i++) pts.push(seg.fn(i / cnt));
+    }
+    return pts;
+  }
+
+  function triWave(t) {
+    return 2 * Math.abs(t - Math.floor(t + 0.5));
+  }
+
+  function lightning(t, ph) {
+    return (
+      (triWave(t * 7.3  + ph * 0.9)  - 0.5) * 0.55 +
+      (triWave(t * 19.7 + ph * 1.4)  - 0.5) * 0.30 +
+      (triWave(t * 43.1 + ph * 2.1)  - 0.5) * 0.15
+    );
+  }
+
+  let phase = 0;
+
+  function frame() {
+    if (!document.body.contains(card)) return;
+    const cw = canvas.width, ch = canvas.height;
+    ctx.clearRect(0, 0, cw, ch);
+
+    const pts = perimeter(cw - PAD*2, ch - PAD*2, BR, 240);
+    const N   = pts.length;
+
+    const disp = pts.map(([x, y, nx, ny], i) => {
+      const t = i / N;
+      const d = lightning(t, phase) * CHAOS_PX;
+      return [x + nx * d, y + ny * d];
+    });
+
+    const drawPass = (lw, blur, alpha) => {
+      ctx.beginPath();
+      ctx.moveTo(disp[0][0], disp[0][1]);
+      for (let i = 1; i < N; i++) ctx.lineTo(disp[i][0], disp[i][1]);
+      ctx.closePath();
+      ctx.strokeStyle = COLOR;
+      ctx.lineWidth   = lw;
+      ctx.shadowColor = COLOR;
+      ctx.shadowBlur  = blur;
+      ctx.globalAlpha = alpha;
+      ctx.stroke();
+    };
+
+    drawPass(12, 60, 0.08);
+    drawPass(4,  30, 0.22);
+    drawPass(THICK, 12, 0.85 + Math.sin(phase*3)*0.1);
+
+    ctx.shadowBlur  = 0;
+    ctx.globalAlpha = 1;
+    phase += 0.014 * SPEED;
+    requestAnimationFrame(frame);
+  }
+
+  frame();
 }
 
 async function carregarPlanos() {
