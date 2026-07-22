@@ -18,6 +18,11 @@
 
   function apply(theme) {
     document.documentElement.setAttribute('data-theme', theme);
+    document.querySelectorAll('.brand-logo').forEach((img) => {
+      img.src = theme === 'light'
+        ? img.src.replace(/logo(-light)?\.svg/, 'logo-light.svg')
+        : img.src.replace(/logo(-light)?\.svg/, 'logo.svg');
+    });
     document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
       btn.setAttribute('data-icon', theme === 'light' ? 'moon' : 'sun');
       btn.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
