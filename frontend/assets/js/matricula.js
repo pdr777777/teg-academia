@@ -300,6 +300,7 @@ document.getElementById('form-matricula').addEventListener('submit', async (ev) 
       telefone: form.telefone.value.trim(),
       cpf: form.cpf.value.trim(),
       link_indicacao_origem: params.get('ref') || undefined,
+      plano_id: state.planoSelecionado.id,
     });
     localStorage.setItem('token', token);
 
