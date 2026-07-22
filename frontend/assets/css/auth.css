@@ -15,6 +15,23 @@
 .auth-brand { position: relative; z-index: 1; font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 0.6rem; transition: opacity 0.15s; }
 .auth-brand:hover { opacity: 0.85; }
 .auth-brand .dot { width: 9px; height: 9px; border-radius: 50%; background: #fff; }
+
+.auth-back {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  transition: color 0.15s;
+}
+.auth-back:hover { color: #fff; }
+@media (max-width: 560px) {
+  .auth-back { position: static; align-self: flex-start; margin-bottom: -1rem; }
+}
 .auth-card {
   position: relative;
   z-index: 1;

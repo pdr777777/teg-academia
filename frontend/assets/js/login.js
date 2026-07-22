@@ -1,30 +1,8 @@
-/* ===== Abas Entrar / Criar conta (mesma página, sem reload) ===== */
+/* ===== Pill Entrar / Matricular-se (a segunda é link real, sai da página) ===== */
 (function initAuthTabs() {
   const tabsEl = document.getElementById('auth-tabs');
   if (!tabsEl) return;
-
-  const panels = document.querySelectorAll('.auth-panel');
-
-  function activate(name, opts) {
-    opts = opts || {};
-    tabsEl.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.panel === name));
-    panels.forEach((p) => p.classList.toggle('active', p.dataset.panel === name));
-    if (opts.updateHash !== false) {
-      const hash = name === 'criar-conta' ? '#criar-conta' : '';
-      history.replaceState(null, '', window.location.pathname + hash);
-    }
-  }
-
   initTabsIndicator(tabsEl, { gooey: true });
-
-  tabsEl.addEventListener('click', (ev) => {
-    const tab = ev.target.closest('.tab');
-    if (tab) activate(tab.dataset.panel);
-  });
-
-  if (window.location.hash === '#criar-conta') {
-    activate('criar-conta', { updateHash: false });
-  }
 })();
 
 let intervaloBloqueio = null;
