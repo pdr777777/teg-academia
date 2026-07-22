@@ -295,6 +295,7 @@ function renderPickerGrid(busca, grupo) {
   const selecionadoId = pickerIdxAtual !== null ? Number(exerciciosForm[pickerIdxAtual]?.exercicio_id) : null;
   grid.innerHTML = filtrados.map((e) => `
     <div class="exercicio-card${e.id === selecionadoId ? ' selecionado' : ''}" data-exercicio-id="${e.id}">
+      ${e.video_url ? `<span class="video-badge">${Icons.icon('play', { size: 9 })}Vídeo</span>` : ''}
       ${exercicioThumb(e)}
       <strong>${escapeHtml(e.nome)}</strong>
       ${e.grupo_muscular ? `<span>${escapeHtml(e.grupo_muscular)}</span>` : ''}

@@ -52,6 +52,7 @@ function renderGrid() {
 
   grid.innerHTML = filtrados.map((e) => `
     <div class="exercicio-lib-card" data-exercicio-id="${e.id}">
+      ${e.video_url ? `<span class="video-badge">${Icons.icon('play', { size: 9 })}Vídeo</span>` : ''}
       ${exercicioThumb(e)}
       <strong>${escapeHtml(e.nome)}</strong>
       ${e.grupo_muscular ? `<span class="badge badge-muted">${escapeHtml(e.grupo_muscular)}</span>` : ''}
