@@ -80,4 +80,42 @@ describe('POST /api/notifications/catraca/:secret/:eventType', () => {
 
     await limparSessao(aluno.id, treino.id);
   });
+
+  test('registra frequência mesmo quando o aluno não tem treino atribuído', async () => {
+    const aluno = await criarUsuario({ role: 'aluno' });
+    await pool.query('UPDATE usuarios SET controlid_user_id = $1 WHERE id = $2', ['43', aluno.id]);
+
+    const res = await request(app)
+      .post(`/api/notifications/catraca/${SECRET}/catra_event`)
+      .send({ user_id: 43 });
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+
+    const { rows: [freq] } = await pool.query(
+      `SELECT * FROM frequencias WHERE usuario_id = $1 AND data = CURRENT_DATE`,
+      [aluno.id]
+    );
+    expect(freq).toBeDefined();
+
+    await limparSessao(aluno.id);
+  });
+
+  test('não duplica frequência se o aluno já fez check-in hoje', async () => {
+    const aluno = await criarUsuario({ role: 'aluno' });
+    await pool.query('UPDATE usuarios SET controlid_user_id = $1 WHERE id = $2', ['44', aluno.id]);
+    await pool.query(`INSERT INTO frequencias (usuario_id, data) VALUES ($1, CURRENT_DATE)`, [aluno.id]);
+
+    const res = await request(app)
+      .post(`/api/notifications/catraca/${SECRET}/catra_event`)
+      .send({ user_id: 44 });
+    expect(res.status).toBe(200);
+
+    const { rows } = await pool.query(
+      `SELECT * FROM frequencias WHERE usuario_id = $1 AND data = CURRENT_DATE`,
+      [aluno.id]
+    );
+    expect(rows).toHaveLength(1);
+
+    await limparSessao(aluno.id);
+  });
 });
