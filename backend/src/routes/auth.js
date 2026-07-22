@@ -27,7 +27,7 @@ function gerarToken(user) {
 // POST /api/auth/registro
 router.post('/registro', async (req, res, next) => {
   try {
-    const { nome, email, senha, telefone, cpf, data_nascimento, link_indicacao_origem } = req.body;
+    const { nome, email, senha, telefone, cpf, data_nascimento, link_indicacao_origem, plano_id } = req.body;
 
     if (!nome || !nome.trim() || !email || !senha) {
       return res.status(400).json({ error: 'nome, email e senha são obrigatórios' });
@@ -43,6 +43,15 @@ router.post('/registro', async (req, res, next) => {
     }
     if (cpf && !cpfValido(cpf)) {
       return res.status(400).json({ error: 'CPF inválido' });
+    }
+
+    // Valida o plano antes de criar qualquer coisa — evita usuário órfão sem
+    // matrícula se o plano_id vier inválido/inativo.
+    let plano = null;
+    if (plano_id) {
+      const { rows: [p] } = await pool.query('SELECT * FROM planos WHERE id = $1 AND ativo = TRUE', [plano_id]);
+      if (!p) return res.status(404).json({ error: 'Plano não encontrado' });
+      plano = p;
     }
 
     const senha_hash = await bcrypt.hash(senha, 12);
@@ -72,7 +81,31 @@ router.post('/registro', async (req, res, next) => {
       );
     }
 
-    res.status(201).json({ token: gerarToken(user), user });
+    // Matrícula de auto-cadastro nasce "suspensa" + pagamento "pendente" —
+    // mesmo estado que o admin usa quando adiciona aluno sem pagamento na
+    // hora (POST /api/admin/matriculas). Só vira "ativa" quando alguém
+    // confirmar o pagamento em PATCH /api/pagamentos/:id/confirmar; até lá
+    // não conta como aluno ativo em nenhuma métrica.
+    let matricula = null;
+    if (plano) {
+      const data_vencimento = new Date();
+      data_vencimento.setDate(data_vencimento.getDate() + plano.duracao_dias);
+
+      const { rows: [novaMatricula] } = await pool.query(
+        `INSERT INTO matriculas (usuario_id, plano_id, data_vencimento, status)
+         VALUES ($1, $2, $3, 'suspensa') RETURNING *`,
+        [user.id, plano.id, data_vencimento]
+      );
+      matricula = novaMatricula;
+
+      await pool.query(
+        `INSERT INTO pagamentos (matricula_id, usuario_id, valor, status)
+         VALUES ($1, $2, $3, 'pendente')`,
+        [matricula.id, user.id, plano.preco_mensal]
+      );
+    }
+
+    res.status(201).json({ token: gerarToken(user), user, matricula });
   } catch (err) {
     next(err);
   }

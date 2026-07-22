@@ -2,7 +2,7 @@ const request = require('supertest');
 const crypto = require('crypto');
 const app = require('../server');
 const pool = require('../config/db');
-const { criarUsuario, gerarToken } = require('../testUtils/fixtures');
+const { criarUsuario, criarPlano, gerarToken } = require('../testUtils/fixtures');
 
 function emailUnico() {
   return `${crypto.randomUUID()}@teste.com`;
@@ -91,6 +91,53 @@ describe('POST /api/auth/registro', () => {
       senha: 'senha1234',
     });
     expect(res.status).toBe(201);
+    await pool.query('DELETE FROM usuarios WHERE email = $1', [email]);
+  });
+
+  test('rejeita quando plano_id não existe/está inativo (não cria o usuário)', async () => {
+    const email = emailUnico();
+    const planoInativo = await criarPlano({ nome: 'Plano Inativo Registro Teste' });
+    await pool.query('UPDATE planos SET ativo = FALSE WHERE id = $1', [planoInativo.id]);
+
+    const res = await request(app).post('/api/auth/registro').send({
+      nome: 'Teste Plano Inativo',
+      email,
+      senha: 'senha1234',
+      plano_id: planoInativo.id,
+    });
+    expect(res.status).toBe(404);
+
+    const { rows } = await pool.query('SELECT id FROM usuarios WHERE email = $1', [email]);
+    expect(rows.length).toBe(0);
+
+    await pool.query('DELETE FROM planos WHERE id = $1', [planoInativo.id]);
+  });
+
+  test('com plano_id, cria matrícula suspensa + pagamento pendente (some da lista de ativos até confirmar pagamento)', async () => {
+    const email = emailUnico();
+    const plano = await criarPlano({ nome: 'Plano Registro Teste', preco_mensal: 99.9, duracao_dias: 365 });
+
+    const res = await request(app).post('/api/auth/registro').send({
+      nome: 'Aluno Com Plano',
+      email,
+      senha: 'senha1234',
+      plano_id: plano.id,
+    });
+
+    expect(res.status).toBe(201);
+    expect(res.body.matricula).toBeDefined();
+    expect(res.body.matricula.plano_id).toBe(plano.id);
+    expect(res.body.matricula.status).toBe('suspensa');
+
+    const { rows: [pagamento] } = await pool.query(
+      'SELECT * FROM pagamentos WHERE matricula_id = $1', [res.body.matricula.id]
+    );
+    expect(pagamento.status).toBe('pendente');
+    expect(Number(pagamento.valor)).toBe(Number(plano.preco_mensal));
+
+    await pool.query('DELETE FROM pagamentos WHERE matricula_id = $1', [res.body.matricula.id]);
+    await pool.query('DELETE FROM matriculas WHERE id = $1', [res.body.matricula.id]);
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
     await pool.query('DELETE FROM usuarios WHERE email = $1', [email]);
   });
 });
