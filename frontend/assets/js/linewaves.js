@@ -115,6 +115,15 @@
     return s;
   }
 
+  // Respeita motion reduzido e poupa aparelho fraco (pouca RAM/poucos núcleos)
+  // — mesmo critério usado no Lightfall (dashboard/auth). Sem isso o shader
+  // rodava full-viewport pra sempre, sem cap de DPR nem pausa em aba oculta,
+  // e deixava o site inteiro travado em celular mais simples.
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var memoriaBaixa = navigator.deviceMemory && navigator.deviceMemory <= 2;
+  var poucosNucleos = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2;
+  if (memoriaBaixa || poucosNucleos) return;
+
   var canvas = document.createElement('canvas');
   canvas.id = 'linewaves-canvas';
   document.body.insertBefore(canvas, document.body.firstChild);
@@ -125,6 +134,11 @@
     canvas.parentNode.removeChild(canvas);
     return;
   }
+
+  // Teto de 1.5x — o shader é caro por pixel (raymarching/noise em loop), e a
+  // maioria das telas tem DPR 2-3x. Sem cap, um celular 3x renderiza 9x mais
+  // pixel do que precisa pra um fundo desfocado/decorativo.
+  var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
   gl.clearColor(0, 0, 0, 0);
   gl.enable(gl.BLEND);
@@ -206,8 +220,8 @@
   }
 
   function resize() {
-    var w = window.innerWidth;
-    var h = window.innerHeight;
+    var w = Math.round(window.innerWidth * dpr);
+    var h = Math.round(window.innerHeight * dpr);
     canvas.width  = w;
     canvas.height = h;
     gl.viewport(0, 0, w, h);
@@ -239,4 +253,14 @@
     gl.bindVertexArray(null);
   }
   raf = requestAnimationFrame(frame);
+
+  // Pausa de vez quando a aba não está visível — economiza CPU/GPU/bateria
+  // em vez de renderizar um shader caro pra uma tela que ninguém está vendo.
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      cancelAnimationFrame(raf);
+    } else {
+      raf = requestAnimationFrame(frame);
+    }
+  });
 })();

@@ -10,6 +10,11 @@
   var shine = document.createElement('div');
   shine.id = 'site-shine';
   document.body.appendChild(shine);
+
+  // Pausa a varredura animada quando a aba não está visível.
+  document.addEventListener('visibilitychange', function () {
+    shine.style.animationPlayState = document.hidden ? 'paused' : 'running';
+  });
 })();
 
 /* ══════════════════════════════════════════════════
