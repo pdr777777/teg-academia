@@ -11,18 +11,18 @@ async function carregarEquipe() {
           <tr>
             <td>
               <div class="ranking-avatar-row">
-                <span class="avatar-fallback">${iniciais(m.nome)}</span>
-                <div><strong>${m.nome}</strong><div class="text-muted" style="font-size:.78rem">${m.email}</div></div>
+                <span class="avatar-fallback">${escapeHtml(iniciais(m.nome))}</span>
+                <div><strong>${escapeHtml(m.nome)}</strong><div class="text-muted" style="font-size:.78rem">${escapeHtml(m.email)}</div></div>
               </div>
             </td>
-            <td><span class="badge badge-primary">${ROLE_LABEL[m.role] || m.role}</span></td>
+            <td><span class="badge badge-primary">${escapeHtml(ROLE_LABEL[m.role] || m.role)}</span></td>
             <td><span class="badge ${m.ativo ? 'badge-success' : 'badge-muted'}">${m.ativo ? 'Ativo' : 'Inativo'}</span></td>
             <td style="display:flex;gap:.4rem;align-items:center">
               <label class="switch">
                 <input type="checkbox" data-toggle-id="${m.id}" ${m.ativo ? 'checked' : ''} />
                 <span class="slider"></span>
               </label>
-              <button class="btn btn-ghost btn-sm" data-reset-id="${m.id}" data-reset-nome="${m.nome}" title="Redefinir senha">
+              <button class="btn btn-ghost btn-sm" data-reset-id="${m.id}" data-reset-nome="${escapeHtml(m.nome)}" title="Redefinir senha">
                 ${Icons.icon('key', { size: 14 })}
               </button>
             </td>

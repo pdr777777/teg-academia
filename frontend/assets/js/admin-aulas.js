@@ -10,7 +10,7 @@ async function carregarProfessores() {
   professoresCache = await api.get('/api/aulas/professores');
   const sel = document.getElementById('aula-professor');
   sel.innerHTML = '<option value="">Sem professor definido</option>' +
-    professoresCache.map((p) => `<option value="${p.id}">${p.nome}</option>`).join('');
+    professoresCache.map((p) => `<option value="${p.id}">${escapeHtml(p.nome)}</option>`).join('');
   return professoresCache;
 }
 
@@ -23,10 +23,10 @@ async function carregarAulas() {
     body.innerHTML = aulasCache.length
       ? aulasCache.map((a) => `
           <tr>
-            <td><strong>${a.nome}</strong></td>
-            <td>${a.dia_semana_nome}</td>
+            <td><strong>${escapeHtml(a.nome)}</strong></td>
+            <td>${escapeHtml(a.dia_semana_nome)}</td>
             <td>${hhmm(a.hora_inicio)} – ${hhmm(a.hora_fim)}</td>
-            <td>${a.professor_nome || '-'}</td>
+            <td>${escapeHtml(a.professor_nome || '-')}</td>
             <td>${a.capacidade_maxima}</td>
             <td>
               <label class="switch" title="Ativar/desativar aula">

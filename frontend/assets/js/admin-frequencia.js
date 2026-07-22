@@ -22,8 +22,8 @@ function renderFrequencia(lista) {
           <tr>
             <td>
               <div class="ranking-avatar-row">
-                <span class="avatar-fallback">${iniciais(a.nome)}</span>
-                <div><strong>${a.nome}</strong><div class="text-muted" style="font-size:.78rem">${a.email}</div></div>
+                <span class="avatar-fallback">${escapeHtml(iniciais(a.nome))}</span>
+                <div><strong>${escapeHtml(a.nome)}</strong><div class="text-muted" style="font-size:.78rem">${escapeHtml(a.email)}</div></div>
               </div>
             </td>
             <td>${a.ultimo_treino ? formatData(a.ultimo_treino) : 'Nunca treinou'}</td>

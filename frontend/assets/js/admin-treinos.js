@@ -56,8 +56,8 @@ function renderListaTreinos() {
   lista.innerHTML = treinosCache.map((t) => `
     <div class="treino-item${treinoSelecionadoId === t.id ? ' selecionado' : ''}" data-treino-id="${t.id}">
       <div class="treino-item-info">
-        <strong>${t.nome}</strong>
-        <span>${t.descricao || 'Sem descrição'}</span>
+        <strong>${escapeHtml(t.nome)}</strong>
+        <span>${escapeHtml(t.descricao || 'Sem descrição')}</span>
       </div>
       <span class="badge badge-muted">${(t.exercicios_count || 0)} ex.</span>
     </div>
@@ -96,7 +96,7 @@ async function carregarDetalheTreino(id) {
     document.getElementById('detalhe-exercicios').innerHTML = valid.length
       ? valid.map((te) => `
           <div class="row gap-sm" style="align-items:center;font-size:.83rem;padding:.45rem .6rem;background:var(--color-surface-2);border-radius:var(--radius-sm)">
-            <span style="flex:1;font-weight:600">${te.exercicio.nome}</span>
+            <span style="flex:1;font-weight:600">${escapeHtml(te.exercicio.nome)}</span>
             <span class="text-muted">${te.series}x${te.repeticoes}${te.carga ? ' · ' + te.carga + 'kg' : ''}</span>
           </div>
         `).join('')
@@ -126,8 +126,8 @@ async function carregarAlunosParaAtribuir(busca) {
       ? alunos.map((a) => `
           <div class="aluno-row-sel${alunoSelecionadoId === a.id ? ' selecionado' : ''}" data-aluno-id="${a.id}">
             <div class="ranking-avatar-row">
-              <span class="avatar-fallback">${iniciais(a.nome)}</span>
-              <div><strong style="font-size:.85rem">${a.nome}</strong><div class="text-muted" style="font-size:.76rem">${a.email}</div></div>
+              <span class="avatar-fallback">${escapeHtml(iniciais(a.nome))}</span>
+              <div><strong style="font-size:.85rem">${escapeHtml(a.nome)}</strong><div class="text-muted" style="font-size:.76rem">${escapeHtml(a.email)}</div></div>
             </div>
             <span class="badge ${a.ativo ? 'badge-success' : 'badge-muted'}" style="font-size:.72rem">${a.ativo ? 'Ativo' : 'Inativo'}</span>
           </div>
@@ -190,7 +190,7 @@ document.getElementById('btn-add-exercicio').addEventListener('click', () => {
 
 function exercicioThumb(ex) {
   return ex && ex.imagem_url
-    ? `<span class="exercicio-thumb"><img src="${ex.imagem_url}" alt="" loading="lazy" decoding="async" /></span>`
+    ? `<span class="exercicio-thumb"><img src="${escapeHtml(ex.imagem_url)}" alt="" loading="lazy" decoding="async" /></span>`
     : `<span class="exercicio-thumb">${Icons.icon('dumbbell', { size: 16 })}</span>`;
 }
 
@@ -206,7 +206,7 @@ function renderExerciciosForm() {
     <div class="exercicio-row-admin">
       <button type="button" class="exercicio-picker-btn${exercicio ? ' preenchido' : ''}" data-escolher-idx="${i}">
         ${exercicio ? exercicioThumb(exercicio) : `<span class="exercicio-thumb">${Icons.icon('dumbbell', { size: 16 })}</span>`}
-        <span class="exercicio-picker-nome${exercicio ? '' : ' exercicio-picker-placeholder'}">${exercicio ? exercicio.nome : 'Escolher exercício...'}</span>
+        <span class="exercicio-picker-nome${exercicio ? '' : ' exercicio-picker-placeholder'}">${exercicio ? escapeHtml(exercicio.nome) : 'Escolher exercício...'}</span>
       </button>
       <input type="number" class="input" placeholder="Séries" value="${ex.series}" min="1" data-ex-idx="${i}" data-field="series" />
       <input type="number" class="input" placeholder="Reps" value="${ex.repeticoes}" min="1" data-ex-idx="${i}" data-field="repeticoes" />
@@ -269,8 +269,8 @@ function renderPickerGrid(busca, grupo) {
   grid.innerHTML = filtrados.map((e) => `
     <div class="exercicio-card${e.id === selecionadoId ? ' selecionado' : ''}" data-exercicio-id="${e.id}">
       ${exercicioThumb(e)}
-      <strong>${e.nome}</strong>
-      ${e.grupo_muscular ? `<span>${e.grupo_muscular}</span>` : ''}
+      <strong>${escapeHtml(e.nome)}</strong>
+      ${e.grupo_muscular ? `<span>${escapeHtml(e.grupo_muscular)}</span>` : ''}
     </div>
   `).join('');
 }

@@ -17,8 +17,8 @@ async function carregarRanking(tipo) {
             <td><span class="ranking-pos ${medalha(r.posicao)}">${r.posicao}</span></td>
             <td>
               <div class="ranking-avatar-row">
-                <span class="avatar-fallback">${iniciais(r.nome)}</span>
-                <span>${r.nome}</span>
+                <span class="avatar-fallback">${escapeHtml(iniciais(r.nome))}</span>
+                <span>${escapeHtml(r.nome)}</span>
               </div>
             </td>
             <td>${r.treinos}</td>

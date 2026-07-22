@@ -11,10 +11,10 @@ let leads = [];
 function cardHtml(lead) {
   return `
     <div class="kanban-card" draggable="true" data-lead-id="${lead.id}">
-      <strong>${lead.nome}</strong>
-      <div class="kanban-meta">${Icons.icon('phone', { size: 13 })}${lead.telefone}</div>
-      ${lead.objetivo ? `<div class="kanban-meta">${Icons.icon('zap', { size: 13 })}${lead.objetivo}</div>` : ''}
-      <div class="kanban-meta">${Icons.icon('calendar', { size: 13 })}${formatData(lead.created_at)} · ${lead.origem || 'site'}</div>
+      <strong>${escapeHtml(lead.nome)}</strong>
+      <div class="kanban-meta">${Icons.icon('phone', { size: 13 })}${escapeHtml(lead.telefone)}</div>
+      ${lead.objetivo ? `<div class="kanban-meta">${Icons.icon('zap', { size: 13 })}${escapeHtml(lead.objetivo)}</div>` : ''}
+      <div class="kanban-meta">${Icons.icon('calendar', { size: 13 })}${formatData(lead.created_at)} · ${escapeHtml(lead.origem || 'site')}</div>
     </div>
   `;
 }

@@ -19,8 +19,8 @@ async function carregarPagamentos(status = '') {
           const s = STATUS_PAGAMENTO[p.status] || STATUS_PAGAMENTO.pendente;
           return `
             <tr>
-              <td><strong>${p.nome}</strong><div class="text-muted" style="font-size:.78rem">${p.email}</div></td>
-              <td>${p.plano_nome}</td>
+              <td><strong>${escapeHtml(p.nome)}</strong><div class="text-muted" style="font-size:.78rem">${escapeHtml(p.email)}</div></td>
+              <td>${escapeHtml(p.plano_nome)}</td>
               <td>${formatMoeda(p.valor)}</td>
               <td><span class="badge ${s.classe}">${s.label}</span></td>
               <td>${p.data_pagamento ? formatData(p.data_pagamento) : formatData(p.created_at)}</td>
