@@ -11,9 +11,11 @@
   shine.id = 'site-shine';
   document.body.appendChild(shine);
 
-  // Pausa a varredura animada quando a aba não está visível.
+  // Pausa a varredura animada quando a aba não está visível. A animação vive
+  // no ::before (ver effects.css), que style.animationPlayState não alcança
+  // — por isso o toggle é por classe.
   document.addEventListener('visibilitychange', function () {
-    shine.style.animationPlayState = document.hidden ? 'paused' : 'running';
+    shine.classList.toggle('paused', document.hidden);
   });
 })();
 

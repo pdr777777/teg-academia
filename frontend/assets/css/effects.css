@@ -98,13 +98,28 @@ h1 .text-primary, h2 .text-primary, h3 .text-primary, h4 .text-primary,
    pontuais (.text-primary, .shiny-text do h1, .eyebrow) — texto normal fica
    estático, sólido, e mais legível. */
 
-/* ─── Site-wide shine overlay — passa luz em todo o site ─── */
+/* ─── Site-wide shine overlay — passa luz em todo o site ───
+   Animava background-position, que exige repintar a tela inteira (mix-blend-mode
+   + full-viewport) a cada frame, pra sempre — em GPU integrada isso sozinho já
+   travava a página. Reescrito pra mover só via transform (translateX), que o
+   compositor anima direto na GPU sem repintar nada. Faixa dupla + translateX de
+   exatamente uma largura de tela fecha o loop sem salto visível. */
 #site-shine {
   position: fixed;
   inset: 0;
+  overflow: hidden;
   pointer-events: none;
   z-index: 9985;
-  background: linear-gradient(
+  mix-blend-mode: overlay;
+}
+#site-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background-image: linear-gradient(
     110deg,
     transparent        22%,
     rgba(255,255,255,0.03) 45%,
@@ -112,14 +127,16 @@ h1 .text-primary, h2 .text-primary, h3 .text-primary, h4 .text-primary,
     rgba(255,255,255,0.03) 55%,
     transparent        78%
   );
-  background-size: 300% 100%;
+  background-size: 50% 100%;
+  background-repeat: repeat-x;
   animation: site-shine 10s linear infinite;
-  mix-blend-mode: overlay;
+  will-change: transform;
 }
 @keyframes site-shine {
-  0%   { background-position: 200% center; }
-  100% { background-position: -200% center; }
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
 }
+#site-shine.paused::before { animation-play-state: paused; }
 
 /* ─── Nav scroll shrink ─── */
 .topnav {
@@ -209,7 +226,7 @@ h1 .text-primary, h2 .text-primary, h3 .text-primary, h4 .text-primary,
 /* ─── Motion reduzido: desliga as varreduras animadas (perf + a11y) ─── */
 @media (prefers-reduced-motion: reduce) {
   .text-primary, .shiny-text, .shiny-text .text-primary, .eyebrow,
-  #site-shine {
+  #site-shine::before {
     animation: none !important;
   }
 }
