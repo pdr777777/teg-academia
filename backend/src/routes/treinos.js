@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/meu', authMiddleware, async (req, res, next) => {
   try {
     const { rows } = await pool.query(
-      `SELECT t.id, t.nome, t.descricao,
+      `SELECT t.id, t.nome, t.descricao, ta.dia_semana,
               json_agg(
                 json_build_object(
                   'id', te.id, 'ordem', te.ordem, 'series', te.series,
@@ -22,7 +22,8 @@ router.get('/meu', authMiddleware, async (req, res, next) => {
        LEFT JOIN treino_exercicios te ON te.treino_id = t.id
        LEFT JOIN exercicios e ON e.id = te.exercicio_id
        WHERE ta.usuario_id = $1 AND ta.ativo = TRUE
-       GROUP BY t.id, t.nome, t.descricao`,
+       GROUP BY t.id, t.nome, t.descricao, ta.dia_semana
+       ORDER BY ta.dia_semana NULLS LAST`,
       [req.user.id]
     );
     res.json(rows);
@@ -81,15 +82,26 @@ router.post('/', authMiddleware, requireRole('professor', 'admin', 'dono'), asyn
 });
 
 // POST /api/treinos/:id/atribuir/:usuarioId (professor/admin)
+// dia_semana no body (0=domingo..6=sabado) atribui o treino só àquele dia,
+// permitindo uma grade semanal; omitido/null atribui "todo dia" (comportamento
+// antigo, um treino único pro aluno).
 router.post('/:id/atribuir/:usuarioId', authMiddleware, requireRole('professor', 'admin', 'dono'), async (req, res, next) => {
   try {
+    const { dia_semana } = req.body;
+    const dia = dia_semana === undefined || dia_semana === null || dia_semana === '' ? null : Number(dia_semana);
+    if (dia !== null && (Number.isNaN(dia) || dia < 0 || dia > 6)) {
+      return res.status(400).json({ error: 'dia_semana deve ser 0-6 ou omitido' });
+    }
+
+    // Só desativa o treino que já ocupava esse mesmo slot (dia específico ou
+    // "todo dia"), não os outros dias da grade do aluno.
     await pool.query(
-      'UPDATE treino_alunos SET ativo = FALSE WHERE usuario_id = $1',
-      [req.params.usuarioId]
+      'UPDATE treino_alunos SET ativo = FALSE WHERE usuario_id = $1 AND dia_semana IS NOT DISTINCT FROM $2 AND ativo = TRUE',
+      [req.params.usuarioId, dia]
     );
     await pool.query(
-      'INSERT INTO treino_alunos (treino_id, usuario_id) VALUES ($1, $2)',
-      [req.params.id, req.params.usuarioId]
+      'INSERT INTO treino_alunos (treino_id, usuario_id, dia_semana) VALUES ($1, $2, $3)',
+      [req.params.id, req.params.usuarioId, dia]
     );
     res.json({ ok: true });
   } catch (err) {

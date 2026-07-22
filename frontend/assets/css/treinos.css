@@ -1,3 +1,24 @@
+#treino-tabs {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+.treino-tab {
+  padding: 0 0 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.treino-tab:hover { color: var(--color-text); }
+.treino-tab.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+
 .exercicio-card { padding: 0; overflow: hidden; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s; }
 .exercicio-card:hover { border-color: rgba(255,138,0,.25); transform: translateY(-2px); box-shadow: 0 14px 40px rgba(0,0,0,.35); }
 .exercicio-video {

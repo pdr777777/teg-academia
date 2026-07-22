@@ -84,6 +84,7 @@ async function carregarDetalheTreino(id) {
   document.getElementById('detalhe-exercicios').innerHTML = '<div class="loading-row"><span class="spinner"></span></div>';
   document.getElementById('lista-alunos-treino').innerHTML = '';
   document.getElementById('btn-atribuir').disabled = true;
+  document.getElementById('dia-semana-treino').value = '';
 
   try {
     const treino = treinosCache.find((t) => t.id === id);
@@ -155,11 +156,15 @@ document.getElementById('busca-aluno-treino').addEventListener('input', debounce
 document.getElementById('btn-atribuir').addEventListener('click', async () => {
   if (!treinoSelecionadoId || !alunoSelecionadoId) return;
   const btn = document.getElementById('btn-atribuir');
+  const diaSemanaInput = document.getElementById('dia-semana-treino').value;
+  const dia_semana = diaSemanaInput === '' ? null : Number(diaSemanaInput);
   setBtnLoading(btn, 'Atribuindo...');
   try {
-    await api.post(`/api/treinos/${treinoSelecionadoId}/atribuir/${alunoSelecionadoId}`, {});
+    await api.post(`/api/treinos/${treinoSelecionadoId}/atribuir/${alunoSelecionadoId}`, { dia_semana });
     const treino = treinosCache.find((t) => t.id === treinoSelecionadoId);
-    toast(`Treino "${treino?.nome}" atribuído com sucesso!`, 'success');
+    const DIAS = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+    const rotulo = dia_semana === null ? 'todo dia' : `toda ${DIAS[dia_semana]}`;
+    toast(`Treino "${treino?.nome}" atribuído (${rotulo})!`, 'success');
     alunoSelecionadoId = null;
     document.getElementById('btn-atribuir').disabled = true;
     document.querySelectorAll('.aluno-row-sel.selecionado').forEach((r) => r.classList.remove('selecionado'));

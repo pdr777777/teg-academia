@@ -1,10 +1,16 @@
 const pool = require('../config/db');
 
 async function treinoAtivoDoAluno(usuario_id) {
+  // Com grade semanal (dia_semana por treino_aluno), o aluno pode ter mais de
+  // uma linha ativa — prioriza o treino do dia de hoje, cai pro "todo dia"
+  // (dia_semana NULL) se não houver um específico pra hoje.
+  const hoje = new Date().getDay();
   const { rows: [treino] } = await pool.query(
     `SELECT t.id FROM treino_alunos ta JOIN treinos t ON t.id = ta.treino_id
-     WHERE ta.usuario_id = $1 AND ta.ativo = TRUE LIMIT 1`,
-    [usuario_id]
+     WHERE ta.usuario_id = $1 AND ta.ativo = TRUE
+     ORDER BY (ta.dia_semana = $2) DESC, ta.dia_semana NULLS LAST
+     LIMIT 1`,
+    [usuario_id, hoje]
   );
   return treino?.id || null;
 }
