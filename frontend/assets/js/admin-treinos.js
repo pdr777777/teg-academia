@@ -237,6 +237,7 @@ function renderExerciciosForm() {
       <input type="number" class="input" placeholder="Séries" value="${ex.series}" min="1" data-ex-idx="${i}" data-field="series" />
       <input type="number" class="input" placeholder="Reps" value="${ex.repeticoes}" min="1" data-ex-idx="${i}" data-field="repeticoes" />
       <input type="number" class="input" placeholder="Carga kg" value="${ex.carga || ''}" min="0" step="0.5" data-ex-idx="${i}" data-field="carga" />
+      <input type="number" class="input" placeholder="Descanso s" value="${ex.descanso_segundos}" min="0" step="5" title="Descanso entre séries (segundos)" data-ex-idx="${i}" data-field="descanso_segundos" />
       <button type="button" class="btn btn-ghost btn-sm" data-remove-idx="${i}" title="Remover">
         ${Icons.icon('trash-2', { size: 13 })}
       </button>

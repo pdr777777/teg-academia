@@ -280,7 +280,7 @@
 .treino-item-info strong { display: block; font-size: .875rem; }
 .treino-item-info span { font-size: .76rem; color: var(--color-muted); }
 .exercicio-row-admin {
-  display: grid; grid-template-columns: 1fr 60px 80px 80px 36px;
+  display: grid; grid-template-columns: 1fr 60px 80px 80px 76px 36px;
   gap: .5rem; align-items: center; font-size: .82rem;
   padding: .5rem .75rem; background: var(--color-surface-2);
   border-radius: var(--radius-sm); border: 1px solid var(--color-border);
@@ -289,13 +289,14 @@
 
 @media (max-width: 560px) {
   .exercicio-row-admin {
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-areas: "picker picker picker" "series reps carga" "remover remover remover";
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-areas: "picker picker picker picker" "series reps carga descanso" "remover remover remover remover";
   }
   .exercicio-row-admin .exercicio-picker-btn { grid-area: picker; }
   .exercicio-row-admin input[data-field="series"] { grid-area: series; }
   .exercicio-row-admin input[data-field="repeticoes"] { grid-area: reps; }
   .exercicio-row-admin input[data-field="carga"] { grid-area: carga; }
+  .exercicio-row-admin input[data-field="descanso_segundos"] { grid-area: descanso; }
   .exercicio-row-admin [data-remove-idx] { grid-area: remover; justify-self: end; }
 }
 
