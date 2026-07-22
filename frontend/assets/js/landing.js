@@ -238,33 +238,6 @@ document.querySelectorAll('.plan-card').forEach((card, i) => {
   frame();
 })();
 
-// ===== Lead form =====
-document.getElementById('form-lead').addEventListener('submit', async (ev) => {
-  ev.preventDefault();
-  const form = ev.target;
-  const btn  = form.querySelector('button[type="submit"]');
-  const params = new URLSearchParams(window.location.search);
-
-  btn.disabled    = true;
-  btn.textContent = 'Enviando...';
-  try {
-    await api.post('/api/leads', {
-      nome:     form.nome.value,
-      telefone: form.telefone.value,
-      objetivo: form.objetivo.value,
-      origem:   'site',
-      ref:      params.get('ref') || undefined,
-    });
-    toast('Recebemos seus dados! Em breve entraremos em contato.', 'success');
-    form.reset();
-  } catch (err) {
-    toast(err.message || 'Erro ao enviar. Tente novamente.', 'error');
-  } finally {
-    btn.disabled    = false;
-    btn.textContent = 'Agendar aula grátis';
-  }
-});
-
 // ===== Scroll reveal =====
 const revealObs = new IntersectionObserver(
   (entries) => entries.forEach((e) => {
