@@ -7,11 +7,19 @@ const state = {
 
 let timerInterval = null;
 
+// Mostra só a miniatura + botão de play — monta o iframe de verdade apenas
+// quando o aluno toca (ver listener em #lista-exercicios mais abaixo). Com
+// vários exercícios por treino, carregar um iframe do YouTube pra cada um
+// de cara deixa a tela pesada; assim só carrega o que o aluno realmente for
+// assistir.
 function embedVideo(url) {
   if (!url) return `<div class="play-placeholder">${Icons.icon('play', { size: 28 })}<span>Vídeo em breve</span></div>`;
-  const youtubeMatch = url.match(/(?:youtu\.be\/|v=)([\w-]{11})/);
+  const youtubeMatch = url.match(/(?:youtu\.be\/|[?&]v=|shorts\/)([\w-]{11})/);
   if (youtubeMatch) {
-    return `<iframe src="https://www.youtube.com/embed/${youtubeMatch[1]}" title="Vídeo do exercício" allowfullscreen loading="lazy"></iframe>`;
+    const id = youtubeMatch[1];
+    return `<button type="button" class="video-thumb" data-youtube-id="${id}" aria-label="Assistir vídeo do exercício" style="background-image:url('https://img.youtube.com/vi/${id}/hqdefault.jpg')">
+      <span class="video-thumb-play">${Icons.icon('play', { size: 28 })}</span>
+    </button>`;
   }
   return `<video src="${url}" controls></video>`;
 }
@@ -190,6 +198,13 @@ document.getElementById('btn-finalizar-treino').addEventListener('click', async 
 });
 
 document.getElementById('lista-exercicios').addEventListener('click', (ev) => {
+  const thumb = ev.target.closest('.video-thumb');
+  if (thumb) {
+    const id = thumb.dataset.youtubeId;
+    thumb.outerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" title="Vídeo do exercício" allowfullscreen allow="autoplay; encrypted-media" loading="lazy"></iframe>`;
+    return;
+  }
+
   const btnAbrir = ev.target.closest('[data-abrir-serie]');
   if (btnAbrir) {
     const id = btnAbrir.dataset.abrirSerie;

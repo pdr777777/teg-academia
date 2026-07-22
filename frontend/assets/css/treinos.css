@@ -8,6 +8,29 @@
 }
 .exercicio-video iframe { width: 100%; height: 100%; border: 0; }
 .exercicio-video .play-placeholder { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; font-size: 0.82rem; }
+.video-thumb {
+  width: 100%; height: 100%;
+  border: 0; padding: 0; cursor: pointer;
+  background-color: var(--color-surface-2);
+  background-size: cover; background-position: center;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.video-thumb::before {
+  content: ''; position: absolute; inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  transition: background 0.15s;
+}
+.video-thumb:hover::before { background: rgba(0, 0, 0, 0.4); }
+.video-thumb-play {
+  position: relative;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: #111;
+  display: flex; align-items: center; justify-content: center;
+  padding-left: 3px; /* ícone de play óptico centralizado */
+}
 .exercicio-body { padding: 1.25rem 1.5rem; }
 .exercicio-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.9rem; }
 .exercicio-head h3 { font-size: 1.05rem; }
