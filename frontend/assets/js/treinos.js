@@ -141,7 +141,7 @@ function renderTabs() {
   }
   tabs.style.display = 'flex';
   tabs.innerHTML = state.treinos.map((t) => `
-    <button type="button" class="treino-tab${t.id === state.treino?.id ? ' active' : ''}" data-treino-id="${t.id}">${t.nome}</button>
+    <button type="button" class="treino-tab${t.id === state.treino?.id ? ' active' : ''}" data-treino-id="${t.id}">${escapeHtml(t.nome)}</button>
   `).join('');
 }
 
