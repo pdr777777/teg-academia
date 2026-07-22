@@ -31,15 +31,53 @@
           <h1>Exercício</h1>
           <p>Biblioteca de exercícios usada para montar os treinos.</p>
         </div>
+        <button class="btn btn-primary btn-sm" id="btn-novo-exercicio">
+          <span data-icon="plus" data-icon-size="14"></span>Novo
+        </button>
       </div>
 
-      <div class="card" style="text-align:center;padding:3rem 1.5rem" data-reveal>
-        <span data-icon="dumbbell" data-icon-size="32" style="color:var(--color-muted);margin-bottom:1rem;display:inline-block"></span>
-        <h2 style="margin-bottom:.5rem">Em construção</h2>
-        <p class="text-muted">Essa função está chegando em breve.</p>
+      <div class="card" data-reveal>
+        <div class="row gap-sm" style="margin-bottom:1rem">
+          <div class="search-field" style="flex:1;position:relative">
+            <span data-icon="search" data-icon-size="16" style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--color-muted)"></span>
+            <input type="text" id="busca-exercicio-lib" class="input" placeholder="Buscar exercício..." style="padding-left:2.5rem" />
+          </div>
+          <select id="filtro-grupo-lib" class="input" style="max-width:200px">
+            <option value="">Todos os grupos</option>
+          </select>
+        </div>
+        <div id="exercicio-lib-grid" class="exercicio-lib-grid">
+          <div class="loading-row"><span class="spinner"></span></div>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Dialog cadastrar/editar exercício -->
+  <dialog id="dialog-exercicio" class="admin-dialog" style="max-width:440px">
+    <form id="form-exercicio" method="dialog">
+      <h2 id="exercicio-dialog-titulo">Novo exercício</h2>
+
+      <label class="field-label">Nome <span class="text-danger">*</span></label>
+      <input type="text" id="exercicio-nome-input" class="input" placeholder="ex: Supino Reto" required />
+
+      <label class="field-label" style="margin-top:.9rem">Grupo muscular</label>
+      <select id="exercicio-grupo-input" class="input">
+        <option value="">Selecione...</option>
+      </select>
+
+      <label class="field-label" style="margin-top:.9rem">URL da imagem</label>
+      <input type="url" id="exercicio-imagem-input" class="input" placeholder="https://..." />
+
+      <label class="field-label" style="margin-top:.9rem">URL do vídeo</label>
+      <input type="url" id="exercicio-video-input" class="input" placeholder="https://..." />
+
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" id="btn-exercicio-cancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-exercicio-confirm">Salvar exercício</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="../assets/js/icons.js"></script>
   <script src="../assets/js/api.js"></script>
@@ -47,5 +85,6 @@
   <script src="../assets/js/sidebar-nav.js"></script>
   <script src="../assets/js/app-effects.js"></script>
   <script src="../assets/js/admin-guard.js"></script>
+  <script src="../assets/js/admin-exercicios.js"></script>
 </body>
 </html>
