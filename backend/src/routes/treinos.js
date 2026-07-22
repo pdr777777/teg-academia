@@ -187,4 +187,26 @@ router.put('/exercicios/:id', authMiddleware, requireRole('professor', 'admin', 
   }
 });
 
+// DELETE /api/treinos/exercicios/:id (professor/admin) — só permite excluir
+// exercício que não está em uso em nenhum treino (treino_exercicios referencia
+// exercicio_id com ON DELETE CASCADE, apagaria o exercício de todo treino que
+// o usa, inclusive dos que já têm sessão/série registrada em cima dele).
+router.delete('/exercicios/:id', authMiddleware, requireRole('professor', 'admin', 'dono'), async (req, res, next) => {
+  try {
+    const { rows: [{ total }] } = await pool.query(
+      'SELECT COUNT(*)::int AS total FROM treino_exercicios WHERE exercicio_id = $1',
+      [req.params.id]
+    );
+    if (total > 0) {
+      return res.status(409).json({ error: 'Esse exercício está em uso em algum treino e não pode ser excluído.' });
+    }
+
+    const { rowCount } = await pool.query('DELETE FROM exercicios WHERE id = $1', [req.params.id]);
+    if (!rowCount) return res.status(404).json({ error: 'Exercício não encontrado' });
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

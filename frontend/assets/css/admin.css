@@ -333,6 +333,26 @@
 .exercicio-card .exercicio-thumb { width: 100%; height: 78px; border-radius: var(--radius-sm); }
 .exercicio-card strong { font-size: .8rem; line-height: 1.2; }
 .exercicio-card span { font-size: .72rem; color: var(--color-muted); }
+.exercicio-lib-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+}
+.exercicio-lib-card {
+  position: relative;
+  display: flex; flex-direction: column; gap: .5rem;
+  padding: .75rem; border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border); background: var(--color-surface-2);
+  transition: border-color .12s, background .12s;
+}
+.exercicio-lib-card:hover { background: var(--color-surface-3, rgba(255,255,255,0.04)); }
+.exercicio-lib-card .exercicio-thumb { width: 100%; height: 96px; border-radius: var(--radius-sm); }
+.exercicio-lib-card strong { font-size: .85rem; line-height: 1.25; }
+.exercicio-lib-actions {
+  display: flex; gap: .35rem;
+  position: absolute; top: .5rem; right: .5rem;
+}
+.exercicio-lib-actions .btn { padding: .3rem; background: var(--color-bg); border: 1px solid var(--color-border); }
+
 .aluno-row-sel {
   display: flex; align-items: center; justify-content: space-between; gap: .75rem;
   padding: .55rem .75rem; border-radius: var(--radius-sm); cursor: pointer;
