@@ -7,17 +7,24 @@
 }
 
 .admin-stat-cards .stat-card { display: flex; flex-direction: column; gap: 0.85rem; padding: 1.35rem 1.5rem; }
+.stat-card-head { display: flex; align-items: center; gap: 0.65rem; }
+.stat-card-label { font-size: 0.82rem; color: var(--color-muted); font-weight: 500; }
 .admin-stat-cards .stat-icon {
-  width: auto;
-  height: auto;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-  color: var(--color-text);
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  flex-shrink: 0;
 }
 .admin-stat-cards .stat-icon svg { color: inherit; }
-.admin-stat-cards strong { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em; }
-.admin-stat-cards span { font-size: 0.82rem; color: var(--color-muted); }
+.admin-stat-cards strong { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; }
+
+/* Card "hero" (Faturamento do mês) — único destaque cheio da fileira */
+.stat-card-hero { background: var(--gradient-flame); border-color: transparent; }
+.stat-card-hero .stat-icon { background: rgba(255,255,255,.16); }
+.stat-card-hero .stat-icon,
+.stat-card-hero .stat-card-label,
+.stat-card-hero strong { color: #fff; }
 
 /* ===== Assistente "Adicionar aluno" (indicador de passos) ===== */
 .wizard-steps { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.75rem; }
@@ -63,7 +70,7 @@
   box-shadow: inset 0 1px 0 rgba(255,255,255,.2);
   transition: height 0.8s cubic-bezier(.16,1,.3,1), filter 0.15s, box-shadow 0.15s;
 }
-.chart-bar-col:hover .chart-bar { filter: brightness(1.12); box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 0 20px rgba(239,77,77,.3); }
+.chart-bar-col:hover .chart-bar { filter: brightness(1.12); box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 0 20px rgba(255,255,255,.18); }
 .chart-bar-value { font-size: 0.72rem; color: var(--color-muted); transition: color 0.15s; }
 .chart-bar-col:hover .chart-bar-value { color: var(--color-text); }
 .chart-bar-label { font-size: 0.76rem; color: var(--color-muted); text-transform: uppercase; }
@@ -77,7 +84,7 @@
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 2px 8px rgba(239,77,77,.32));
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.4));
 }
 .line-chart-guide { stroke: var(--color-border); stroke-width: 1; stroke-dasharray: 3 4; }
 .line-chart-dot {
@@ -237,7 +244,7 @@
 .goal-bar-track { height: 9px; border-radius: 999px; background: var(--color-surface-2); border: 1px solid var(--color-border); overflow: hidden; }
 .goal-bar-fill {
   height: 100%; border-radius: 999px; width: 0%;
-  background: linear-gradient(90deg, #ffaa40, var(--color-primary));
+  background: linear-gradient(90deg, var(--color-coral), var(--color-primary));
   transition: width 0.9s cubic-bezier(.16,1,.3,1);
 }
 .goal-bar-fill.over { background: linear-gradient(90deg, #4ade80, var(--color-success)); }
@@ -366,25 +373,26 @@
 .admin-dialog .field-label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--color-muted); margin-bottom: 0.4rem; }
 .dialog-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
 
-/* ===== Liquid glass — paleta oficial da marca, escopada só no admin =====
-   Redefine as variáveis de marca localmente em .app-shell (não em :root),
-   então tudo que já lê var(--color-primary)/var(--color-wine)/var(--color-coral)
-   — gráficos, donut, badges, botões, .sidebar-nav a.active via
-   --gradient-flame — recolore automaticamente sem tocar em nenhum .js, e
-   sem afetar páginas fora do admin (login, landing, dashboard do aluno). */
+/* ===== Paleta monocromática — laranja/vinho fora, cinza claro/escuro no
+   lugar, escopado só no admin (não em :root, não afeta login/landing/
+   dashboard do aluno). Pedido do usuário: preto e branco, básico, sem
+   gradiente colorido. Tudo que já lia var(--color-primary)/-wine/-coral ou
+   --gradient-flame — ícones, badges, botões, gráfico, nav ativa da sidebar
+   — recolore sozinho, sem tocar em .js. Raio de borda também reduzido só
+   aqui (menos arredondado que o resto do site). */
 .app-shell {
   position: relative;
-  --color-primary: #FF7A1A;
-  --color-primary-hover: #e56a10;
-  --color-wine: #7A1B1E;
-  --color-coral: #B62929;
-  /* As variantes "-soft" (usadas por .badge-primary etc.) são valores rgba
-     fixos em global.css, não derivados de --color-primary — sem essa
-     redefinição, badges/destaques ficariam com o laranja antigo por baixo
-     do texto na cor nova. */
-  --color-primary-soft: rgba(255, 122, 26, 0.14);
-  --color-wine-soft: rgba(122, 27, 30, 0.12);
-  --color-coral-soft: rgba(182, 41, 41, 0.14);
+  --color-primary: #e5e5e5;
+  --color-primary-hover: #ffffff;
+  --color-wine: #404040;
+  --color-coral: #a3a3a3;
+  --color-primary-soft: rgba(255, 255, 255, 0.08);
+  --color-wine-soft: rgba(255, 255, 255, 0.04);
+  --color-coral-soft: rgba(255, 255, 255, 0.06);
+  --gradient-flame: linear-gradient(135deg, #d4d4d4 0%, #a3a3a3 32%, #737373 68%, #404040 100%);
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-lg: 8px;
 }
 /* Fundo estático (sem WebGL/animação) — mesma técnica usada no dashboard
    do aluno (.dash-shell::before), dá textura pro blur dos cards sem custo
@@ -412,45 +420,23 @@
 .app-shell .kanban-col { background: var(--color-surface); border: 1px solid var(--color-border); }
 .app-shell .kanban-card { background: var(--color-surface-2); border: 1px solid var(--color-border); }
 
-/* ===== Paleta do dashboard admin (frontend/admin/index.html) =====
-   Mesma técnica de escopo por variável que o resto do admin já usa (ver bloco
-   acima): redefine a marca localmente em .dash-capsule, então tudo que já lê
-   var(--color-primary/-wine/-coral)/--gradient-flame — ícones dos stat-cards,
-   gráfico de faturamento, nav ativa da sidebar, barra de destaque do card do
-   gráfico — recolore sozinho, sem tocar em nenhum .js. Não afeta nenhuma
-   outra página do admin (elas não têm essa classe). Cards/sidebar já saem
-   sólidos por padrão (bloco acima), então não precisa achatar vidro aqui —
-   só a paleta e o layout dos stat-cards mudam. */
-.dash-capsule {
-  --color-primary: #d946ef;
-  --color-primary-hover: #c026d3;
-  --color-primary-soft: rgba(217, 70, 239, 0.14);
-  --color-wine: #6d28d9;
-  --color-wine-soft: rgba(109, 40, 217, 0.12);
-  --color-coral: #9333ea;
-  --color-coral-soft: rgba(147, 51, 234, 0.14);
-  --gradient-flame: linear-gradient(135deg, #f0abfc 0%, #d946ef 32%, #9333ea 68%, #6d28d9 100%);
+/* ===== Neutraliza acentos laranja fixos em rgba/hex de global.css =====
+   Alguns elementos globais não leem var(--color-primary) direto (cor fixa
+   pensada pro laranja da marca) — sobrescreve só dentro do admin. */
+.app-shell input:focus,
+.app-shell textarea:focus,
+.app-shell select:focus {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
 }
-
-/* Stat-cards: ícone em badge circular tintado + rótulo lado a lado, valor grande embaixo */
-.dash-capsule .stat-card-head { display: flex; align-items: center; gap: 0.65rem; }
-.dash-capsule .stat-card-label { font-size: 0.82rem; color: var(--color-muted); font-weight: 500; }
-.dash-capsule .admin-stat-cards .stat-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: color-mix(in srgb, currentColor 15%, transparent);
-  flex-shrink: 0;
+.app-shell .btn-primary {
+  background: var(--color-text);
+  color: var(--color-bg);
+  box-shadow: none;
 }
-.dash-capsule .admin-stat-cards strong { font-size: 1.85rem; }
-
-/* Card "hero" (Faturamento do mês) — destaque cheio, tipo "total balance" */
-.dash-capsule .stat-card-hero {
-  background: var(--gradient-flame);
-  border-color: transparent;
-  box-shadow: 0 10px 28px rgba(217, 70, 239, 0.3), inset 0 1px 0 rgba(255,255,255,.15);
+.app-shell .btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  box-shadow: 0 6px 20px rgba(255,255,255,.12);
+  filter: none;
 }
-.dash-capsule .stat-card-hero .stat-icon { background: rgba(255,255,255,.2); }
-.dash-capsule .stat-card-hero .stat-icon,
-.dash-capsule .stat-card-hero .stat-card-label,
-.dash-capsule .stat-card-hero strong { color: #fff; }
+.app-shell .badge-primary { border-color: rgba(255, 255, 255, 0.16); }
+.app-shell .badge { border-radius: var(--radius-sm); }
