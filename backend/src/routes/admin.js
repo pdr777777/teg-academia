@@ -242,7 +242,7 @@ router.delete('/alunos/:id', authMiddleware, requireRole('admin', 'dono'), async
 router.patch('/alunos/:id/toggle', authMiddleware, requireRole('admin', 'dono'), async (req, res, next) => {
   try {
     const { rows: [user] } = await pool.query(
-      'UPDATE usuarios SET ativo = NOT ativo, updated_at = NOW() WHERE id = $1 RETURNING id, nome, ativo',
+      `UPDATE usuarios SET ativo = NOT ativo, updated_at = NOW() WHERE id = $1 AND role = 'aluno' RETURNING id, nome, ativo`,
       [req.params.id]
     );
     if (!user) return res.status(404).json({ error: 'Aluno não encontrado' });
