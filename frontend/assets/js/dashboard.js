@@ -157,18 +157,6 @@ async function carregarFrequenciaSemana() {
     // segue com o set vazio, as barras aparecem todas "não treinou"
   }
 
-  const chaveHoje = hoje.toISOString().slice(0, 10);
-  const LABELS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-
-  const bars = document.getElementById('bars-semana');
-  bars.innerHTML = diasSemana.map((d, i) => {
-    const chave = d.toISOString().slice(0, 10);
-    const classes = ['bar'];
-    if (treinados.has(chave)) classes.push('on');
-    if (chave === chaveHoje) classes.push('hoje');
-    return `<div class="bar-col"><div class="${classes.join(' ')}"></div><span>${LABELS[i]}</span></div>`;
-  }).join('');
-
   const pontos = diasSemana.map((d, i) => {
     const chave = d.toISOString().slice(0, 10);
     const y = treinados.has(chave) ? 6 : 24;

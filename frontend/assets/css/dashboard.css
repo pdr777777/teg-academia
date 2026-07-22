@@ -70,21 +70,42 @@
 .stat-big { font-weight: 700; font-size: 1.5rem; }
 .stat-lbl { font-size: 0.66rem; color: var(--color-muted); }
 
-/* ===== Activity ===== */
-.activity { padding: 1rem 1.1rem; }
-.activity-head { margin-bottom: 0.8rem; }
-.activity-head h2 { font-size: 0.9rem; font-weight: 700; }
-.bars { display: flex; align-items: flex-end; gap: 0.5rem; height: 84px; }
-.bar-col { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; flex: 1; }
-.bar {
-  width: 100%; height: 22%;
-  border-radius: 6px 6px 3px 3px;
-  background: var(--color-surface-2);
-  transition: height 0.4s ease;
+/* ===== Promo do app ===== */
+.app-promo {
+  padding: 1.4rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.55rem;
+  background: linear-gradient(160deg, var(--color-surface) 0%, var(--color-primary-soft) 160%);
 }
-.bar.on { height: 100%; background: var(--color-primary); }
-.bar.hoje { box-shadow: inset 0 0 0 1.5px var(--color-text); }
-.bar-col span { font-size: 0.63rem; color: var(--color-muted); }
+.app-promo-icon {
+  width: 52px; height: 52px;
+  border-radius: 16px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 0.2rem;
+}
+.app-promo h2 { font-size: 1.05rem; font-weight: 700; margin: 0; }
+.app-promo p { font-size: 0.8rem; color: var(--color-muted); margin: 0; max-width: 320px; }
+.app-promo-stores { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; margin-top: 0.5rem; }
+.store-badge {
+  display: flex; align-items: center; gap: 0.55rem;
+  padding: 0.55rem 1rem;
+  border-radius: 12px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.store-badge:hover { border-color: var(--color-primary); transform: translateY(-1px); }
+.store-badge-icon { flex-shrink: 0; display: flex; }
+.store-badge-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.15; }
+.store-badge-text small { font-size: 0.62rem; color: var(--color-muted); }
+.store-badge-text strong { font-size: 0.85rem; font-weight: 700; }
 
 /* ===== Lower row ===== */
 .lower-row { display: grid; grid-template-columns: 1fr; gap: 0.6rem; }
