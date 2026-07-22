@@ -53,6 +53,46 @@ describe('POST /api/auth/registro', () => {
 
     await pool.query('DELETE FROM usuarios WHERE id = $1', [usuario.id]);
   });
+
+  test('rejeita e-mail com formato inválido', async () => {
+    const res = await request(app).post('/api/auth/registro').send({
+      nome: 'Teste',
+      email: 'nao-e-email',
+      senha: 'senha1234',
+    });
+    expect(res.status).toBe(400);
+  });
+
+  test('rejeita telefone com formato inválido quando informado', async () => {
+    const res = await request(app).post('/api/auth/registro').send({
+      nome: 'Teste',
+      email: emailUnico(),
+      senha: 'senha1234',
+      telefone: '123',
+    });
+    expect(res.status).toBe(400);
+  });
+
+  test('rejeita CPF com dígito verificador inválido quando informado', async () => {
+    const res = await request(app).post('/api/auth/registro').send({
+      nome: 'Teste',
+      email: emailUnico(),
+      senha: 'senha1234',
+      cpf: '111.111.111-11',
+    });
+    expect(res.status).toBe(400);
+  });
+
+  test('aceita cadastro sem telefone/cpf (campos opcionais)', async () => {
+    const email = emailUnico();
+    const res = await request(app).post('/api/auth/registro').send({
+      nome: 'Sem Telefone',
+      email,
+      senha: 'senha1234',
+    });
+    expect(res.status).toBe(201);
+    await pool.query('DELETE FROM usuarios WHERE email = $1', [email]);
+  });
 });
 
 describe('POST /api/auth/login', () => {

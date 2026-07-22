@@ -3,6 +3,7 @@ const multer = require('multer');
 const pool = require('../config/db');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const supabaseStorageService = require('../services/supabaseStorageService');
+const { telefoneValido } = require('../utils/validacao');
 
 const router = express.Router();
 
@@ -83,6 +84,10 @@ router.get('/perfil', authMiddleware, async (req, res, next) => {
 // PATCH /api/alunos/perfil
 router.patch('/perfil', authMiddleware, async (req, res, next) => {
   try {
+    if (req.body.telefone && !telefoneValido(req.body.telefone)) {
+      return res.status(400).json({ error: 'Telefone inválido' });
+    }
+
     const CAMPOS_PERMITIDOS = ['nome', 'telefone', 'foto_url', 'data_nascimento', 'notificacoes_whatsapp', 'apelido'];
     const updates = [];
     const values = [];
