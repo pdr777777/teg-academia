@@ -38,15 +38,19 @@ router.get('/', authMiddleware, async (req, res, next) => {
   }
 });
 
-// GET /api/ranking/conquistas/:usuarioId
+// GET /api/ranking/conquistas/:usuarioId — só as próprias conquistas (o
+// :usuarioId da URL é ignorado de propósito, ver comentário abaixo)
 router.get('/conquistas/:usuarioId', authMiddleware, async (req, res, next) => {
   try {
+    // Único caller (frontend/assets/js/ranking.js) sempre manda o próprio id,
+    // mas nada impedia trocar o id na URL e ver as conquistas de outro aluno
+    // (IDOR). Usa req.user.id (do token) em vez de confiar no path.
     const { rows } = await pool.query(
       `SELECT c.*, ac.desbloqueada_em
        FROM conquistas c
        LEFT JOIN aluno_conquistas ac ON ac.conquista_id = c.id AND ac.usuario_id = $1
        ORDER BY c.tipo, c.meta`,
-      [req.params.usuarioId]
+      [req.user.id]
     );
     res.json(rows);
   } catch (err) {
