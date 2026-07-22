@@ -21,7 +21,7 @@ function embedVideo(url) {
       <span class="video-thumb-play">${Icons.icon('play', { size: 28 })}</span>
     </button>`;
   }
-  return `<video src="${url}" controls></video>`;
+  return `<video src="${escapeHtml(url)}" controls></video>`;
 }
 
 function seriesFeitasDoExercicio(treinoExercicioId) {
@@ -113,8 +113,8 @@ function renderExercicios() {
       <div class="exercicio-video">${embedVideo(te.exercicio.video_url)}</div>
       <div class="exercicio-body">
         <div class="exercicio-head">
-          <h3>${te.exercicio.nome}</h3>
-          ${te.exercicio.grupo_muscular ? `<span class="badge badge-muted">${te.exercicio.grupo_muscular}</span>` : ''}
+          <h3>${escapeHtml(te.exercicio.nome)}</h3>
+          ${te.exercicio.grupo_muscular ? `<span class="badge badge-muted">${escapeHtml(te.exercicio.grupo_muscular)}</span>` : ''}
         </div>
         <div class="exercicio-stats">
           <div class="exercicio-stat"><strong>${te.series}</strong><span>Séries</span></div>
@@ -122,7 +122,7 @@ function renderExercicios() {
           <div class="exercicio-stat"><strong>${te.carga ? te.carga + ' kg' : '-'}</strong><span>Carga</span></div>
           <div class="exercicio-stat"><strong>${te.descanso_segundos ? te.descanso_segundos + 's' : '-'}</strong><span>Descanso</span></div>
         </div>
-        ${te.observacoes ? `<div class="exercicio-obs">${te.observacoes}</div>` : ''}
+        ${te.observacoes ? `<div class="exercicio-obs">${escapeHtml(te.observacoes)}</div>` : ''}
         ${renderSerieTracker(te)}
       </div>
     </div>
