@@ -70,10 +70,16 @@
 }
 .avatar-img { border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 
-/* ===== Portal do aluno agora é só no app — tela força o download =====
-   Compartilhada por dashboard.html, treinos.html, ranking.html,
-   indicacao.html e perfil.html: nenhuma dessas páginas tem mais conteúdo
-   próprio, todas mostram só isso. */
+/* ===== Portal do aluno: conteúdo completo só dentro do app nativo =====
+   No navegador (data-client="web", setado cedo por app-gate.js) mostra só
+   o convite pra baixar o app; dentro do Capacitor (data-client="native")
+   mostra a tela de verdade. Compartilhado por dashboard.html, treinos.html,
+   ranking.html, indicacao.html e perfil.html. */
+#app-gate { display: none; }
+html[data-client="web"] #app-main,
+html[data-client="web"] #app-main-nav { display: none; }
+html[data-client="web"] #app-gate { display: block; }
+
 .app-gate-main {
   min-height: calc(100dvh - 160px);
   display: flex;

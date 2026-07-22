@@ -10,27 +10,70 @@
   <link rel="stylesheet" href="assets/css/global.css" />
   <link rel="stylesheet" href="assets/css/aluno.css" />
   <link rel="stylesheet" href="assets/css/liquid-glass.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
   <link rel="stylesheet" href="assets/css/app-effects.css" />
   <script src="assets/js/theme.js"></script>
+  <script src="assets/js/app-gate.js"></script>
 </head>
 <body>
 
-  <div class="dash-shell">
+  <!-- App nativo (Capacitor): dashboard de verdade -->
+  <div class="dash-shell" id="app-main">
     <header class="dash-topbar">
-      <a href="index.html" class="sb-logo">
+      <a href="dashboard.html" class="sb-logo">
         <img src="assets/img/logo-icon.svg" alt="" class="sb-logo-img" onerror="this.style.display='none'" />
         <span>TEG ACADEMIA</span>
       </a>
       <div class="dash-topbar-actions">
+        <button type="button" id="btn-open-config" aria-label="Configurações"><span data-icon="settings" data-icon-size="18"></span></button>
         <button type="button" id="btn-logout" aria-label="Sair"><span data-icon="log-out" data-icon-size="18"></span></button>
       </div>
     </header>
 
-    <main class="dash-main aluno-main app-gate-main">
+    <main class="dash-main aluno-main">
+      <div id="bloqueio-banner"></div>
+
+      <div class="glass greet">
+        <div>
+          <p class="text-muted" id="saudacao">Carregando...</p>
+          <h1 id="dash-nome">-</h1>
+        </div>
+        <span class="chip" id="dash-plano-badge"></span>
+      </div>
+
+      <a href="treinos.html" class="glass treino-hero" id="dash-treino-hero">
+        <div class="treino-hero-bg" id="dash-treino-bg"></div>
+        <div class="treino-hero-content">
+          <span class="treino-hero-eyebrow">Treino de hoje</span>
+          <h2 id="dash-treino-nome">Carregando...</h2>
+          <span class="treino-hero-meta" id="dash-treino-meta"></span>
+          <span class="chip treino-hero-cta">Iniciar treino<span data-icon="arrow-right" data-icon-size="14"></span></span>
+        </div>
+      </a>
+
+      <div class="stats-row">
+        <div class="glass stat-glass">
+          <div class="ring" id="ring-sequencia"><div class="ring-inner"><strong id="dash-sequencia">0</strong></div></div>
+          <span class="stat-lbl">Sequência (dias)</span>
+        </div>
+        <div class="glass stat-glass">
+          <svg class="heartline" id="freq-sparkline" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="" /></svg>
+          <span class="stat-lbl">Frequência da semana</span>
+        </div>
+        <div class="glass stat-glass">
+          <strong class="stat-big" id="stat-total-treinos">0</strong>
+          <span class="stat-lbl">Treinos no total</span>
+        </div>
+        <div class="glass stat-glass">
+          <div class="ring" id="ring-xp"><div class="ring-inner"><strong id="dash-nivel">Nv.1</strong></div></div>
+          <span class="stat-lbl" id="dash-xp-next">0 XP até o próximo nível</span>
+        </div>
+      </div>
+
       <section class="glass app-promo">
-        <div class="app-promo-icon"><span data-icon="smartphone" data-icon-size="28"></span></div>
-        <h1>Baixe nosso app</h1>
-        <p>A área do aluno agora é só no app — treinos, check-in e sua evolução, sempre na palma da mão.</p>
+        <div class="app-promo-icon"><span data-icon="smartphone" data-icon-size="24"></span></div>
+        <h2>Baixe nosso app</h2>
+        <p>Treinos, check-in e sua evolução, sempre na palma da mão.</p>
         <div class="app-promo-stores">
           <!-- TODO: trocar href="#" pelo link real da App Store quando o Heros mandar -->
           <a href="#" class="store-badge" id="link-app-store" target="_blank" rel="noopener">
@@ -44,6 +87,162 @@
           </a>
         </div>
       </section>
+
+      <div class="lower-row">
+        <section class="glass conquistas">
+          <div class="section-label">Conquistas recentes</div>
+          <div id="lista-conquistas" class="stack gap-md"></div>
+        </section>
+
+        <section class="glass hoje">
+          <span data-icon="flame" data-icon-size="26" class="text-primary"></span>
+          <div class="section-label">Hoje</div>
+          <p class="text-muted" id="hoje-status">Carregando...</p>
+          <button id="btn-checkin" class="btn-checkin-glass">
+            <span data-icon="check-circle" data-icon-size="16"></span>Registrar treino
+          </button>
+        </section>
+
+        <section class="glass next-aula" id="next-aula">
+          <div>
+            <div class="section-label">Próxima aula</div>
+            <div class="next-aula-nome" id="next-aula-nome">-</div>
+          </div>
+          <span class="chip" id="next-aula-prof"></span>
+        </section>
+      </div>
+    </main>
+
+    <aside class="right-col">
+      <div class="glass profile">
+        <span class="avatar-fallback" id="profile-avatar">-</span>
+        <strong id="profile-nome">-</strong>
+        <span class="text-muted" id="profile-email">-</span>
+        <div class="chips">
+          <span class="chip" id="profile-plano"></span>
+          <span class="chip" id="profile-vencimento"></span>
+        </div>
+      </div>
+
+      <div class="glass calendar-card">
+        <div class="row-between">
+          <div class="section-label" id="calendar-mes">-</div>
+          <span data-icon="calendar" data-icon-size="16" class="text-muted"></span>
+        </div>
+        <div class="calendario-grid" id="calendario-grid"></div>
+      </div>
+
+      <div class="glass schedule-card">
+        <div class="section-label">Aulas da semana</div>
+        <div id="lista-agenda" class="stack gap-sm"></div>
+      </div>
+    </aside>
+  </div>
+
+  <nav class="bottom-nav" id="app-main-nav">
+    <a href="dashboard.html" class="bottom-nav-item active"><span data-icon="home" data-icon-size="20"></span><span>Início</span></a>
+    <a href="treinos.html" class="bottom-nav-item"><span data-icon="dumbbell" data-icon-size="20"></span><span>Treinos</span></a>
+    <a href="ranking.html" class="bottom-nav-item"><span data-icon="award" data-icon-size="20"></span><span>Ranking</span></a>
+    <a href="indicacao.html" class="bottom-nav-item"><span data-icon="link" data-icon-size="20"></span><span>Indicação</span></a>
+    <a href="perfil.html" class="bottom-nav-item"><span data-icon="user" data-icon-size="20"></span><span>Perfil</span></a>
+  </nav>
+
+  <div class="config-overlay" id="config-overlay">
+    <div class="glass config-drawer" id="config-drawer">
+      <div class="drawer-head">
+        <h2>Configurações</h2>
+        <button type="button" id="btn-close-config" data-icon="x" data-icon-size="18" aria-label="Fechar"></button>
+      </div>
+      <div class="drawer-body">
+        <nav class="drawer-nav">
+          <button type="button" class="drawer-nav-item active" data-section="conta"><span data-icon="user" data-icon-size="15"></span>Conta</button>
+          <button type="button" class="drawer-nav-item" data-section="seguranca"><span data-icon="shield" data-icon-size="15"></span>Segurança</button>
+          <button type="button" class="drawer-nav-item" data-section="notificacoes"><span data-icon="bell" data-icon-size="15"></span>Notificações</button>
+          <button type="button" class="drawer-nav-item" data-section="aparencia"><span data-icon="sun" data-icon-size="15"></span>Aparência</button>
+          <button type="button" class="drawer-nav-item" data-section="ajuda"><span data-icon="phone" data-icon-size="15"></span>Ajuda</button>
+        </nav>
+        <div class="drawer-content">
+          <div class="drawer-section active" data-section-panel="conta">
+            <div class="setting-row">
+              <div><div class="setting-t">Nome</div><div class="setting-d" id="config-conta-nome">-</div></div>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-t">E-mail</div><div class="setting-d" id="config-conta-email">-</div></div>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-t">Telefone</div><div class="setting-d" id="config-conta-telefone">-</div></div>
+            </div>
+            <a href="perfil.html" class="btn btn-ghost btn-sm">Editar dados no Perfil<span data-icon="chevron-right" data-icon-size="14"></span></a>
+          </div>
+
+          <form class="drawer-section" data-section-panel="seguranca" id="form-senha">
+            <div class="field">
+              <label for="config-senha-atual">Senha atual</label>
+              <input type="password" id="config-senha-atual" required autocomplete="current-password" />
+            </div>
+            <div class="field">
+              <label for="config-senha-nova">Nova senha</label>
+              <input type="password" id="config-senha-nova" required autocomplete="new-password" minlength="8" />
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" id="btn-senha-salvar">Trocar senha</button>
+          </form>
+
+          <div class="drawer-section" data-section-panel="notificacoes">
+            <div class="setting-row">
+              <div><div class="setting-t">Lembretes por WhatsApp</div><div class="setting-d">Avisos de vencimento, ausência e cobrança</div></div>
+              <button type="button" class="toggle-glass" id="toggle-whatsapp" role="switch" aria-checked="false"></button>
+            </div>
+          </div>
+
+          <div class="drawer-section" data-section-panel="aparencia">
+            <div class="setting-row" style="flex-direction:column;align-items:flex-start">
+              <div class="setting-t">Tema</div>
+              <div class="theme-options">
+                <button type="button" class="theme-opt" data-theme-option="light">Claro</button>
+                <button type="button" class="theme-opt" data-theme-option="dark">Escuro</button>
+                <button type="button" class="theme-opt" data-theme-option="auto">Automático</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="drawer-section" data-section-panel="ajuda">
+            <a href="https://wa.me/5567999999999" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Falar com o suporte<span data-icon="chevron-right" data-icon-size="14"></span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navegador comum: convite pra baixar o app -->
+  <div class="dash-shell" id="app-gate">
+    <header class="dash-topbar">
+      <a href="index.html" class="sb-logo">
+        <img src="assets/img/logo-icon.svg" alt="" class="sb-logo-img" onerror="this.style.display='none'" />
+        <span>TEG ACADEMIA</span>
+      </a>
+      <div class="dash-topbar-actions">
+        <button type="button" id="btn-logout-gate" aria-label="Sair"><span data-icon="log-out" data-icon-size="18"></span></button>
+      </div>
+    </header>
+
+    <main class="dash-main aluno-main app-gate-main">
+      <section class="glass app-promo">
+        <div class="app-promo-icon"><span data-icon="smartphone" data-icon-size="28"></span></div>
+        <h1>Baixe nosso app</h1>
+        <p>A área do aluno agora é só no app — treinos, check-in e sua evolução, sempre na palma da mão.</p>
+        <div class="app-promo-stores">
+          <!-- TODO: trocar href="#" pelo link real da App Store quando o Heros mandar -->
+          <a href="#" class="store-badge" id="link-app-store-gate" target="_blank" rel="noopener">
+            <span class="store-badge-icon" data-icon="apple" data-icon-size="22"></span>
+            <span class="store-badge-text"><small>Baixar na</small><strong>App Store</strong></span>
+          </a>
+          <!-- TODO: trocar href="#" pelo link real da Play Store quando o Heros mandar -->
+          <a href="#" class="store-badge" id="link-play-store-gate" target="_blank" rel="noopener">
+            <span class="store-badge-icon" data-icon="play" data-icon-size="22"></span>
+            <span class="store-badge-text"><small>Disponível no</small><strong>Google Play</strong></span>
+          </a>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -52,5 +251,6 @@
   <script src="assets/js/ui.js"></script>
   <script src="assets/js/app-effects.js"></script>
   <script src="assets/js/auth-guard.js"></script>
+  <script src="assets/js/dashboard.js"></script>
 </body>
 </html>
