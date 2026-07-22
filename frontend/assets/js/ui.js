@@ -12,6 +12,50 @@ function toast(mensagem, tipo = 'info') {
   setTimeout(() => el.remove(), 4000);
 }
 
+// Substitui o confirm() nativo do navegador (que sai com a cara genérica do
+// Chrome/Brave, "site diz:", destoando do resto da UI) por um modal no
+// mesmo estilo do painel — reaproveita .modal-overlay/.modal-box/.card já
+// usados em outras telas do admin. Promise<boolean>: true = confirmou.
+function confirmDialog(mensagem, opts = {}) {
+  const titulo = opts.titulo || 'Confirmar ação';
+  const textoConfirmar = opts.textoConfirmar || 'Confirmar';
+  const textoCancelar = opts.textoCancelar || 'Cancelar';
+  const perigo = opts.perigo !== false;
+
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="card modal-box">
+        <h2 style="margin-bottom:0.6rem">${escapeHtml(titulo)}</h2>
+        <p class="text-muted">${escapeHtml(mensagem)}</p>
+        <div class="row gap-sm" style="justify-content:flex-end;margin-top:1.25rem">
+          <button type="button" class="btn btn-ghost" data-acao="cancelar">${escapeHtml(textoCancelar)}</button>
+          <button type="button" class="btn ${perigo ? 'btn-danger' : 'btn-primary'}" data-acao="confirmar">${escapeHtml(textoConfirmar)}</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    function fechar(resultado) {
+      overlay.remove();
+      document.removeEventListener('keydown', onKeydown);
+      resolve(resultado);
+    }
+    function onKeydown(ev) {
+      if (ev.key === 'Escape') fechar(false);
+    }
+
+    overlay.addEventListener('click', (ev) => {
+      if (ev.target === overlay) fechar(false);
+    });
+    overlay.querySelector('[data-acao="cancelar"]').addEventListener('click', () => fechar(false));
+    overlay.querySelector('[data-acao="confirmar"]').addEventListener('click', () => fechar(true));
+    document.addEventListener('keydown', onKeydown);
+    overlay.querySelector('[data-acao="confirmar"]').focus();
+  });
+}
+
 function formatMoeda(valor) {
   return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }

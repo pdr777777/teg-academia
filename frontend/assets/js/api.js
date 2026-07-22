@@ -12,7 +12,26 @@ async function apiFetch(path, options = {}) {
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
-  const data = await res.json();
+
+  // Nem toda resposta é JSON: 204 sem corpo, erro 502/504 de infra (Railway
+  // fora do ar), ou uma rota que não existe (HTML de erro do próprio Express).
+  // Tentar `res.json()` direto nesses casos jogava o SyntaxError bruto
+  // ("Unexpected token '<' ... is not valid JSON") na tela do usuário.
+  const raw = await res.text();
+  let data = {};
+  if (raw) {
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      const err = new Error(
+        res.ok
+          ? 'Resposta inesperada do servidor.'
+          : `Erro ${res.status} ao falar com o servidor. Tenta de novo em alguns segundos.`
+      );
+      err.status = res.status;
+      throw err;
+    }
+  }
 
   if (!res.ok) {
     const err = new Error(data.error || 'Erro na requisição');

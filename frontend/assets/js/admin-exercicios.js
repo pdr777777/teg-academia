@@ -127,7 +127,8 @@ document.getElementById('exercicio-lib-grid').addEventListener('click', async (e
   if (excluirBtn) {
     const exercicio = exerciciosCache.find((e) => e.id === Number(excluirBtn.dataset.excluirId));
     if (!exercicio) return;
-    if (!confirm(`Excluir o exercício "${exercicio.nome}"? Essa ação não pode ser desfeita.`)) return;
+    const confirmado = await confirmDialog(`Excluir o exercício "${exercicio.nome}"? Essa ação não pode ser desfeita.`, { titulo: 'Excluir exercício', textoConfirmar: 'Excluir' });
+    if (!confirmado) return;
 
     setBtnLoading(excluirBtn, '');
     try {

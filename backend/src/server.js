@@ -156,6 +156,13 @@ app.get('/metrics', async (req, res, next) => {
   }
 });
 
+// Rota que não bate com nada acima — sem isso, o Express respondia com uma
+// página HTML de erro ("Cannot DELETE /api/..."), e o frontend (que sempre
+// espera JSON) quebrava com "Unexpected token '<' ... is not valid JSON".
+app.use((req, res) => {
+  res.status(404).json({ error: 'Rota não encontrada' });
+});
+
 app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 3001;

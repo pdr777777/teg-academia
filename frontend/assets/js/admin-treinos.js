@@ -119,7 +119,8 @@ document.getElementById('btn-fechar-detalhe').addEventListener('click', () => {
 document.getElementById('btn-excluir-treino').addEventListener('click', async () => {
   const treino = treinosCache.find((t) => t.id === treinoSelecionadoId);
   if (!treino) return;
-  if (!confirm(`Excluir o treino "${treino.nome}"? Essa ação não pode ser desfeita.`)) return;
+  const confirmado = await confirmDialog(`Excluir o treino "${treino.nome}"? Essa ação não pode ser desfeita.`, { titulo: 'Excluir treino', textoConfirmar: 'Excluir' });
+  if (!confirmado) return;
 
   const btn = document.getElementById('btn-excluir-treino');
   setBtnLoading(btn, '');
