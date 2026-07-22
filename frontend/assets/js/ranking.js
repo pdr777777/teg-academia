@@ -25,8 +25,8 @@ async function carregarRanking(tipo) {
           <td><span class="ranking-pos ${medalha(r.posicao)}">${r.posicao}</span></td>
           <td>
             <div class="ranking-avatar-row">
-              <span class="avatar-fallback">${iniciais(r.nome)}</span>
-              <span>${r.nome}${r.id === usuarioId ? ' (você)' : ''}</span>
+              <span class="avatar-fallback">${escapeHtml(iniciais(r.nome))}</span>
+              <span>${escapeHtml(r.nome)}${r.id === usuarioId ? ' (você)' : ''}</span>
             </div>
           </td>
           <td>${r.treinos}</td>
@@ -60,7 +60,7 @@ async function carregarConquistas() {
     grid.innerHTML = conquistas.map((c) => `
       <div class="conquista-card${c.desbloqueada_em ? ' desbloqueada' : ''}">
         <span class="icon-badge">${Icons.icon('award', { size: 20 })}</span>
-        <strong>${c.nome}</strong>
+        <strong>${escapeHtml(c.nome)}</strong>
         <span>${c.desbloqueada_em ? formatData(c.desbloqueada_em) : 'Bloqueada'}</span>
       </div>
     `).join('');

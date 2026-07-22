@@ -66,10 +66,10 @@ async function carregarHorarios() {
       dia.aulas.forEach((aula) => {
         linhas.push(`
           <tr>
-            <td>${dia.dia}</td>
-            <td>${aula.nome}</td>
+            <td>${escapeHtml(dia.dia)}</td>
+            <td>${escapeHtml(aula.nome)}</td>
             <td>${aula.hora_inicio?.slice(0, 5)} – ${aula.hora_fim?.slice(0, 5)}</td>
-            <td>${aula.professor_nome || '-'}</td>
+            <td>${escapeHtml(aula.professor_nome || '-')}</td>
           </tr>
         `);
       });

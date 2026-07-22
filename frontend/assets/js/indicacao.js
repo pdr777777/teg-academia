@@ -43,8 +43,8 @@ async function carregarIndicacoes() {
           const s = STATUS_LABEL[i.status] || STATUS_LABEL.pendente;
           return `
             <tr>
-              <td>${i.lead_nome || 'Aguardando cadastro'}</td>
-              <td>${i.lead_telefone || '-'}</td>
+              <td>${escapeHtml(i.lead_nome || 'Aguardando cadastro')}</td>
+              <td>${escapeHtml(i.lead_telefone || '-')}</td>
               <td><span class="badge ${s.classe}">${s.label}</span></td>
               <td>${formatData(i.created_at)}</td>
             </tr>

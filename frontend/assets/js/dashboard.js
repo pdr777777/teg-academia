@@ -59,7 +59,7 @@ async function carregarDashboard() {
       ? d.conquistas_recentes.map((c) => `
           <div class="conquista-item">
             <span class="icon-badge">${Icons.icon('award', { size: 18 })}</span>
-            <div><strong>${c.nome}</strong><span>${formatData(c.desbloqueada_em)}</span></div>
+            <div><strong>${escapeHtml(c.nome)}</strong><span>${formatData(c.desbloqueada_em)}</span></div>
           </div>
         `).join('')
       : '<div class="empty-state">Nenhuma conquista ainda, treine para desbloquear!</div>';
@@ -213,7 +213,7 @@ async function carregarAgenda() {
     lista.innerHTML = ordenadas.length
       ? ordenadas.slice(0, 5).map((a) => `
           <div class="agenda-item">
-            <span class="agenda-dot"></span>${DIAS_ABREV[a.dia_semana]} ${a.hora_inicio.slice(0, 5)}: ${a.nome}
+            <span class="agenda-dot"></span>${DIAS_ABREV[a.dia_semana]} ${a.hora_inicio.slice(0, 5)}: ${escapeHtml(a.nome)}
           </div>
         `).join('')
       : '<div class="empty-state">Nenhuma aula cadastrada.</div>';
