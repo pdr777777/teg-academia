@@ -109,18 +109,19 @@ router.post('/:id/atribuir/:usuarioId', authMiddleware, requireRole('professor',
   }
 });
 
-// DELETE /api/treinos/:id (professor/admin) — só permite excluir treino que
-// nunca foi atribuído a ninguém. Uma vez atribuído, treino_sessoes (histórico
-// real de treino do aluno) referencia treino_id com ON DELETE CASCADE, então
-// excluir apagaria junto o histórico/XP já registrado — bloqueado por design.
+// DELETE /api/treinos/:id (professor/admin) — só bloqueia exclusão se existe
+// histórico real de treino (treino_sessoes, que referencia treino_id com ON
+// DELETE CASCADE): excluir apagaria XP/frequência já registrados do aluno.
+// Uma simples atribuição em treino_alunos sem sessão nenhuma não trava nada
+// -- é só metadado de "quem pega esse treino agora", sem histórico pra perder.
 router.delete('/:id', authMiddleware, requireRole('professor', 'admin', 'dono'), async (req, res, next) => {
   try {
     const { rows: [{ total }] } = await pool.query(
-      'SELECT COUNT(*)::int AS total FROM treino_alunos WHERE treino_id = $1',
+      'SELECT COUNT(*)::int AS total FROM treino_sessoes WHERE treino_id = $1',
       [req.params.id]
     );
     if (total > 0) {
-      return res.status(409).json({ error: 'Esse treino já foi atribuído a um aluno e não pode ser excluído.' });
+      return res.status(409).json({ error: 'Esse treino já tem histórico de sessões registradas e não pode ser excluído.' });
     }
 
     const { rowCount } = await pool.query('DELETE FROM treinos WHERE id = $1', [req.params.id]);

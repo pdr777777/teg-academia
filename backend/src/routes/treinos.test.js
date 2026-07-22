@@ -120,6 +120,49 @@ describe('POST /api/treinos e /:id/atribuir/:usuarioId', () => {
   });
 });
 
+describe('DELETE /api/treinos/:id', () => {
+  test('bloqueia exclusão de treino com sessão real registrada', async () => {
+    const professor = await criarUsuario({ role: 'professor' });
+    const aluno = await criarUsuario({ role: 'aluno' });
+    const treino = await criarTreino({ nome: 'Treino Com Sessao Teste', professor_id: professor.id });
+    await atribuirTreino(treino.id, aluno.id);
+    await pool.query(
+      `INSERT INTO treino_sessoes (usuario_id, treino_id, status) VALUES ($1, $2, 'finalizada')`,
+      [aluno.id, treino.id]
+    );
+
+    const res = await request(app)
+      .delete(`/api/treinos/${treino.id}`)
+      .set('Authorization', `Bearer ${gerarToken(professor)}`);
+    expect(res.status).toBe(409);
+
+    const { rows } = await pool.query('SELECT id FROM treinos WHERE id = $1', [treino.id]);
+    expect(rows).toHaveLength(1);
+
+    await pool.query('DELETE FROM treino_sessoes WHERE treino_id = $1', [treino.id]);
+    await pool.query('DELETE FROM treino_alunos WHERE treino_id = $1', [treino.id]);
+    await pool.query('DELETE FROM treinos WHERE id = $1', [treino.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[professor.id, aluno.id]]);
+  });
+
+  test('permite excluir treino atribuído a um aluno mas sem nenhuma sessão registrada', async () => {
+    const professor = await criarUsuario({ role: 'professor' });
+    const aluno = await criarUsuario({ role: 'aluno' });
+    const treino = await criarTreino({ nome: 'Treino Sem Sessao Teste', professor_id: professor.id });
+    await atribuirTreino(treino.id, aluno.id);
+
+    const res = await request(app)
+      .delete(`/api/treinos/${treino.id}`)
+      .set('Authorization', `Bearer ${gerarToken(professor)}`);
+    expect(res.status).toBe(200);
+
+    const { rows } = await pool.query('SELECT id FROM treinos WHERE id = $1', [treino.id]);
+    expect(rows).toHaveLength(0);
+
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[professor.id, aluno.id]]);
+  });
+});
+
 describe('GET /api/treinos/exercicios', () => {
   test('lista biblioteca de exercícios, com filtro por grupo muscular', async () => {
     const aluno = await criarUsuario({ role: 'aluno' });
