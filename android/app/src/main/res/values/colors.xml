@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sobrescreve os defaults do template Capacitor (#3F51B5/#303F9F/#FF4081).
+         colorPrimaryDark pinta a status bar e a área do notch/cutout — deixado
+         no azul padrão, aparecia como mancha atrás do topo da tela sobre o
+         fundo preto do app (--color-bg no CSS). -->
+    <color name="colorPrimary">#0a0a0a</color>
+    <color name="colorPrimaryDark">#0a0a0a</color>
+    <color name="colorAccent">#ff8a00</color>
+</resources>
