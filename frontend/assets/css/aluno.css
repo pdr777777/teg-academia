@@ -70,6 +70,53 @@
 }
 .avatar-img { border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 
+/* ===== Portal do aluno agora é só no app — tela força o download =====
+   Compartilhada por dashboard.html, treinos.html, ranking.html,
+   indicacao.html e perfil.html: nenhuma dessas páginas tem mais conteúdo
+   próprio, todas mostram só isso. */
+.app-gate-main {
+  min-height: calc(100dvh - 160px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 1rem;
+}
+.app-promo {
+  padding: 2.2rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+  background: linear-gradient(160deg, var(--color-surface) 0%, var(--color-primary-soft) 160%);
+}
+.app-promo-icon {
+  width: 64px; height: 64px;
+  border-radius: 18px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 0.3rem;
+}
+.app-promo h1 { font-size: 1.3rem; font-weight: 700; margin: 0; }
+.app-promo p { font-size: 0.85rem; color: var(--color-muted); margin: 0; max-width: 340px; }
+.app-promo-stores { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; margin-top: 0.7rem; }
+.store-badge {
+  display: flex; align-items: center; gap: 0.55rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 12px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.store-badge:hover { border-color: var(--color-primary); transform: translateY(-1px); }
+.store-badge-icon { flex-shrink: 0; display: flex; }
+.store-badge-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.15; }
+.store-badge-text small { font-size: 0.64rem; color: var(--color-muted); }
+.store-badge-text strong { font-size: 0.88rem; font-weight: 700; }
+
 /* ===== Transaction item (histórico de pagamentos) ===== */
 .transaction-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid var(--color-border); }
 .transaction-item:last-child { border-bottom: none; padding-bottom: 0; }

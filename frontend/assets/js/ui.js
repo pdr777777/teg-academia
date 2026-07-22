@@ -103,10 +103,10 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
   }
 
-  const logoutLink = document.getElementById('btn-logout');
-  if (logoutLink && logoutLink.tagName === 'A') {
-    logoutLink.addEventListener('click', (ev) => {
-      ev.preventDefault();
+  const logoutBtn = document.getElementById('btn-logout');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', (ev) => {
+      if (logoutBtn.tagName === 'A') ev.preventDefault();
       logout();
     });
   }

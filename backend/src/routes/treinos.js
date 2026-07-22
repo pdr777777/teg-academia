@@ -109,6 +109,28 @@ router.post('/:id/atribuir/:usuarioId', authMiddleware, requireRole('professor',
   }
 });
 
+// DELETE /api/treinos/:id (professor/admin) — só permite excluir treino que
+// nunca foi atribuído a ninguém. Uma vez atribuído, treino_sessoes (histórico
+// real de treino do aluno) referencia treino_id com ON DELETE CASCADE, então
+// excluir apagaria junto o histórico/XP já registrado — bloqueado por design.
+router.delete('/:id', authMiddleware, requireRole('professor', 'admin', 'dono'), async (req, res, next) => {
+  try {
+    const { rows: [{ total }] } = await pool.query(
+      'SELECT COUNT(*)::int AS total FROM treino_alunos WHERE treino_id = $1',
+      [req.params.id]
+    );
+    if (total > 0) {
+      return res.status(409).json({ error: 'Esse treino já foi atribuído a um aluno e não pode ser excluído.' });
+    }
+
+    const { rowCount } = await pool.query('DELETE FROM treinos WHERE id = $1', [req.params.id]);
+    if (!rowCount) return res.status(404).json({ error: 'Treino não encontrado' });
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/treinos/exercicios (biblioteca)
 router.get('/exercicios', authMiddleware, async (req, res, next) => {
   try {
@@ -160,6 +182,28 @@ router.put('/exercicios/:id', authMiddleware, requireRole('professor', 'admin', 
     );
     if (!exercicio) return res.status(404).json({ error: 'Exercício não encontrado' });
     res.json(exercicio);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DELETE /api/treinos/exercicios/:id (professor/admin) — só permite excluir
+// exercício que não está em uso em nenhum treino (treino_exercicios referencia
+// exercicio_id com ON DELETE CASCADE, apagaria o exercício de todo treino que
+// o usa, inclusive dos que já têm sessão/série registrada em cima dele).
+router.delete('/exercicios/:id', authMiddleware, requireRole('professor', 'admin', 'dono'), async (req, res, next) => {
+  try {
+    const { rows: [{ total }] } = await pool.query(
+      'SELECT COUNT(*)::int AS total FROM treino_exercicios WHERE exercicio_id = $1',
+      [req.params.id]
+    );
+    if (total > 0) {
+      return res.status(409).json({ error: 'Esse exercício está em uso em algum treino e não pode ser excluído.' });
+    }
+
+    const { rowCount } = await pool.query('DELETE FROM exercicios WHERE id = $1', [req.params.id]);
+    if (!rowCount) return res.status(404).json({ error: 'Exercício não encontrado' });
+    res.json({ ok: true });
   } catch (err) {
     next(err);
   }

@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 
-const GRAPH_API_VERSION = 'v21.0';
+const GRAPH_API_VERSION = 'v25.0';
 
 // Valida o header X-Hub-Signature-256 que a Meta envia em todo POST de
 // webhook, assinando o corpo bruto com HMAC-SHA256 e o App Secret.
@@ -31,9 +31,25 @@ function normalizarTelefone(telefone) {
   return digitos.startsWith('55') ? digitos : `55${digitos}`;
 }
 
-async function enviar(telefone, mensagem) {
+// Nomes dos Message Templates que precisam existir (e estar aprovados) no
+// Meta Business Manager antes de qualquer notificação proativa funcionar de
+// verdade. Fora da janela de 24h após o cliente mandar mensagem, a Cloud API
+// rejeita texto livre (type: text) — só aceita template aprovado. Texto de
+// cada um e passo a passo de cadastro: ver "Backlog - Passos Manuais" no vault.
+const TEMPLATES = {
+  BOAS_VINDAS: 'teg_boas_vindas',
+  LEMBRETE_AUSENCIA: 'teg_lembrete_ausencia',
+  LEMBRETE_VENCIMENTO: 'teg_lembrete_vencimento',
+  ANIVERSARIO: 'teg_aniversario',
+  REATIVACAO: 'teg_reativacao',
+  COBRANCA_COM_LINK: 'teg_cobranca_gerada_link',
+  COBRANCA_SEM_LINK: 'teg_cobranca_recepcao',
+  LEMBRETE_ATRASO: 'teg_lembrete_atraso',
+};
+
+async function enviarPayload(telefone, payload) {
   if (!process.env.WHATSAPP_TOKEN || !process.env.WHATSAPP_PHONE_NUMBER_ID) {
-    console.log(`[WhatsApp MOCK] → ${telefone}: ${mensagem}`);
+    console.log(`[WhatsApp MOCK] → ${telefone}: ${JSON.stringify(payload)}`);
     return;
   }
 
@@ -45,12 +61,7 @@ async function enviar(telefone, mensagem) {
         Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        messaging_product: 'whatsapp',
-        to: normalizarTelefone(telefone),
-        type: 'text',
-        text: { body: mensagem },
-      }),
+      body: JSON.stringify(payload),
     }
   );
 
@@ -60,64 +71,70 @@ async function enviar(telefone, mensagem) {
   }
 }
 
+// Texto livre — só vale dentro da janela de 24h após o cliente mandar
+// mensagem (uso: respostas da IA a leads que acabaram de escrever pra gente).
+async function enviar(telefone, mensagem) {
+  await enviarPayload(telefone, {
+    messaging_product: 'whatsapp',
+    to: normalizarTelefone(telefone),
+    type: 'text',
+    text: { body: mensagem },
+  });
+}
+
+// Message Template aprovado — obrigatório pra qualquer mensagem que a gente
+// inicia (fora da janela de 24h). Parâmetros preenchem as variáveis {{1}},
+// {{2}}... do corpo do template, na ordem.
+async function enviarTemplate(telefone, nomeTemplate, parametros = []) {
+  await enviarPayload(telefone, {
+    messaging_product: 'whatsapp',
+    to: normalizarTelefone(telefone),
+    type: 'template',
+    template: {
+      name: nomeTemplate,
+      language: { code: 'pt_BR' },
+      components: parametros.length
+        ? [{ type: 'body', parameters: parametros.map((texto) => ({ type: 'text', text: String(texto) })) }]
+        : [],
+    },
+  });
+}
+
 async function enviarBoasVindas(telefone, nome, plano) {
-  await enviar(telefone,
-    `Olá ${nome}! 🎉 Seja bem-vindo(a) à academia!\n` +
-    `Seu plano *${plano}* foi ativado com sucesso.\n` +
-    `Estamos te esperando! 💪`
-  );
+  await enviarTemplate(telefone, TEMPLATES.BOAS_VINDAS, [nome, plano]);
 }
 
 async function enviarLembreteAusencia(telefone, nome, dias) {
-  await enviar(telefone,
-    `Ei ${nome}, sentimos sua falta! 😢\n` +
-    `Faz ${dias} dias que você não aparece por aqui.\n` +
-    `Que tal voltar hoje? Seu corpo agradece! 💪`
-  );
+  await enviarTemplate(telefone, TEMPLATES.LEMBRETE_AUSENCIA, [nome, dias]);
 }
 
 async function enviarLembreteVencimento(telefone, nome, diasRestantes) {
-  await enviar(telefone,
-    `Olá ${nome}! 📅\n` +
-    `Seu plano vence em *${diasRestantes} dia(s)*.\n` +
-    `Renove agora e continue sua sequência! 🔥`
-  );
+  await enviarTemplate(telefone, TEMPLATES.LEMBRETE_VENCIMENTO, [nome, diasRestantes]);
 }
 
 async function enviarPaizens(telefone, nome) {
-  await enviar(telefone,
-    `Feliz aniversário, ${nome}! 🎂🎉\n` +
-    `A academia inteira torce por você.\n` +
-    `Apareça hoje para uma aula especial! 🎁`
-  );
+  await enviarTemplate(telefone, TEMPLATES.ANIVERSARIO, [nome]);
 }
 
 async function enviarReativacao(telefone, nome) {
-  await enviar(telefone,
-    `Ei ${nome}, tá com saudade da gente? 🥺\n` +
-    `Faz um tempo que você não treina e sentimos sua falta por aqui!\n` +
-    `Preparamos um presente pra você voltar: *R$10 de desconto* na sua próxima mensalidade. 🎁\n` +
-    `Bora retomar? É só chamar a gente aqui no WhatsApp!`
-  );
+  await enviarTemplate(telefone, TEMPLATES.REATIVACAO, [nome]);
 }
 
 async function enviarCobrancaGerada(telefone, nome, linkPagamento) {
-  await enviar(telefone,
-    linkPagamento
-      ? `Olá ${nome}! 💳\nSua próxima cobrança já está disponível:\n${linkPagamento}\n\nPague para continuar treinando sem interrupção!`
-      : `Olá ${nome}! 💳\nSua próxima cobrança foi gerada. Procure a recepção da academia para regularizar.`
-  );
+  if (linkPagamento) {
+    await enviarTemplate(telefone, TEMPLATES.COBRANCA_COM_LINK, [nome, linkPagamento]);
+  } else {
+    await enviarTemplate(telefone, TEMPLATES.COBRANCA_SEM_LINK, [nome]);
+  }
 }
 
 async function enviarLembreteAtraso(telefone, nome, diasAtraso) {
-  await enviar(telefone,
-    `Olá ${nome}! ⚠️\nSeu pagamento está atrasado há *${diasAtraso} dia(s)*.\n` +
-    `Regularize o quanto antes para não perder o acesso aos treinos e aulas.`
-  );
+  await enviarTemplate(telefone, TEMPLATES.LEMBRETE_ATRASO, [nome, diasAtraso]);
 }
 
 module.exports = {
   enviar,
+  enviarTemplate,
   enviarBoasVindas,
   enviarLembreteAusencia,
   enviarLembreteVencimento,
@@ -127,4 +144,5 @@ module.exports = {
   enviarCobrancaGerada,
   enviarLembreteAtraso,
   validarAssinaturaWebhook,
+  TEMPLATES,
 };

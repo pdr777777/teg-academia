@@ -116,6 +116,26 @@ document.getElementById('btn-fechar-detalhe').addEventListener('click', () => {
   renderListaTreinos();
 });
 
+document.getElementById('btn-excluir-treino').addEventListener('click', async () => {
+  const treino = treinosCache.find((t) => t.id === treinoSelecionadoId);
+  if (!treino) return;
+  if (!confirm(`Excluir o treino "${treino.nome}"? Essa ação não pode ser desfeita.`)) return;
+
+  const btn = document.getElementById('btn-excluir-treino');
+  setBtnLoading(btn, '');
+  try {
+    await api.del(`/api/treinos/${treino.id}`);
+    treinosCache = treinosCache.filter((t) => t.id !== treino.id);
+    treinoSelecionadoId = null;
+    document.getElementById('treino-detalhe').style.display = 'none';
+    renderListaTreinos();
+    toast(`Treino "${treino.nome}" excluído.`, 'success');
+  } catch (err) {
+    toast(err.message || 'Erro ao excluir treino.', 'error');
+    resetBtnLoading(btn);
+  }
+});
+
 /* ========== Buscar alunos para atribuir ========== */
 async function carregarAlunosParaAtribuir(busca) {
   const lista = document.getElementById('lista-alunos-treino');
