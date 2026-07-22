@@ -9,12 +9,19 @@ const ETAPAS = [
 let leads = [];
 
 function cardHtml(lead) {
+  // O drag-and-drop (ativarDragDrop) é só mouse — API nativa do HTML5, sem
+  // suporte a toque na maioria dos navegadores mobile (Safari iOS, Chrome
+  // Android). Esse <select> é o fallback que funciona em qualquer
+  // dispositivo, inclusive tablet/celular na recepção.
   return `
     <div class="kanban-card" draggable="true" data-lead-id="${lead.id}">
       <strong>${escapeHtml(lead.nome)}</strong>
       <div class="kanban-meta">${Icons.icon('phone', { size: 13 })}${escapeHtml(lead.telefone)}</div>
       ${lead.objetivo ? `<div class="kanban-meta">${Icons.icon('zap', { size: 13 })}${escapeHtml(lead.objetivo)}</div>` : ''}
       <div class="kanban-meta">${Icons.icon('calendar', { size: 13 })}${formatData(lead.created_at)} · ${escapeHtml(lead.origem || 'site')}</div>
+      <select class="input kanban-card-mover" data-mover-lead-id="${lead.id}" aria-label="Mover ${escapeHtml(lead.nome)} para outra etapa">
+        ${ETAPAS.map((e) => `<option value="${e.key}" ${e.key === lead.status_pipeline ? 'selected' : ''}>${e.label}</option>`).join('')}
+      </select>
     </div>
   `;
 }
@@ -36,6 +43,23 @@ function renderBoard() {
   ativarDragDrop();
 }
 
+async function moverLead(leadId, novaEtapa) {
+  const lead = leads.find((l) => String(l.id) === String(leadId));
+  if (!lead || lead.status_pipeline === novaEtapa) return;
+
+  const etapaAnterior = lead.status_pipeline;
+  lead.status_pipeline = novaEtapa;
+  renderBoard();
+
+  try {
+    await api.patch(`/api/leads/${leadId}/pipeline`, { status_novo: novaEtapa });
+  } catch (err) {
+    lead.status_pipeline = etapaAnterior;
+    renderBoard();
+    toast(err.message || 'Erro ao mover lead.', 'error');
+  }
+}
+
 function ativarDragDrop() {
   document.querySelectorAll('.kanban-card').forEach((card) => {
     card.addEventListener('dragstart', (ev) => {
@@ -51,25 +75,18 @@ function ativarDragDrop() {
       col.classList.add('drag-over');
     });
     col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
-    col.addEventListener('drop', async (ev) => {
+    col.addEventListener('drop', (ev) => {
       ev.preventDefault();
       col.classList.remove('drag-over');
       const leadId = ev.dataTransfer.getData('text/plain');
-      const novaEtapa = col.dataset.etapa;
-      const lead = leads.find((l) => String(l.id) === leadId);
-      if (!lead || lead.status_pipeline === novaEtapa) return;
+      moverLead(leadId, col.dataset.etapa);
+    });
+  });
 
-      const etapaAnterior = lead.status_pipeline;
-      lead.status_pipeline = novaEtapa;
-      renderBoard();
-
-      try {
-        await api.patch(`/api/leads/${leadId}/pipeline`, { status_novo: novaEtapa });
-      } catch (err) {
-        lead.status_pipeline = etapaAnterior;
-        renderBoard();
-        toast(err.message || 'Erro ao mover lead.', 'error');
-      }
+  document.querySelectorAll('.kanban-card-mover').forEach((select) => {
+    select.addEventListener('click', (ev) => ev.stopPropagation());
+    select.addEventListener('change', (ev) => {
+      moverLead(ev.target.dataset.moverLeadId, ev.target.value);
     });
   });
 }
