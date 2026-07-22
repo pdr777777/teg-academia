@@ -36,7 +36,7 @@ async function carregarPerfil() {
             <div class="transaction-item">
               <span class="transaction-icon ${p.status}">${Icons.icon(p.status === 'pago' ? 'check-circle' : 'clock', { size: 16 })}</span>
               <div class="transaction-info">
-                <strong>${p.plano_nome}</strong>
+                <strong>${escapeHtml(p.plano_nome)}</strong>
                 <span>${formatData(p.data_pagamento || p.created_at)}</span>
               </div>
               <span class="transaction-value">${formatMoeda(p.valor)}</span>

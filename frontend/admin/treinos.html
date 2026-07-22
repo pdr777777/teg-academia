@@ -55,9 +55,14 @@
               <h2 id="detalhe-nome">-</h2>
               <p class="text-muted" id="detalhe-desc" style="font-size:.85rem"></p>
             </div>
-            <button class="btn btn-ghost btn-sm" id="btn-fechar-detalhe" title="Fechar">
-              <span data-icon="x" data-icon-size="16"></span>
-            </button>
+            <div class="row gap-sm">
+              <button class="btn btn-ghost btn-sm" id="btn-excluir-treino" title="Excluir treino">
+                <span data-icon="trash" data-icon-size="16"></span>
+              </button>
+              <button class="btn btn-ghost btn-sm" id="btn-fechar-detalhe" title="Fechar">
+                <span data-icon="x" data-icon-size="16"></span>
+              </button>
+            </div>
           </div>
 
           <div id="detalhe-exercicios" class="stack gap-sm" style="margin-bottom:1.5rem"></div>
@@ -70,6 +75,18 @@
               <span data-icon="search" data-icon-size="16" style="position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--color-muted)"></span>
               <input type="text" id="busca-aluno-treino" class="input" placeholder="Buscar aluno..." style="padding-left:2.5rem" />
             </div>
+          </div>
+          <div class="row gap-sm" style="margin-top:.6rem">
+            <select id="dia-semana-treino" class="input" style="flex:1" title="Em qual dia esse treino vale pro aluno">
+              <option value="">Todo dia (treino único)</option>
+              <option value="1">Segunda</option>
+              <option value="2">Terça</option>
+              <option value="3">Quarta</option>
+              <option value="4">Quinta</option>
+              <option value="5">Sexta</option>
+              <option value="6">Sábado</option>
+              <option value="0">Domingo</option>
+            </select>
             <button class="btn btn-primary" id="btn-atribuir" disabled>Atribuir</button>
           </div>
           <div id="lista-alunos-treino" class="stack gap-xs" style="margin-top:.75rem;max-height:260px;overflow-y:auto"></div>

@@ -1,7 +1,8 @@
 document.getElementById('btn-logout').addEventListener('click', logout);
 
 const state = {
-  treino: null,
+  treinos: [], // todos os treinos ativos do aluno (grade semanal — pode ser só 1)
+  treino: null, // treino selecionado na aba atual
   sessao: null, // { id, iniciado_em, series_registradas: [{ treino_exercicio_id, numero_serie, ... }] }
 };
 
@@ -21,7 +22,7 @@ function embedVideo(url) {
       <span class="video-thumb-play">${Icons.icon('play', { size: 28 })}</span>
     </button>`;
   }
-  return `<video src="${url}" controls></video>`;
+  return `<video src="${escapeHtml(url)}" controls></video>`;
 }
 
 function seriesFeitasDoExercicio(treinoExercicioId) {
@@ -113,8 +114,8 @@ function renderExercicios() {
       <div class="exercicio-video">${embedVideo(te.exercicio.video_url)}</div>
       <div class="exercicio-body">
         <div class="exercicio-head">
-          <h3>${te.exercicio.nome}</h3>
-          ${te.exercicio.grupo_muscular ? `<span class="badge badge-muted">${te.exercicio.grupo_muscular}</span>` : ''}
+          <h3>${escapeHtml(te.exercicio.nome)}</h3>
+          ${te.exercicio.grupo_muscular ? `<span class="badge badge-muted">${escapeHtml(te.exercicio.grupo_muscular)}</span>` : ''}
         </div>
         <div class="exercicio-stats">
           <div class="exercicio-stat"><strong>${te.series}</strong><span>Séries</span></div>
@@ -122,7 +123,7 @@ function renderExercicios() {
           <div class="exercicio-stat"><strong>${te.carga ? te.carga + ' kg' : '-'}</strong><span>Carga</span></div>
           <div class="exercicio-stat"><strong>${te.descanso_segundos ? te.descanso_segundos + 's' : '-'}</strong><span>Descanso</span></div>
         </div>
-        ${te.observacoes ? `<div class="exercicio-obs">${te.observacoes}</div>` : ''}
+        ${te.observacoes ? `<div class="exercicio-obs">${escapeHtml(te.observacoes)}</div>` : ''}
         ${renderSerieTracker(te)}
       </div>
     </div>
@@ -131,19 +132,55 @@ function renderExercicios() {
   fillIcons();
 }
 
+function renderTabs() {
+  const tabs = document.getElementById('treino-tabs');
+  if (state.treinos.length < 2) {
+    tabs.style.display = 'none';
+    tabs.innerHTML = '';
+    return;
+  }
+  tabs.style.display = 'flex';
+  tabs.innerHTML = state.treinos.map((t) => `
+    <button type="button" class="treino-tab${t.id === state.treino?.id ? ' active' : ''}" data-treino-id="${t.id}">${escapeHtml(t.nome)}</button>
+  `).join('');
+}
+
+function selecionarTreino(treino) {
+  state.treino = treino;
+  document.getElementById('treino-nome').textContent = treino.nome;
+  document.getElementById('treino-desc').textContent = treino.descricao || '';
+  renderTabs();
+  renderSessaoBar();
+  renderExercicios();
+}
+
+document.getElementById('treino-tabs').addEventListener('click', (ev) => {
+  const btn = ev.target.closest('[data-treino-id]');
+  if (!btn) return;
+  const treino = state.treinos.find((t) => t.id === Number(btn.dataset.treinoId));
+  if (treino && treino.id !== state.treino?.id) selecionarTreino(treino);
+});
+
 async function carregarTreino() {
   try {
-    const treinos = await api.get('/api/treinos/meu');
-    state.treino = treinos[0] || null;
+    state.treinos = await api.get('/api/treinos/meu');
 
-    if (!state.treino) {
+    if (!state.treinos.length) {
+      state.treino = null;
       document.getElementById('treino-desc').textContent = 'Nenhum treino atribuído ainda.';
       document.getElementById('lista-exercicios').innerHTML = '<div class="empty-state">' + Icons.icon('dumbbell', { size: 32 }) + '<p>Seu professor ainda não montou seu treino. Fale com a equipe na recepção.</p></div>';
       return;
     }
 
+    // Aba padrão: o treino de hoje, senão o "geral" (dia_semana null), senão o primeiro.
+    const hoje = new Date().getDay();
+    state.treino = state.treinos.find((t) => t.dia_semana === hoje)
+      || state.treinos.find((t) => t.dia_semana === null)
+      || state.treinos[0];
+
     document.getElementById('treino-nome').textContent = state.treino.nome;
     document.getElementById('treino-desc').textContent = state.treino.descricao || '';
+    renderTabs();
   } catch (err) {
     document.getElementById('lista-exercicios').innerHTML = '<div class="empty-state">Não foi possível carregar seu treino agora.</div>';
   }
@@ -159,6 +196,19 @@ async function carregarSessao() {
 
 async function init() {
   await Promise.all([carregarTreino(), carregarSessao()]);
+
+  // Se já tem um treino em andamento, abre nele em vez de "hoje" — evita
+  // mostrar o tracker de séries zerado num treino que não é o da sessão.
+  if (state.sessao && state.treino?.id !== state.sessao.treino_id) {
+    const daSessao = state.treinos.find((t) => t.id === state.sessao.treino_id);
+    if (daSessao) {
+      state.treino = daSessao;
+      document.getElementById('treino-nome').textContent = daSessao.nome;
+      document.getElementById('treino-desc').textContent = daSessao.descricao || '';
+    }
+  }
+
+  renderTabs();
   renderSessaoBar();
   renderExercicios();
 }

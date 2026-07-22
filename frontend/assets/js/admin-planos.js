@@ -11,7 +11,7 @@ async function carregarPlanos() {
     body.innerHTML = planos.length
       ? planos.map((p) => `
           <tr>
-            <td><strong>${p.nome}</strong><div class="text-muted" style="font-size:.78rem">${p.descricao || ''}</div></td>
+            <td><strong>${escapeHtml(p.nome)}</strong><div class="text-muted" style="font-size:.78rem">${escapeHtml(p.descricao || '')}</div></td>
             <td>${p.duracao_dias} dias</td>
             <td>${formatMoeda(p.preco_mensal)}</td>
             <td>${p.alunos_ativos}</td>

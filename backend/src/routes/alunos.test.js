@@ -145,6 +145,19 @@ describe('apelido no perfil', () => {
 
     await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
   });
+
+  test('PATCH /api/alunos/perfil rejeita telefone inválido', async () => {
+    const aluno = await criarUsuario({ role: 'aluno' });
+
+    const res = await request(app)
+      .patch('/api/alunos/perfil')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`)
+      .send({ telefone: '123' });
+
+    expect(res.status).toBe(400);
+
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
+  });
 });
 
 jest.mock('../services/supabaseStorageService');

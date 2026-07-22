@@ -53,6 +53,30 @@ describe('POST /api/planos', () => {
     await pool.query('DELETE FROM planos WHERE id = $1', [res.body.id]);
     await pool.query('DELETE FROM usuarios WHERE id = $1', [admin.id]);
   });
+
+  test('rejeita preco_mensal negativo ou zero', async () => {
+    const admin = await criarUsuario({ role: 'admin' });
+    const res = await request(app)
+      .post('/api/planos')
+      .set('Authorization', `Bearer ${gerarToken(admin)}`)
+      .send({ nome: 'Plano Preco Negativo Teste', preco_mensal: -50 });
+
+    expect(res.status).toBe(400);
+
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [admin.id]);
+  });
+
+  test('rejeita nome vazio', async () => {
+    const admin = await criarUsuario({ role: 'admin' });
+    const res = await request(app)
+      .post('/api/planos')
+      .set('Authorization', `Bearer ${gerarToken(admin)}`)
+      .send({ nome: '   ', preco_mensal: 100 });
+
+    expect(res.status).toBe(400);
+
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [admin.id]);
+  });
 });
 
 describe('PUT /api/planos/:id', () => {
@@ -74,6 +98,24 @@ describe('PUT /api/planos/:id', () => {
       .set('Authorization', `Bearer ${gerarToken(admin)}`)
       .send({ preco_mensal: 150 });
     expect(inexistente.status).toBe(404);
+
+    await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [admin.id]);
+  });
+
+  test('rejeita preco_mensal negativo na atualização', async () => {
+    const admin = await criarUsuario({ role: 'admin' });
+    const plano = await criarPlano({ nome: 'Plano Update Invalido Teste', preco_mensal: 100 });
+
+    const res = await request(app)
+      .put(`/api/planos/${plano.id}`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`)
+      .send({ preco_mensal: -10 });
+
+    expect(res.status).toBe(400);
+
+    const { rows: [row] } = await pool.query('SELECT preco_mensal FROM planos WHERE id = $1', [plano.id]);
+    expect(Number(row.preco_mensal)).toBe(100);
 
     await pool.query('DELETE FROM planos WHERE id = $1', [plano.id]);
     await pool.query('DELETE FROM usuarios WHERE id = $1', [admin.id]);

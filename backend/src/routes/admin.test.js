@@ -287,3 +287,37 @@ describe('DELETE /api/admin/alunos/:id — exclusão (soft-delete)', () => {
     await pool.query('DELETE FROM usuarios WHERE id = $1', [admin.id]);
   });
 });
+
+describe('PATCH /api/admin/alunos/:id/toggle — não permite mexer em quem não é aluno', () => {
+  test('404 quando o alvo é o dono (escalada de privilégio)', async () => {
+    const admin = await criarUsuario({ role: 'admin' });
+    const dono = await criarUsuario({ role: 'dono' });
+
+    const res = await request(app)
+      .patch(`/api/admin/alunos/${dono.id}/toggle`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+
+    expect(res.status).toBe(404);
+
+    const { rows: [row] } = await pool.query('SELECT ativo FROM usuarios WHERE id = $1', [dono.id]);
+    expect(row.ativo).toBe(true);
+
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, dono.id]]);
+  });
+
+  test('404 quando o alvo é outro admin', async () => {
+    const admin = await criarUsuario({ role: 'admin' });
+    const outroAdmin = await criarUsuario({ role: 'admin' });
+
+    const res = await request(app)
+      .patch(`/api/admin/alunos/${outroAdmin.id}/toggle`)
+      .set('Authorization', `Bearer ${gerarToken(admin)}`);
+
+    expect(res.status).toBe(404);
+
+    const { rows: [row] } = await pool.query('SELECT ativo FROM usuarios WHERE id = $1', [outroAdmin.id]);
+    expect(row.ativo).toBe(true);
+
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[admin.id, outroAdmin.id]]);
+  });
+});

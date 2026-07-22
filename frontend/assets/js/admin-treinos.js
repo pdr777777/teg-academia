@@ -56,8 +56,8 @@ function renderListaTreinos() {
   lista.innerHTML = treinosCache.map((t) => `
     <div class="treino-item${treinoSelecionadoId === t.id ? ' selecionado' : ''}" data-treino-id="${t.id}">
       <div class="treino-item-info">
-        <strong>${t.nome}</strong>
-        <span>${t.descricao || 'Sem descrição'}</span>
+        <strong>${escapeHtml(t.nome)}</strong>
+        <span>${escapeHtml(t.descricao || 'Sem descrição')}</span>
       </div>
       <span class="badge badge-muted">${(t.exercicios_count || 0)} ex.</span>
     </div>
@@ -84,6 +84,7 @@ async function carregarDetalheTreino(id) {
   document.getElementById('detalhe-exercicios').innerHTML = '<div class="loading-row"><span class="spinner"></span></div>';
   document.getElementById('lista-alunos-treino').innerHTML = '';
   document.getElementById('btn-atribuir').disabled = true;
+  document.getElementById('dia-semana-treino').value = '';
 
   try {
     const treino = treinosCache.find((t) => t.id === id);
@@ -96,7 +97,7 @@ async function carregarDetalheTreino(id) {
     document.getElementById('detalhe-exercicios').innerHTML = valid.length
       ? valid.map((te) => `
           <div class="row gap-sm" style="align-items:center;font-size:.83rem;padding:.45rem .6rem;background:var(--color-surface-2);border-radius:var(--radius-sm)">
-            <span style="flex:1;font-weight:600">${te.exercicio.nome}</span>
+            <span style="flex:1;font-weight:600">${escapeHtml(te.exercicio.nome)}</span>
             <span class="text-muted">${te.series}x${te.repeticoes}${te.carga ? ' · ' + te.carga + 'kg' : ''}</span>
           </div>
         `).join('')
@@ -115,6 +116,26 @@ document.getElementById('btn-fechar-detalhe').addEventListener('click', () => {
   renderListaTreinos();
 });
 
+document.getElementById('btn-excluir-treino').addEventListener('click', async () => {
+  const treino = treinosCache.find((t) => t.id === treinoSelecionadoId);
+  if (!treino) return;
+  if (!confirm(`Excluir o treino "${treino.nome}"? Essa ação não pode ser desfeita.`)) return;
+
+  const btn = document.getElementById('btn-excluir-treino');
+  setBtnLoading(btn, '');
+  try {
+    await api.del(`/api/treinos/${treino.id}`);
+    treinosCache = treinosCache.filter((t) => t.id !== treino.id);
+    treinoSelecionadoId = null;
+    document.getElementById('treino-detalhe').style.display = 'none';
+    renderListaTreinos();
+    toast(`Treino "${treino.nome}" excluído.`, 'success');
+  } catch (err) {
+    toast(err.message || 'Erro ao excluir treino.', 'error');
+    resetBtnLoading(btn);
+  }
+});
+
 /* ========== Buscar alunos para atribuir ========== */
 async function carregarAlunosParaAtribuir(busca) {
   const lista = document.getElementById('lista-alunos-treino');
@@ -126,8 +147,8 @@ async function carregarAlunosParaAtribuir(busca) {
       ? alunos.map((a) => `
           <div class="aluno-row-sel${alunoSelecionadoId === a.id ? ' selecionado' : ''}" data-aluno-id="${a.id}">
             <div class="ranking-avatar-row">
-              <span class="avatar-fallback">${iniciais(a.nome)}</span>
-              <div><strong style="font-size:.85rem">${a.nome}</strong><div class="text-muted" style="font-size:.76rem">${a.email}</div></div>
+              <span class="avatar-fallback">${escapeHtml(iniciais(a.nome))}</span>
+              <div><strong style="font-size:.85rem">${escapeHtml(a.nome)}</strong><div class="text-muted" style="font-size:.76rem">${escapeHtml(a.email)}</div></div>
             </div>
             <span class="badge ${a.ativo ? 'badge-success' : 'badge-muted'}" style="font-size:.72rem">${a.ativo ? 'Ativo' : 'Inativo'}</span>
           </div>
@@ -155,11 +176,15 @@ document.getElementById('busca-aluno-treino').addEventListener('input', debounce
 document.getElementById('btn-atribuir').addEventListener('click', async () => {
   if (!treinoSelecionadoId || !alunoSelecionadoId) return;
   const btn = document.getElementById('btn-atribuir');
+  const diaSemanaInput = document.getElementById('dia-semana-treino').value;
+  const dia_semana = diaSemanaInput === '' ? null : Number(diaSemanaInput);
   setBtnLoading(btn, 'Atribuindo...');
   try {
-    await api.post(`/api/treinos/${treinoSelecionadoId}/atribuir/${alunoSelecionadoId}`, {});
+    await api.post(`/api/treinos/${treinoSelecionadoId}/atribuir/${alunoSelecionadoId}`, { dia_semana });
     const treino = treinosCache.find((t) => t.id === treinoSelecionadoId);
-    toast(`Treino "${treino?.nome}" atribuído com sucesso!`, 'success');
+    const DIAS = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+    const rotulo = dia_semana === null ? 'todo dia' : `toda ${DIAS[dia_semana]}`;
+    toast(`Treino "${treino?.nome}" atribuído (${rotulo})!`, 'success');
     alunoSelecionadoId = null;
     document.getElementById('btn-atribuir').disabled = true;
     document.querySelectorAll('.aluno-row-sel.selecionado').forEach((r) => r.classList.remove('selecionado'));
@@ -190,7 +215,7 @@ document.getElementById('btn-add-exercicio').addEventListener('click', () => {
 
 function exercicioThumb(ex) {
   return ex && ex.imagem_url
-    ? `<span class="exercicio-thumb"><img src="${ex.imagem_url}" alt="" loading="lazy" decoding="async" /></span>`
+    ? `<span class="exercicio-thumb"><img src="${escapeHtml(ex.imagem_url)}" alt="" loading="lazy" decoding="async" /></span>`
     : `<span class="exercicio-thumb">${Icons.icon('dumbbell', { size: 16 })}</span>`;
 }
 
@@ -206,7 +231,7 @@ function renderExerciciosForm() {
     <div class="exercicio-row-admin">
       <button type="button" class="exercicio-picker-btn${exercicio ? ' preenchido' : ''}" data-escolher-idx="${i}">
         ${exercicio ? exercicioThumb(exercicio) : `<span class="exercicio-thumb">${Icons.icon('dumbbell', { size: 16 })}</span>`}
-        <span class="exercicio-picker-nome${exercicio ? '' : ' exercicio-picker-placeholder'}">${exercicio ? exercicio.nome : 'Escolher exercício...'}</span>
+        <span class="exercicio-picker-nome${exercicio ? '' : ' exercicio-picker-placeholder'}">${exercicio ? escapeHtml(exercicio.nome) : 'Escolher exercício...'}</span>
       </button>
       <input type="number" class="input" placeholder="Séries" value="${ex.series}" min="1" data-ex-idx="${i}" data-field="series" />
       <input type="number" class="input" placeholder="Reps" value="${ex.repeticoes}" min="1" data-ex-idx="${i}" data-field="repeticoes" />
@@ -269,8 +294,8 @@ function renderPickerGrid(busca, grupo) {
   grid.innerHTML = filtrados.map((e) => `
     <div class="exercicio-card${e.id === selecionadoId ? ' selecionado' : ''}" data-exercicio-id="${e.id}">
       ${exercicioThumb(e)}
-      <strong>${e.nome}</strong>
-      ${e.grupo_muscular ? `<span>${e.grupo_muscular}</span>` : ''}
+      <strong>${escapeHtml(e.nome)}</strong>
+      ${e.grupo_muscular ? `<span>${escapeHtml(e.grupo_muscular)}</span>` : ''}
     </div>
   `).join('');
 }

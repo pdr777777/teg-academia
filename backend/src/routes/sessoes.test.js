@@ -57,6 +57,26 @@ describe('POST /api/sessoes/iniciar', () => {
 
     await limparSessao(aluno.id, treino.id);
   });
+
+  test('rejeita treino_id de um treino que não está atribuído ao aluno (IDOR)', async () => {
+    const aluno = await criarUsuario({ role: 'aluno' });
+    const outroAluno = await criarUsuario({ role: 'aluno' });
+    const treinoAlheio = await criarTreino({ nome: 'Treino De Outro Aluno' });
+    await atribuirTreino(treinoAlheio.id, outroAluno.id);
+
+    const res = await request(app)
+      .post('/api/sessoes/iniciar')
+      .set('Authorization', `Bearer ${gerarToken(aluno)}`)
+      .send({ treino_id: treinoAlheio.id });
+
+    expect(res.status).toBe(403);
+
+    const { rows } = await pool.query('SELECT * FROM treino_sessoes WHERE usuario_id = $1', [aluno.id]);
+    expect(rows).toHaveLength(0);
+
+    await limparSessao(aluno.id);
+    await limparSessao(outroAluno.id, treinoAlheio.id);
+  });
 });
 
 describe('GET /api/sessoes/atual', () => {

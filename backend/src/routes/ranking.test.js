@@ -44,4 +44,25 @@ describe('GET /api/ranking/conquistas/:usuarioId', () => {
 
     await pool.query('DELETE FROM usuarios WHERE id = $1', [aluno.id]);
   });
+
+  test('ignora o :usuarioId da URL — sempre retorna as conquistas de quem está logado (IDOR)', async () => {
+    const dono = await criarUsuario({ role: 'aluno' });
+    const bisbilhoteiro = await criarUsuario({ role: 'aluno' });
+    const { rows: [conquista] } = await pool.query('SELECT id FROM conquistas LIMIT 1');
+    await pool.query(
+      `INSERT INTO aluno_conquistas (usuario_id, conquista_id, desbloqueada_em) VALUES ($1, $2, NOW())`,
+      [dono.id, conquista.id]
+    );
+
+    const res = await request(app)
+      .get(`/api/ranking/conquistas/${dono.id}`)
+      .set('Authorization', `Bearer ${gerarToken(bisbilhoteiro)}`);
+
+    expect(res.status).toBe(200);
+    const desbloqueadas = res.body.filter((c) => c.desbloqueada_em);
+    expect(desbloqueadas).toHaveLength(0);
+
+    await pool.query('DELETE FROM aluno_conquistas WHERE usuario_id = $1', [dono.id]);
+    await pool.query('DELETE FROM usuarios WHERE id = ANY($1)', [[dono.id, bisbilhoteiro.id]]);
+  });
 });

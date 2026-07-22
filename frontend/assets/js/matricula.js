@@ -84,7 +84,7 @@ function renderPlanos(grid) {
     return `
       <div class="plano-card${meta.destaque ? ' plano-destaque' : ''}" data-reveal>
         ${meta.badge ? `<div class="plano-badge${meta.destaque ? '' : ' plano-badge-fire'}">${meta.badge}</div>` : ''}
-        <div class="plano-nome">${p.nome}</div>
+        <div class="plano-nome">${escapeHtml(p.nome)}</div>
         <div class="plano-preco">
           <span class="plano-currency">R$</span><span class="plano-amount">${Math.floor(p.preco_mensal)}</span><span class="plano-cents">,${String(Number(p.preco_mensal).toFixed(2)).split('.')[1]}</span><span class="plano-period">/mês</span>
         </div>
@@ -232,8 +232,8 @@ async function carregarBannerIndicacao() {
     const { indicador } = await api.get(`/api/indicacoes/ref/${ref}`);
     const banner = document.getElementById('banner-indicacao');
     banner.innerHTML = `
-      <span class="avatar-fallback">${iniciais(indicador.nome)}</span>
-      <div><strong>${indicador.nome} te convidou para a Academia TEG</strong><span>Escolha um plano e garanta seu desconto de indicação.</span></div>
+      <span class="avatar-fallback">${escapeHtml(iniciais(indicador.nome))}</span>
+      <div><strong>${escapeHtml(indicador.nome)} te convidou para a Academia TEG</strong><span>Escolha um plano e garanta seu desconto de indicação.</span></div>
     `;
     banner.style.display = 'flex';
   } catch (err) {

@@ -65,7 +65,7 @@ function renderDonutPlanos(distribuicao, totalAtivos) {
   const legenda = distribuicao.map((d, i) => `
     <li>
       <span class="dot" style="background:${DONUT_CORES[i % DONUT_CORES.length]}"></span>
-      ${d.nome}
+      ${escapeHtml(d.nome)}
       <b>${d.total} (${Math.round((d.total / total) * 100)}%)</b>
     </li>
   `).join('');
@@ -90,8 +90,8 @@ function renderTransacoes(transacoes) {
     <div class="transaction-item">
       <span class="transaction-icon ${t.status}">${Icons.icon(t.status === 'pago' ? 'check-circle' : t.status === 'pendente' ? 'clock' : 'alert-triangle', { size: 17 })}</span>
       <div class="transaction-info">
-        <strong>${t.aluno_nome}</strong>
-        <span>${formatData(t.data_pagamento || t.created_at)} · ${t.metodo || 'pendente'}</span>
+        <strong>${escapeHtml(t.aluno_nome)}</strong>
+        <span>${formatData(t.data_pagamento || t.created_at)} · ${escapeHtml(t.metodo || 'pendente')}</span>
       </div>
       <span class="transaction-value">${formatMoeda(t.valor)}</span>
     </div>
@@ -143,7 +143,7 @@ function renderInadimplentes(lista) {
             ${Icons.icon('alert-triangle', { size: 16 })}
           </span>
           <div class="transaction-info">
-            <strong>${i.nome}</strong>
+            <strong>${escapeHtml(i.nome)}</strong>
             <span>${i.matricula_status === 'suspensa' ? 'Suspensa' : 'Vencida'} há ${i.dias_atraso} dia(s), venceu em ${formatData(i.data_vencimento)}</span>
           </div>
           <a href="alunos.html" class="btn btn-ghost btn-sm">Ver aluno</a>

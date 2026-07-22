@@ -90,26 +90,13 @@ h1 .text-primary, h2 .text-primary, h3 .text-primary, h4 .text-primary,
   100% { background-position: -150% center; }
 }
 
-/* ─── Shiny em todo o texto do site ─── */
-p, li, td, th, label,
-span:not([class*="icon"]):not([data-icon]):not(.text-primary):not(.eyebrow):not(.badge),
-.hero-lead, .hero-stat span, .depoimento-card p,
-.gam-feature span, .step-card p, .faq-body p,
-.section-head p, .footer-brand p {
-  background: linear-gradient(
-    120deg,
-    rgba(240,240,240,1) 30%,
-    rgba(255,255,255,0.5) 46%,
-    rgba(255,252,230,1) 50%,
-    rgba(255,255,255,0.5) 54%,
-    rgba(240,240,240,1) 70%
-  );
-  background-size: 300% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shiny-sweep 8s linear infinite;
-}
+/* Removido: brilho animado em CADA parágrafo/span/li do site. Cada um desses
+   elementos era uma camada com background-clip:text + gradiente animado —
+   com uma página cheia de texto (depoimentos, FAQ, planos...) isso somava
+   dezenas de camadas repintando a cada frame ao mesmo tempo, e era o maior
+   contribuinte pra sensação de "travado". O brilho continua só nos acentos
+   pontuais (.text-primary, .shiny-text do h1, .eyebrow) — texto normal fica
+   estático, sólido, e mais legível. */
 
 /* ─── Site-wide shine overlay — passa luz em todo o site ─── */
 #site-shine {
@@ -156,12 +143,6 @@ span:not([class*="icon"]):not([data-icon]):not(.text-primary):not(.eyebrow):not(
 @keyframes text-reveal {
   from { transform: translateY(105%); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
-}
-
-/* ─── Parallax — disable on mobile ─── */
-@media (max-width: 900px) {
-  .hero-visual,
-  .hero-copy { transform: none !important; }
 }
 
 /* ─── SpotlightCard (react-bits) ─── */
@@ -223,4 +204,12 @@ span:not([class*="icon"]):not([data-icon]):not(.text-primary):not(.eyebrow):not(
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 200px 200px;
+}
+
+/* ─── Motion reduzido: desliga as varreduras animadas (perf + a11y) ─── */
+@media (prefers-reduced-motion: reduce) {
+  .text-primary, .shiny-text, .shiny-text .text-primary, .eyebrow,
+  #site-shine {
+    animation: none !important;
+  }
 }

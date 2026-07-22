@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const whatsappService = require('../services/whatsappService');
+const { emailValido, telefoneValido, cpfValido } = require('../utils/validacao');
 
 const router = express.Router();
 
@@ -28,11 +29,20 @@ router.post('/registro', async (req, res, next) => {
   try {
     const { nome, email, senha, telefone, cpf, data_nascimento, link_indicacao_origem, plano_id } = req.body;
 
-    if (!nome || !email || !senha) {
+    if (!nome || !nome.trim() || !email || !senha) {
       return res.status(400).json({ error: 'nome, email e senha são obrigatórios' });
     }
     if (senha.length < 8 || !/[a-zA-Z]/.test(senha) || !/[0-9]/.test(senha)) {
       return res.status(400).json({ error: 'Senha deve ter no mínimo 8 caracteres com letra e número' });
+    }
+    if (!emailValido(email)) {
+      return res.status(400).json({ error: 'E-mail inválido' });
+    }
+    if (telefone && !telefoneValido(telefone)) {
+      return res.status(400).json({ error: 'Telefone inválido' });
+    }
+    if (cpf && !cpfValido(cpf)) {
+      return res.status(400).json({ error: 'CPF inválido' });
     }
 
     // Valida o plano antes de criar qualquer coisa — evita usuário órfão sem

@@ -2,6 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const pool = require('../config/db');
 const { iniciarSessao } = require('./sessoes');
+const frequenciaService = require('../services/frequenciaService');
 
 const router = express.Router();
 
@@ -65,10 +66,19 @@ router.post('/catraca/:secret/:eventType', async (req, res) => {
       return res.status(200).json({ ok: true, aviso: 'aluno não mapeado' });
     }
 
-    await iniciarSessao(usuario.id, null, 'catraca');
+    try {
+      await iniciarSessao(usuario.id, null, 'catraca');
+    } catch (err) {
+      // Sem treino atribuído é esperado (caso comum) — só não ganha o
+      // auto-início de sessão. Não pode abortar o try externo, senão o
+      // aluno sem treino nunca teria frequência registrada via catraca.
+      console.warn('[catraca-controlid] iniciarSessao não iniciou sessão automática', { usuarioId: usuario.id, erro: err.message });
+    }
+
+    await frequenciaService.registrarCheckin(usuario.id, 'catraca');
     res.status(200).json({ ok: true });
   } catch (err) {
-    console.error('[catraca-controlid] erro ao iniciar sessão', err);
+    console.error('[catraca-controlid] erro ao registrar acesso', err);
     res.status(200).json({ ok: false });
   }
 });

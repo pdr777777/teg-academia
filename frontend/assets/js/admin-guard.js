@@ -9,7 +9,13 @@
   fetch(`${typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:3001'}/api/auth/me`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-    .then((res) => (res.ok ? res.json() : Promise.reject()))
+    .then((res) => {
+      if (res.ok) return res.json();
+      // Resposta real do servidor negando o token — essa sim desloga.
+      const err = new Error('token inválido');
+      err.tokenInvalido = true;
+      throw err;
+    })
     .then((user) => {
       if (!['admin', 'dono', 'professor'].includes(user.role)) {
         window.location.href = '/dashboard.html';
@@ -39,10 +45,10 @@
         const userEl = document.createElement('div');
         userEl.className = 'sidebar-user';
         userEl.innerHTML = `
-          <span class="avatar-fallback">${iniciais(user.nome)}</span>
+          <span class="avatar-fallback">${escapeHtml(iniciais(user.nome))}</span>
           <span class="sidebar-user-info">
-            <strong>${user.nome}</strong>
-            <span>${roleLabel}</span>
+            <strong>${escapeHtml(user.nome)}</strong>
+            <span>${escapeHtml(roleLabel)}</span>
           </span>
         `;
         sidebarFoot.prepend(userEl);
@@ -51,8 +57,14 @@
       window.tegUser = user;
       document.dispatchEvent(new CustomEvent('teg-user-ready', { detail: user }));
     })
-    .catch(() => {
-      localStorage.removeItem('token');
-      window.location.href = '/login.html';
+    .catch((err) => {
+      // Falha de rede (offline, timeout) não desloga — só um token
+      // explicitamente rejeitado pelo servidor conta. O app roda em WebView
+      // dentro da academia, onde sinal ruim é comum; derrubar o login por
+      // uma soneca de conexão seria pior que só seguir com o token salvo.
+      if (err && err.tokenInvalido) {
+        localStorage.removeItem('token');
+        window.location.href = '/login.html';
+      }
     });
 })();
