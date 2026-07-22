@@ -234,10 +234,22 @@ function renderExerciciosForm() {
         ${exercicio ? exercicioThumb(exercicio) : `<span class="exercicio-thumb">${Icons.icon('dumbbell', { size: 16 })}</span>`}
         <span class="exercicio-picker-nome${exercicio ? '' : ' exercicio-picker-placeholder'}">${exercicio ? escapeHtml(exercicio.nome) : 'Escolher exercício...'}</span>
       </button>
-      <input type="number" class="input" placeholder="Séries" value="${ex.series}" min="1" data-ex-idx="${i}" data-field="series" />
-      <input type="number" class="input" placeholder="Reps" value="${ex.repeticoes}" min="1" data-ex-idx="${i}" data-field="repeticoes" />
-      <input type="number" class="input" placeholder="Carga kg" value="${ex.carga || ''}" min="0" step="0.5" data-ex-idx="${i}" data-field="carga" />
-      <input type="number" class="input" placeholder="Descanso s" value="${ex.descanso_segundos}" min="0" step="5" title="Descanso entre séries (segundos)" data-ex-idx="${i}" data-field="descanso_segundos" />
+      <div class="exercicio-campo campo-series">
+        <label>Séries</label>
+        <input type="number" class="input" value="${ex.series}" min="1" data-ex-idx="${i}" data-field="series" />
+      </div>
+      <div class="exercicio-campo campo-reps">
+        <label>Reps</label>
+        <input type="number" class="input" value="${ex.repeticoes}" min="1" data-ex-idx="${i}" data-field="repeticoes" />
+      </div>
+      <div class="exercicio-campo campo-carga">
+        <label>Carga kg</label>
+        <input type="number" class="input" value="${ex.carga || ''}" min="0" step="0.5" data-ex-idx="${i}" data-field="carga" />
+      </div>
+      <div class="exercicio-campo campo-descanso">
+        <label>Descanso s</label>
+        <input type="number" class="input" value="${ex.descanso_segundos}" min="0" step="5" title="Descanso entre séries (segundos)" data-ex-idx="${i}" data-field="descanso_segundos" />
+      </div>
       <button type="button" class="btn btn-ghost btn-sm" data-remove-idx="${i}" title="Remover">
         ${Icons.icon('trash-2', { size: 13 })}
       </button>

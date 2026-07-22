@@ -286,6 +286,11 @@
   border-radius: var(--radius-sm); border: 1px solid var(--color-border);
 }
 .exercicio-row-admin input { font-size: .82rem; min-width: 0; }
+.exercicio-campo { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+.exercicio-campo label {
+  font-size: .64rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .02em; color: var(--color-muted);
+}
 
 @media (max-width: 560px) {
   .exercicio-row-admin {
@@ -293,10 +298,10 @@
     grid-template-areas: "picker picker picker picker" "series reps carga descanso" "remover remover remover remover";
   }
   .exercicio-row-admin .exercicio-picker-btn { grid-area: picker; }
-  .exercicio-row-admin input[data-field="series"] { grid-area: series; }
-  .exercicio-row-admin input[data-field="repeticoes"] { grid-area: reps; }
-  .exercicio-row-admin input[data-field="carga"] { grid-area: carga; }
-  .exercicio-row-admin input[data-field="descanso_segundos"] { grid-area: descanso; }
+  .exercicio-row-admin .campo-series { grid-area: series; }
+  .exercicio-row-admin .campo-reps { grid-area: reps; }
+  .exercicio-row-admin .campo-carga { grid-area: carga; }
+  .exercicio-row-admin .campo-descanso { grid-area: descanso; }
   .exercicio-row-admin [data-remove-idx] { grid-area: remover; justify-self: end; }
 }
 
