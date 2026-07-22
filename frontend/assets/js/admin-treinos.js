@@ -1,7 +1,7 @@
 let treinosCache = [];
 let exerciciosCache = [];
 let treinoSelecionadoId = null;
-let alunoSelecionadoId = null;
+let alunosSelecionados = new Set();
 
 const GRUPOS_MUSCULARES = [
   'Peito', 'Costas', 'Ombro', 'Bíceps', 'Tríceps', 'Antebraço', 'Trapézio',
@@ -71,7 +71,8 @@ document.getElementById('lista-treinos').addEventListener('click', async (ev) =>
   const id = Number(item.dataset.treinoId);
   if (treinoSelecionadoId === id) return;
   treinoSelecionadoId = id;
-  alunoSelecionadoId = null;
+  alunosSelecionados.clear();
+  atualizarBotaoAtribuir();
   renderListaTreinos();
   await carregarDetalheTreino(id);
 });
@@ -111,7 +112,8 @@ async function carregarDetalheTreino(id) {
 
 document.getElementById('btn-fechar-detalhe').addEventListener('click', () => {
   treinoSelecionadoId = null;
-  alunoSelecionadoId = null;
+  alunosSelecionados.clear();
+  atualizarBotaoAtribuir();
   document.getElementById('treino-detalhe').style.display = 'none';
   renderListaTreinos();
 });
@@ -146,7 +148,7 @@ async function carregarAlunosParaAtribuir(busca) {
     const { alunos } = await api.get(`/api/admin/alunos${query}`);
     lista.innerHTML = alunos.length
       ? alunos.map((a) => `
-          <div class="aluno-row-sel${alunoSelecionadoId === a.id ? ' selecionado' : ''}" data-aluno-id="${a.id}">
+          <div class="aluno-row-sel${alunosSelecionados.has(a.id) ? ' selecionado' : ''}" data-aluno-id="${a.id}">
             <div class="ranking-avatar-row">
               <span class="avatar-fallback">${escapeHtml(iniciais(a.nome))}</span>
               <div><strong style="font-size:.85rem">${escapeHtml(a.nome)}</strong><div class="text-muted" style="font-size:.76rem">${escapeHtml(a.email)}</div></div>
@@ -160,14 +162,25 @@ async function carregarAlunosParaAtribuir(busca) {
   }
 }
 
+function atualizarBotaoAtribuir() {
+  const btn = document.getElementById('btn-atribuir');
+  const n = alunosSelecionados.size;
+  btn.disabled = n === 0;
+  btn.textContent = n > 1 ? `Atribuir (${n})` : 'Atribuir';
+}
+
 document.getElementById('lista-alunos-treino').addEventListener('click', (ev) => {
   const row = ev.target.closest('[data-aluno-id]');
   if (!row) return;
-  alunoSelecionadoId = Number(row.dataset.alunoId);
-  document.querySelectorAll('.aluno-row-sel').forEach((r) =>
-    r.classList.toggle('selecionado', Number(r.dataset.alunoId) === alunoSelecionadoId)
-  );
-  document.getElementById('btn-atribuir').disabled = false;
+  const id = Number(row.dataset.alunoId);
+  if (alunosSelecionados.has(id)) {
+    alunosSelecionados.delete(id);
+    row.classList.remove('selecionado');
+  } else {
+    alunosSelecionados.add(id);
+    row.classList.add('selecionado');
+  }
+  atualizarBotaoAtribuir();
 });
 
 document.getElementById('busca-aluno-treino').addEventListener('input', debounce((ev) => {
@@ -175,24 +188,36 @@ document.getElementById('busca-aluno-treino').addEventListener('input', debounce
 }, 350));
 
 document.getElementById('btn-atribuir').addEventListener('click', async () => {
-  if (!treinoSelecionadoId || !alunoSelecionadoId) return;
+  if (!treinoSelecionadoId || !alunosSelecionados.size) return;
   const btn = document.getElementById('btn-atribuir');
   const diaSemanaInput = document.getElementById('dia-semana-treino').value;
   const dia_semana = diaSemanaInput === '' ? null : Number(diaSemanaInput);
+  const ids = [...alunosSelecionados];
   setBtnLoading(btn, 'Atribuindo...');
   try {
-    await api.post(`/api/treinos/${treinoSelecionadoId}/atribuir/${alunoSelecionadoId}`, { dia_semana });
+    const resultados = await Promise.allSettled(
+      ids.map((usuarioId) => api.post(`/api/treinos/${treinoSelecionadoId}/atribuir/${usuarioId}`, { dia_semana }))
+    );
+    const falhas = resultados.filter((r) => r.status === 'rejected').length;
+    const sucessos = ids.length - falhas;
     const treino = treinosCache.find((t) => t.id === treinoSelecionadoId);
     const DIAS = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
     const rotulo = dia_semana === null ? 'todo dia' : `toda ${DIAS[dia_semana]}`;
-    toast(`Treino "${treino?.nome}" atribuído (${rotulo})!`, 'success');
-    alunoSelecionadoId = null;
-    document.getElementById('btn-atribuir').disabled = true;
+    if (sucessos > 0) {
+      const quem = sucessos === 1 ? '1 aluno' : `${sucessos} alunos`;
+      toast(`Treino "${treino?.nome}" atribuído a ${quem} (${rotulo})!`, 'success');
+    }
+    if (falhas > 0) {
+      toast(`Não deu pra atribuir a ${falhas} aluno${falhas > 1 ? 's' : ''}.`, 'error');
+    }
+    alunosSelecionados.clear();
     document.querySelectorAll('.aluno-row-sel.selecionado').forEach((r) => r.classList.remove('selecionado'));
-  } catch (err) {
-    toast(err.message || 'Erro ao atribuir treino.', 'error');
   } finally {
+    // resetBtnLoading restaura o texto de antes do loading (que pode ter sido
+    // "Atribuir (N)" de uma seleção anterior); atualizarBotaoAtribuir corrige
+    // pro estado real depois que a seleção foi limpa acima.
     resetBtnLoading(btn);
+    atualizarBotaoAtribuir();
   }
 });
 
