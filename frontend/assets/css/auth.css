@@ -7,23 +7,11 @@
   justify-content: center;
   padding: 2rem 1.5rem;
   gap: 2rem;
-  background:
-    radial-gradient(50% 40% at 50% 0%, rgba(255,255,255,0.06), transparent),
-    radial-gradient(40% 35% at 85% 100%, rgba(255,255,255,0.04), transparent),
-    var(--color-bg);
+  /* Sólido — radial-gradient de baixo alfa + grão via feTurbulence/blend-mode
+     dava banding em WebView (Capacitor), aparecendo como manchas borradas
+     nos cantos. Mesmo motivo pelo qual os cards da landing viraram sólidos. */
+  background: var(--color-bg);
 }
-/* Grão sutil — tira a cara de "gradiente CSS liso" sem custar peso de asset */
-.auth-wrap::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.05;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-:root[data-theme="light"] .auth-wrap::before { display: none; }
 .auth-brand { position: relative; z-index: 1; font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 0.6rem; transition: opacity 0.15s; }
 .auth-brand:hover { opacity: 0.85; }
 .auth-brand .dot { width: 9px; height: 9px; border-radius: 50%; background: #fff; }
