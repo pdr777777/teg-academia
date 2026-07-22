@@ -41,10 +41,6 @@ const DEPOIMENTOS = [
   { nome: 'Camila Duarte',  tag: 'Aluna há 1 ano',   texto: 'Estrutura excelente, ambiente limpo e horários que cabem na minha rotina.' },
 ];
 
-function iniciais(nome) {
-  return nome.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
-}
-
 document.getElementById('depoimentos-grid').innerHTML = DEPOIMENTOS.map((d) => `
   <div class="card depoimento-card reveal">
     <div class="stars">${Icons.icon('star', { size: 14 }).repeat(5)}</div>
