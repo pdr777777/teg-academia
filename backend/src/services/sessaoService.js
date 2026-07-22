@@ -9,8 +9,28 @@ async function treinoAtivoDoAluno(usuario_id) {
   return treino?.id || null;
 }
 
+async function treinoPertenceAoAluno(usuario_id, treino_id) {
+  const { rows: [vinculo] } = await pool.query(
+    `SELECT 1 FROM treino_alunos WHERE usuario_id = $1 AND treino_id = $2 AND ativo = TRUE`,
+    [usuario_id, treino_id]
+  );
+  return !!vinculo;
+}
+
 async function iniciarSessao(usuario_id, treino_id, origem) {
-  const treinoId = treino_id || await treinoAtivoDoAluno(usuario_id);
+  let treinoId = treino_id;
+  if (treinoId) {
+    // treino_id explícito (fluxo manual, aluno escolhe no app) tem que ser
+    // conferido — sem isso, um aluno consegue iniciar sessão (e ganhar XP)
+    // em cima do treino de outra pessoa só adivinhando/enumerando o id.
+    if (!(await treinoPertenceAoAluno(usuario_id, treinoId))) {
+      const err = new Error('Treino não atribuído a este aluno');
+      err.status = 403;
+      throw err;
+    }
+  } else {
+    treinoId = await treinoAtivoDoAluno(usuario_id);
+  }
   if (!treinoId) {
     const err = new Error('Aluno não tem treino atribuído');
     err.status = 400;
